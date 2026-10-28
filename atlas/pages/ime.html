@@ -1,7 +1,7 @@
 <!-- id: ime | nav: 输入法 luoke-ime | group: 组件 -->
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。个人化组件把上屏写入记忆，并把打分和联想请求转给主控。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.19 · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.23（build 26）· bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
@@ -14,7 +14,7 @@
 <h2>进程模型</h2>
 <ul>
 <li><b>壳</b>由系统拉起，不进程序坞；用户自己打开 LuokeIME.app 时也作为输入法服务运行。每个输入框一个 <code>Session</code>；全进程一个 <code>EngineManager</code>，主线程每秒轮询配置和引擎状态。带不认识的参数时打印用法退出。只运行一份：父进程不是 launchd 时直接退出；用 <code>$TMPDIR/ai.luoke.inputmethod.Luoke.lock</code> 文件锁占位（最多等 3 秒），已有一份时请在跑的那份按需弹添加引导，自己退出。</li>
-<li><b>换版</b>：每 5 秒读一次磁盘上包里的 build 号，和启动时不同且新包的可执行文件在时，等所有输入框空闲（不在组字、没挂着逗号、不在快捷键会话、联想没打开）且 3 秒没有按键，收尾退出，1 秒后用 <code>open -g</code> 从原路径拉起新版。</li>
+<li><b>换版</b>：每 5 秒读一次磁盘上包里的 build 号，和启动时不同且新包的可执行文件在时，等所有输入框空闲（不在组字、没挂着逗号、不在快捷键会话、联想没打开）且 3 秒没有按键、设置窗口和添加引导都关着，收尾退出，1 秒后用 <code>open -g</code> 从原路径拉起新版。</li>
 <li><b>引擎</b>以 <code>posix_spawn</code> 在独立进程组中启动，命令为 <code>/usr/bin/sandbox-exec -p &lt;模板&gt; …</code>，工作目录是引擎文件夹。<code>run[0]</code> 为 <code>luoke-python</code> 时使用螺壳（主控）包内的 Python：依次找 <code>/Applications</code>、<code>~/Applications</code> 下的 <code>螺壳.app</code>、<code>螺壳主控.app</code>，核对 bundle id <code>ai.luoke.core</code>，不问 LaunchServices；都没有时用 PATH 里的 <code>python3</code>；参数前加 <code>-B -E -s -u</code>。自带引擎用固定 PATH；第三方引擎第一次启动时才解析登录 shell 的 PATH（最多 3 秒）。</li>
 <li><b>通信</b>：标准输入输出上每行一个 JSON，第一条必定是 <code>hello</code>；写入走每个引擎自己的串行队列。</li>
 <li><b>停止</b>：关闭 stdin，1 秒后对整个进程组 SIGKILL。</li>
@@ -112,7 +112,7 @@
 </table></div>
 
 <p><b>设置窗口</b>四页：通用（输入方案、中英文、排版、候选窗口、联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案学到的词和忘掉的词；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（开发模式记录、记录文件夹、引擎文件夹、设置文件）。每行带一句说明；窗口里不放文本框。</p>
-<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用、沙盒拦截、等确认的第三方引擎也列在这里。</p>
+<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用、沙盒拦截、等确认的第三方引擎也列在这里。</p>
 
 <h2>安全</h2>
 <ul>
@@ -122,7 +122,7 @@
 </ul>
 
 <h2>安装与输入源</h2>
-<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>other_copies</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，没切过去退出码 3。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。</p>
+<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>registered</code>、<code>added</code>、<code>consent_list</code>、<code>tis_enabled</code>、<code>tis_selectable</code>、<code>current</code>、<code>other_copies</code>（含废纸篓里同一 bundle id 的包）、<code>version</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，调用失败退出码 1，调用成功却没切过去退出码 3；另有 <code>--disable</code>、<code>--current</code>。配件清单的 <code>capabilities.listing</code> 给出「添加应用」时显示的一句话介绍（<code>tagline</code>）和类别「输入」（<code>category</code>），不写 <code>permissions</code>。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。</p>
 
 <h2>系统要求</h2>
 <p>螺壳只在 macOS 26 起安装输入法（清单 <code>min_macos</code> 26）；LuokeIME.app 本身的最低系统是 14.0，供手动安装验证旧系统。</p>

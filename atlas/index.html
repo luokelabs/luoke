@@ -66,7 +66,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 </style>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-28 11:58</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-28 17:00</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -479,12 +479,12 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.16.4 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP，可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.18.14 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP，可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
 <li>为每封邮件给出建议（回复、加入日程、待跟进、归档、移到垃圾箱），附类别、优先级、摘要、截止日期、日程字段、回复要点和可疑标记。</li>
-<li>执行用户的操作并保留撤销步骤：归档、移到垃圾箱、移到垃圾邮件、加星标、标已读、加标签、写草稿、生成日历文件、退订。</li>
+<li>执行用户的操作并保留撤销步骤：归档、移到垃圾箱、移到垃圾邮件、加星标、标已读、加标签、写草稿、加入日历（Gmail 打开 Google 日历的新建日程页面，其他邮箱下载 .ics 文件）、退订。</li>
 <li>不发信，不永久删除：删除即移到垃圾箱，回复只存入草稿箱。</li>
 <li>把用户的操作写成记忆记录；关于用户的结论由记忆形成。</li>
 </ul>
@@ -498,7 +498,7 @@ sequenceDiagram
 <tr><td><code>--forget-secrets</code></td><td>卸载前删除钥匙串中的本工具条目</td></tr>
 </table></div>
 <ul>
-<li><b>网页服务</b>：只绑定 127.0.0.1，端口默认 8765（被占用时依次试后面 19 个；指定了就只用那一个）；令牌保存在 <code>token</code> 文件（0600），请求需带 <code>X-Luoke-Token</code>；校验 Host；HTML 带 CSP；请求体上限 1 MB；以 <code>server.lock</code> 保证单实例。</li>
+<li><b>网页服务</b>：只绑定 127.0.0.1，端口默认 8765（被占用时依次试后面 19 个；指定了就只用那一个）；令牌保存在 <code>token</code> 文件（0600），请求需带 <code>X-Luoke-Token</code>；页面从地址里的 <code>?t=</code> 取得令牌后立即从地址栏去掉，按这个地址存进 localStorage，同一地址的各个标签页、服务重启或升级后都能用，接口返回 401 时清掉，没有令牌时显示「无法验证访问权限。请从「螺壳邮件助手」App 重新打开页面。」；校验 Host；HTML 带 CSP；请求体上限 1 MB；以 <code>server.lock</code> 保证单实例。</li>
 <li><b>日志</b>：常驻实例的标准错误写入 <code>service.log</code>，开头记版本；每条通知同时记入 <code>run/notifications.json</code>。</li>
 <li><b>后台循环</b>：每 30 秒一次（有空闲任务时 5 秒），启动 60 秒后才开始。后台整理默认关闭，开启需确认说明并已连接邮箱、有模型；间隔默认 30 分钟（可选 15、30、60、120），对每个邮箱执行同步流程；一个邮箱失败不影响其他。</li>
 <li><b>主控</b>：经 Unix socket 调用任务（<code>X-Luoke-Accessory: luoke-mail/&lt;版本&gt;</code>，优先级 <code>user-waiting</code> 或 <code>background</code>）；任务状态和参数（<code>max_chars</code>、<code>batch</code>、<code>sender_verdict</code>）从 <code>GET /tasks</code> 读取并缓存 60 秒；页面可见时预热 <code>luoke-mail.triage</code>。打包版只经主控。</li>
@@ -508,11 +508,11 @@ sequenceDiagram
 
 <h2>同步与分拣</h2>
 <ol>
-<li>读取收件箱最近 N 天（默认 30）的邮件，新邮件最多取 100 封；只取前 1 MiB、不改变已读状态，正文去引用后截到 6000 字。</li>
+<li>读取收件箱最近 N 天（默认 30）的邮件，新邮件最多取 100 封，每 10 封读一批、读到就入库；连接断了重开一次接着读，再断就保留已读的，下次同步从断处继续。只取前 1 MiB、不改变已读状态；纯文本部分其实是 HTML 源码的按 HTML 读；长于 60 字符的链接写成 <code>https://域名/…</code>；正文去引用后截到 6000 字。</li>
 <li>对照收件箱现状：已不在的标记为完成；推断用户在别处做了什么（归档、删除、读过、加标签，写入 <code>mail-acted</code>，<code>where=elsewhere</code>；每次最多查 30 封的去向）；邮件助手 3 天内操作记录里动过的邮件不算用户的处理，分析后标已读不移动邮件、不在此列；记为已移走却仍在收件箱的放回待处理。</li>
 <li>邮箱第一次同步时，把收件箱里当时未读、在分拣范围以前的邮件记成一个队列（新的在前，只记这一次）。</li>
 <li>补充发件域名验证结论（Gmail 的 DMARC），以及用户最近 7 天自己归档但可能仍需处理的邮件（Gmail，最多 50 封）。</li>
-<li>逐封分拣（<code>luoke-mail.triage</code>）。命中的规则作为上下文提供给模型；模型可提出不同建议。</li>
+<li>逐封分拣（<code>luoke-mail.triage</code>）。命中的规则作为上下文提供给模型；模型可提出不同建议。寄出日期早于今天的邮件，提示词多一行寄出日期，没写年份的日期和「明天」这类说法按寄出日期换算，代码兜底 <code>triage.settle_dates</code>。用户只在抄送、不在收件人里时，提示词多一行「一般 archive，priority 不超过 medium」，代码再把 high 降为 medium（<code>triage.settle_cc</code>）。任务参数 <code>sender_verdict</code> 为 false 时（16、32 GB 档），提示词里不给发件域名验证结论。</li>
 <li>依次执行：最近归档的邮件只留需要用户处理的、精选来源排队、自动标已读、按习惯处理、处理螺壳自己的邮箱、更新往来邮件状态（每次最多问 10 串，只问有新邮件的）。</li>
 </ol>
 <h3>以前的未读邮件</h3>
@@ -534,10 +534,10 @@ sequenceDiagram
 <tr><td>按习惯归档、标已读、加标签</td><td>记忆中确定的处理习惯（发件人 × 邮件类别）；跳过可疑、需用户处理、高优先级、登录和安全类通知、撤销过的邮件</td><td>今日处理中逐封撤销，记一次反证（<code>mail-undo-auto</code>）</td></tr>
 <tr><td>螺壳自己的邮箱</td><td>设置中标为 <code>own</code> 的邮箱：照建议归档或移到垃圾箱</td><td>今日处理中逐封撤销</td></tr>
 </table></div>
-<p>用户自己的邮箱里，移到垃圾箱、垃圾邮件、退订不会自动执行。<b>处理模式</b>（默认关，开启需确认）只控制不可逆的批量操作：批量移到垃圾箱或垃圾邮件、含删除的清理、清理某发件人的历史邮件。</p>
+<p>用户自己的邮箱里，移到垃圾箱、垃圾邮件、退订不会自动执行。<b>处理模式</b>（默认关，开启需确认）只控制不可逆的批量操作：批量移到垃圾箱或垃圾邮件、含删除的清理、清理某发件人的历史邮件。需要处理模式的批量按钮照样能点，旁边写明需要处理模式，点了弹出开启说明，开启后接着执行。</p>
 
 <h2>通知</h2>
-<p>系统通知由后台整理在每个邮箱同步后发出。agent 正在读 outbox 时（10 分钟内读过），新邮件、快到期、精选、今日处理这四类不再发通知，交给 agent。</p>
+<p>系统通知由后台整理在每个邮箱同步后发出。agent 正在读 outbox 时（10 分钟内读过），新邮件、快到期、精选、清理分析完、今日处理这五类不再发通知，交给 agent。收件箱中的旧邮件全部分析完时通知一次建议归档、移到垃圾箱、待确认各几封，点开进入清理。</p>
 <ul>
 <li>需要回复、加入日程、待跟进的新邮件（3 天内到达、非可疑）：封数和最急的两封。</li>
 <li>按习惯自动处理后：处理了几封，点开进入"今日处理"。</li>
@@ -551,20 +551,20 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>页面</th><th>内容</th></tr>
 <tr><td>今日处理</td><td>某天每封邮件的结果，需要用户处理的排在前面；可撤销、标未读、改建议；可查看前 7 天。补分的以前未读邮件单列"以前的未读邮件"一节，仍等用户处理的标"已过期"（截止日期已过）、"快到期"（3 天内）或收到日期（一个多月前收到）</td></tr>
-<tr><td>收件箱</td><td>同步、分组显示建议、快到期（3 天内到期或过期不到 7 天）、等对方回复的往来、逐封或批量处理、草稿、日历</td></tr>
+<tr><td>收件箱</td><td>同步、分组显示建议、快到期（3 天内到期或过期不到 7 天）、等对方回复的往来、逐封或批量处理、草稿、日历。卡片时间显示「今天 HH:MM」「昨天 HH:MM」或日期；类别和优先级相同的，新的在前。日程已过的不进快到期，显示「日程已过」；同一预约已从本工具加过日历的显示「已在日程中」</td></tr>
 <tr><td>清理</td><td>收件箱中的旧邮件和已归档邮件：只读邮件头，模型在后台逐封判断，按类别和来源分组执行；星标和保留类标签的邮件不参与；切换邮箱或标签后迟到的答复不再绘制，分析开启但在等其他任务时显示"已分析 x / y"</td></tr>
 <tr><td>精选</td><td>最近 7 天约 20 条、更早每月约 10 条；收藏和"没兴趣"写入记忆</td></tr>
 <tr><td>订阅体检</td><td>按发件人统计，建议退订、无法退订、可疑勿退订或常读；可退订、批量归档、清理历史、生成规则</td></tr>
 <tr><td>规则</td><td>按发件人、域名、邮件列表的规则；导出 Gmail 过滤器前用过去一年邮件预演命中数和误伤；操作记录可撤销</td></tr>
-<tr><td>记忆</td><td>想问你的、全部类别的理解及依据、用户网站、学习的暂停与继续、打开整份记忆</td></tr>
+<tr><td>记忆</td><td>想问你的、全部类别的理解及依据、用户网站（每 30 天重读一次）、学习的暂停与继续、打开整份记忆</td></tr>
 <tr><td>设置</td><td>邮箱（含"螺壳自己的邮箱"）、本机模型（打包版显示"螺壳 · 模型名"和就绪标记，模型名取 <code>GET /tasks</code> 中分拣任务的 <code>model_name</code>，不解析 <code>combo</code>；换档在主控设置里）、处理模式、后台整理（含通知权限提示和"发送测试通知"）、自动标已读、往来邮件、功耗、分析范围</td></tr>
 </table></div>
-<p>页面在浏览器的 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时，或示例邮箱）；存不了时显示第一个邮箱。</p>
+<p>页面在浏览器的 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
 
 <h2>主控任务</h2>
 <div class="tbl"><table>
 <tr><th>任务</th><th>提示词</th><th>输入 → 输出</th><th>批量与失败</th></tr>
-<tr><td><code>triage</code></td><td><code>triage.py</code></td><td>一封邮件、规则、关于用户（≤ 600 字）→ 类别、优先级、动作、摘要、截止日期、可疑等</td><td>一次一封；两次失败后记错误，下次同步重试。以前的未读邮件以后台优先级、每批 10 封</td></tr>
+<tr><td><code>triage</code></td><td><code>triage.py</code></td><td>一封邮件（含寄出日期、抄送、发件域名验证结论）、规则、关于用户（≤ 600 字）→ 类别、优先级、动作、摘要、截止日期、可疑等</td><td>一次一封；两次失败后记错误，下次同步重试。以前的未读邮件以后台优先级、每批 10 封</td></tr>
 <tr><td><code>draft</code></td><td><code>triage.py</code></td><td>回复要点 + 邮件 → 正文</td><td>一次</td></tr>
 <tr><td><code>senders</code></td><td><code>triage.py</code></td><td>发件人最近 8 个主题 → 类型</td><td>每批 ≤ 10；失败则不改判</td></tr>
 <tr><td><code>cleanup</code></td><td><code>triage.py</code></td><td>邮件头 → 归档、删除、保留类别</td><td>每批 ≤ 25；失败一律保留</td></tr>
@@ -607,7 +607,7 @@ sequenceDiagram
 <tr><td><code>~/.luoke-mail/config.json</code></td><td>邮箱、模型、处理模式、后台整理、功耗、学习、往来、自动标已读等设置</td></tr>
 <tr><td><code>~/.luoke-mail/luoke.db</code></td><td>邮件和建议（<code>items</code>，<code>older</code> 标记补分的以前未读邮件）、规则、发件人决定、缓存、清理（<code>old_mail</code>）、操作记录和撤销步骤（<code>log</code>）、精选、学习候选</td></tr>
 <tr><td>钥匙串 <code>luoke-mail:imap</code>、<code>luoke-mail:engine</code></td><td>邮箱授权码、模型服务密钥；Mac 锁定时读不到会跳过本轮，不视为未保存</td></tr>
-<tr><td><code>service.log</code>、<code>app.log</code></td><td>常驻实例的标准错误（启动时超过 2 MB 先另存为 <code>service.log.1</code>）；从应用后台启动的实例的标准错误（追加，不轮转）</td></tr>
+<tr><td><code>service.log</code>、<code>app.log</code></td><td>常驻实例的标准错误（启动时超过 2 MB 先另存为 <code>service.log.1</code>）；从应用后台启动的实例的标准错误（启动时超过 2 MB 另存为 <code>app.log.1</code>）；两份日志每行带时间，一分钟内的重复行只计数</td></tr>
 <tr><td><code>run/notifications.json</code></td><td>最近 100 条通知：时间、标题、发送方式、启动器的结果（posted / not allowed / failed / no answer）</td></tr>
 <tr><td><code>token</code>、<code>server.json</code>、<code>server.lock</code></td><td>页面令牌（0600）；运行中实例的 pid、端口、是否常驻；单实例锁</td></tr>
 <tr><td><code>idle.lock</code>、<code>resident</code></td><td>空闲工作锁（应用和主控的空闲任务不同时做）；后台整理已开启的标记</td></tr>
@@ -618,7 +618,7 @@ sequenceDiagram
 <h2>可靠性</h2>
 <ul>
 <li><b>写入核实</b>：移动后检查是否真的移走，没移走的不标已处理；不支持 MOVE 的服务器先确认副本存在才标删除，只对自己标记的邮件做 UID EXPUNGE。</li>
-<li><b>撤销</b>：按 Message-ID 找邮件；改动前先备好撤销步骤，断线时记"结果未确认"并保留撤销。</li>
+<li><b>撤销</b>：先用上次见到的 UID 找并核对 Message-ID，再按 Message-ID 搜索，不是 Gmail 的再查文件夹里最新 500 封；改动前先备好撤销步骤，断线时记"结果未确认"并保留撤销。</li>
 <li><b>主控不可用</b>：邮件照常入库、暂不分析，主控就绪后自动开始；模型忙时用户等待的请求原地等，后台任务延后。</li>
 <li><b>邮箱差异</b>：网易登录后需发 IMAP ID；QQ 先查 CAPABILITY 再用扩展命令；Gmail 归档即移到"所有邮件"，标签用 <code>X-GM-LABELS</code>。</li>
 </ul>
@@ -634,7 +634,7 @@ sequenceDiagram
 <section class="page" id="ime" data-title="输入法 luoke-ime">
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。个人化组件把上屏写入记忆，并把打分和联想请求转给主控。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.19 · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.23（build 26）· bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
@@ -647,7 +647,7 @@ sequenceDiagram
 <h2>进程模型</h2>
 <ul>
 <li><b>壳</b>由系统拉起，不进程序坞；用户自己打开 LuokeIME.app 时也作为输入法服务运行。每个输入框一个 <code>Session</code>；全进程一个 <code>EngineManager</code>，主线程每秒轮询配置和引擎状态。带不认识的参数时打印用法退出。只运行一份：父进程不是 launchd 时直接退出；用 <code>$TMPDIR/ai.luoke.inputmethod.Luoke.lock</code> 文件锁占位（最多等 3 秒），已有一份时请在跑的那份按需弹添加引导，自己退出。</li>
-<li><b>换版</b>：每 5 秒读一次磁盘上包里的 build 号，和启动时不同且新包的可执行文件在时，等所有输入框空闲（不在组字、没挂着逗号、不在快捷键会话、联想没打开）且 3 秒没有按键，收尾退出，1 秒后用 <code>open -g</code> 从原路径拉起新版。</li>
+<li><b>换版</b>：每 5 秒读一次磁盘上包里的 build 号，和启动时不同且新包的可执行文件在时，等所有输入框空闲（不在组字、没挂着逗号、不在快捷键会话、联想没打开）且 3 秒没有按键、设置窗口和添加引导都关着，收尾退出，1 秒后用 <code>open -g</code> 从原路径拉起新版。</li>
 <li><b>引擎</b>以 <code>posix_spawn</code> 在独立进程组中启动，命令为 <code>/usr/bin/sandbox-exec -p &lt;模板&gt; …</code>，工作目录是引擎文件夹。<code>run[0]</code> 为 <code>luoke-python</code> 时使用螺壳（主控）包内的 Python：依次找 <code>/Applications</code>、<code>~/Applications</code> 下的 <code>螺壳.app</code>、<code>螺壳主控.app</code>，核对 bundle id <code>ai.luoke.core</code>，不问 LaunchServices；都没有时用 PATH 里的 <code>python3</code>；参数前加 <code>-B -E -s -u</code>。自带引擎用固定 PATH；第三方引擎第一次启动时才解析登录 shell 的 PATH（最多 3 秒）。</li>
 <li><b>通信</b>：标准输入输出上每行一个 JSON，第一条必定是 <code>hello</code>；写入走每个引擎自己的串行队列。</li>
 <li><b>停止</b>：关闭 stdin，1 秒后对整个进程组 SIGKILL。</li>
@@ -745,7 +745,7 @@ sequenceDiagram
 </table></div>
 
 <p><b>设置窗口</b>四页：通用（输入方案、中英文、排版、候选窗口、联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案学到的词和忘掉的词；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（开发模式记录、记录文件夹、引擎文件夹、设置文件）。每行带一句说明；窗口里不放文本框。</p>
-<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用、沙盒拦截、等确认的第三方引擎也列在这里。</p>
+<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用、沙盒拦截、等确认的第三方引擎也列在这里。</p>
 
 <h2>安全</h2>
 <ul>
@@ -755,7 +755,7 @@ sequenceDiagram
 </ul>
 
 <h2>安装与输入源</h2>
-<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>other_copies</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，没切过去退出码 3。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。</p>
+<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>registered</code>、<code>added</code>、<code>consent_list</code>、<code>tis_enabled</code>、<code>tis_selectable</code>、<code>current</code>、<code>other_copies</code>（含废纸篓里同一 bundle id 的包）、<code>version</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，调用失败退出码 1，调用成功却没切过去退出码 3；另有 <code>--disable</code>、<code>--current</code>。配件清单的 <code>capabilities.listing</code> 给出「添加应用」时显示的一句话介绍（<code>tagline</code>）和类别「输入」（<code>category</code>），不写 <code>permissions</code>。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。</p>
 
 <h2>系统要求</h2>
 <p>螺壳只在 macOS 26 起安装输入法（清单 <code>min_macos</code> 26）；LuokeIME.app 本身的最低系统是 14.0，供手动安装验证旧系统。</p>
@@ -1904,6 +1904,7 @@ sequenceDiagram
 
 <h2>2026-10-28</h2>
 <ul>
+<li>邮件助手页按代码复核到 0.18.14（beta1.1 用的 0.18.11.3 功能相同）：页面令牌存进 localStorage、同步分批入库和断点续读、长链接写法、分拣的寄出日期 / 只在抄送 / <code>sender_verdict</code>、五类通知和清理分析完、收件箱卡片时间和已过日程、处理模式按钮、加入日历、撤销的查找顺序、日志轮转。输入法页复核到 0.1.23：换版等设置窗口和添加引导关着、<code>--status</code> 的全部字段和退出码、<code>--disable</code> / <code>--current</code>、清单的 <code>listing</code>、菜单里联想的勾选。</li>
 <li>螺壳页、配件清单页、文件页按 luoke-core eb1ad95 复核：引擎密钥写进 0600 的 settings.json、不联网找模型；计费 / 低数据网络不自动补下；只装应用不动引擎、换引擎后删旧版本；首次设置的进度估算、试打框重新聚焦、邮件助手完成行；验证历史记"本版放行的任务"；Finder 版本是发布号；"上一版"只认发布出去的、beta 全部重评；发布页只放 Luoke.dmg；配件清单的 <code>main</code>、<code>min_macos</code>、<code>capabilities</code> 里的 <code>service</code> / <code>permissions</code> / <code>listing</code>、配方的 <code>background_input_chars</code> 和 <code>expectations</code>、发布清单字段。</li>
 </ul>
 
