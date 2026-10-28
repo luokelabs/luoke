@@ -2,10 +2,10 @@
 /*
 !/.gitignore
 !/README.md
+!/README.en.md
 !/SECURITY.md
 !/ARCHITECTURE.md
 !/CONTEXT.md
-!/CLAUDE.md
 !/docs/
 !/projects/
 !/atlas/
