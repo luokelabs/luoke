@@ -1,6 +1,6 @@
 # 螺壳输入法 luoke-ime
 
-- 仓库：[`luoke-ime/`](../luoke-ime)；进度：`luoke-ime/STATUS.md`；设计：`luoke-ime/docs/设计.md`
+- 仓库：[`luoke-ime/`](../luoke-ime)；进度：见 luoke-ime 的 README「现状」；设计：`luoke-ime/docs/设计.md`
 - 本页由 luoke-ime 的会话维护。
 
 ## 是什么
