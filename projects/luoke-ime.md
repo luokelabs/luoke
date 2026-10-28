@@ -27,7 +27,7 @@ macOS 输入法。壳只管按键、候选窗、上屏和沙盒，出什么候�
 
 ## 对主控的需求
 
-**身份**：对主控来说配件只有一个，"luoke-ime"（配件清单 `luoke-accessory.json` 在 LuokeIME.app 的 Contents/Resources，`type` 是 `input-method`，`memory` 为 true；`data` 是 `["~/.luoke/ime"]`：卸载时主控删 `~/Library/Input Methods/LuokeIME.app` 和这个目录，里面只有输入法自己的设置、各引擎的数据、开发模式的记录和用户装的引擎，不含 `mem.db`；另有系统临时目录里的 `luoke-ime/`，空的，删不删都行；2026-10-16 和 luoke-core 对过）。只有壳（Swift，不在沙盒里）连主控的 socket；输入法引擎和个人化组件的请求由壳转发，壳只看声明、不看内容。
+**身份**：对主控来说配件只有一个，"luoke-ime"（配件清单 `luoke-accessory.json` 在 LuokeIME.app 的 Contents/Resources，`type` 是 `input-method`，`memory` 为 true；`data` 是 `["~/.luoke/ime"]`：卸载时主控删 `~/Library/Input Methods/LuokeIME.app` 和这个目录，里面只有输入法自己的设置、各引擎的数据、开发模式的记录和用户装的引擎，不含 `mem.db`；另有系统临时目录里的 `luoke-ime/`，空的，删不删都行；2026-10-16 和 luoke-core 对过）。「添加应用」装之前看到的介绍写在清单的 `capabilities.listing`（类别「输入」，0.1.23 起，luoke-ime#19）；输入法不接 agent，没有 `service`；要用户在系统设置里手动添加输入源这一步不是系统授权，不写进 `permissions`，由主控的完成页和输入法的添加引导带着做。只有壳（Swift，不在沙盒里）连主控的 socket；输入法引擎和个人化组件的请求由壳转发，壳只看声明、不看内容。
 
 **任务**（草案，名字和数值待主控定）：
 
