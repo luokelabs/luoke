@@ -1,12 +1,12 @@
 #!/bin/sh
 # Build the docs and push the generated site to the public repo luokelabs/luoke-atlas (GitHub Pages).
-# Only the generated site/ goes public; sources stay in the private top-level repo.
+# Only the generated site/ goes to this repo; sources are in the top-level repo luokelabs/luoke.
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
 python3 "$HERE/build.py"
 WORK=$(mktemp -d)
 git clone -q https://github.com/luokelabs/luoke-atlas.git "$WORK"
-cp "$HERE/site/index.html" "$HERE/site/.nojekyll" "$WORK/"
+cp "$HERE/site/index.html" "$HERE/site/.nojekyll" "$HERE/site/README.md" "$WORK/"
 cd "$WORK"
 if git diff --quiet && [ -z "$(git status --porcelain)" ]; then echo "no change"; exit 0; fi
 git add -A
