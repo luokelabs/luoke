@@ -10,14 +10,14 @@ Luoke is made by **Luoke Labs (螺壳实验室)** and is in closed beta (beta1).
 
 | Name | What it is | Repository |
 |---|---|---|
-| **Luoke** (螺壳) | The app you install: runs all local model inference (choosing models by how much memory your Mac has), installs and updates the other apps; Luoke Memory lives inside it | [luoke-core](projects/luoke-core.md) |
-| **Luoke Memory** (螺壳记忆) | One on-device memory shared by all apps: records what happened and distills an understanding of you; every entry shows its evidence and can be viewed, corrected or deleted | [luoke-mem](projects/luoke-mem.md) |
-| **Luoke Mail** (螺壳邮件助手) | Sorts your whole mailbox with a local model: triages new mail, cleans up old mail, audits subscriptions, picks what's worth reading, drafts replies | [luoke-mail](projects/luoke-mail.md) |
-| **Luoke Input Method** (螺壳输入法) | Chinese input (Xiaohe Shuangpin and Quanpin); a local model picks the top candidate from what you've written so far and suggests what comes next | [luoke-ime](projects/luoke-ime.md) |
+| **Luoke** (螺壳) | The app you install: runs all local model inference (choosing models by how much memory your Mac has), installs and updates the other apps; Luoke Memory lives inside it | [luoke-core](https://github.com/luokelabs/luoke-core) |
+| **Luoke Memory** (螺壳记忆) | One on-device memory shared by all apps: records what happened and distills an understanding of you; every entry shows its evidence and can be viewed, corrected or deleted | [luoke-mem](https://github.com/luokelabs/luoke-mem) |
+| **Luoke Mail** (螺壳邮件助手) | Sorts your whole mailbox with a local model: triages new mail, cleans up old mail, audits subscriptions, picks what's worth reading, drafts replies | [luoke-mail](https://github.com/luokelabs/luoke-mail) |
+| **Luoke Input Method** (螺壳输入法) | Chinese input (Xiaohe Shuangpin and Quanpin); a local model picks the top candidate from what you've written so far and suggests what comes next | [luoke-ime](https://github.com/luokelabs/luoke-ime) |
 
 In progress and not yet released: proactive reminders and chat (the agent), deep search over your files and photos, and a system checkup that looks for clutter and security issues while your Mac is idle.
 
-The component repositories are still private and will be open-sourced as they are ready.
+These four components are open source (since October 28, 2026); code, docs and licenses are in their repositories. The ones in progress will be published the same way when they are ready.
 
 ## Principles
 
@@ -50,7 +50,7 @@ cd luoke
 git submodule foreach 'git switch main && git pull'
 ```
 
-The third line puts each component on the latest `main` (otherwise submodules sit on the commit recorded here, in detached HEAD). Commit and push in the component's own directory. The component commits recorded here are only updated, and tagged, when a build is cut (internal `internal-*`, beta, release), so that each build can be traced back to its code.
+The submodules point to the private repositories the team develops in (`<component>-private`); if you only want to read the code, clone the public repositories in the table above. The third line puts each component on the latest `main` (otherwise submodules sit on the commit recorded here, in detached HEAD). Commit and push in the component's own directory. The component commits recorded here are only updated, and tagged, when a build is cut (internal `internal-*`, beta, release), so that each build can be traced back to its code.
 
 ---
 
