@@ -21,7 +21,7 @@
 - **只做 macOS**，最低 26.2。
 - **首发**：不在 v1 首发里，跟着 agent（v1.x）出。图片和声音的向量要等主控换上带新 mlx-vlm 的引擎包；在那之前图片、视频、录音只能按文件名和 OCR 的字找，所以有了图片和声音再发布。
 - **和 digup 的关系**：从头写。原来基于开源 DigUp（MIT）的 digup 不登记；顶层 ADR 0018「digup 的嵌入」一节由本项目接手，任务改名为 `luoke-search.embed`。
-- **现状**：2026-10-20 立项，第一版代码已在 main（2026-10-21）：读文档、PDF 和扫描件、截图、图片、录音、视频和照片图库，按字词和按意思搜，给 agent 的 MCP 和命令行，常驻服务和 .app。进度见 `luoke-search/STATUS.md`。
+- **现状**：2026-10-20 立项，第一版代码已在 main（2026-10-21）：读文档、PDF 和扫描件、截图、图片、录音、视频和照片图库，按字词和按意思搜，给 agent 的 MCP 和命令行，常驻服务和 .app。10-26 起装好后还没选要搜的地方时，经 outbox 给一张现成方案的卡片；10-28 接进螺壳的窗口（配件清单加了 `service`、`permissions`、`listing`，见下）。版本 0.1.0，还没发布过。进度见 `luoke-search/STATUS.md`。
 
 ## 对外提供
 
@@ -30,26 +30,62 @@
 | 工具 | 只读 | 做什么 |
 |---|---|---|
 | `search_query` | 是 | 参数 `query`，可选 `kinds`（文档、PDF、截图、图片、视频、录音、照片）、`since` / `until`、`limit`。答复：结果列表（编号、类型、标题、出处、页码或时刻、命中片段、为什么对得上、分数）、`partial`（还在建索引或缺向量时为真，附一句说明），加一张 A2UI 结果卡片 |
-| `search_open` | 是 | 按结果编号在 Mac 上打开，跳到那一页或那一刻；或在访达里显示 |
+| `search_open` | 否（列进 `actions`，要用户点按；`ai.luoke/where: mac`） | 按结果编号在 Mac 上打开，跳到那一页或那一刻；或在访达里显示 |
 | `search_status` | 是 | 索引了多少、还在等什么、主控能不能算向量 |
 | `search_settings` | 是 | 看现在的设置；给出要改的，就出一张确认卡片（方案） |
-| `search_settings_apply` | 否（列进 `actions`） | 执行用户在卡片上点了的方案：搜哪些文件夹、跳过哪些、要不要照片图库、用电池时建不建索引 |
+| `search_settings_apply` | 否（列进 `actions`） | 执行用户在卡片上点了的方案：搜哪些文件夹、跳过哪些、要不要照片图库、用电池时建不建索引；可选 `checks`（`needs-setup` 卡片上勾了哪几项） |
 | `search_open_system_settings` | 是 | 打开 macOS 系统设置里对应的隐私页（给"要你允许"那张卡片上的按钮用） |
+| `search_request_access` | 否（列进 `actions`，要用户点按；`ai.luoke/where: mac`） | 照片图库的申请（清单 `permissions` 里的 `request`）：用户在卡片上点了「继续」以后，由深度搜索自己的程序请 macOS 弹出询问，等用户答了（最多 4 分钟）再答复 |
+| `outbox_ack` | 是 | agent 告诉深度搜索 outbox 里的一件事已经给用户看过、答过或放下了 |
 
-**outbox** `luoke://luoke-search/outbox`，只报两类事，不推搜索结果：
-- `needs-access`（normal）：要用户允许读某个文件夹或照片图库，带去系统设置的说明；
+**资源**（工具协议 §1a 的相对 id）：`summary`（概况，螺壳窗口里深度搜索那一页用）、`permissions`（每项权限现在的状态）、`outbox`（同下）。
+
+**outbox** `luoke://luoke-search/outbox`（相对 id `outbox`），只报三类事，不推搜索结果：
+- `needs-setup`（normal）：装好后还没选任何文件夹、照片也没开时报一件。卡片上是一个现成的方案：桌面、文稿、下载（勾上），照片图库（不勾）；用户点了 [好] 才改，[算了] 以后不再报；
+- `needs-access`（low）：要用户允许读某个文件夹或照片图库，带去系统设置的说明；照片的卡片上先点「继续」，再请 macOS 问。每次又要用户处理时换新编号（`needs-access/<文件夹>/<编号>`、`needs-access/photos/<编号>`），agent 当成新的一件；
 - `index-ready`（low）：第一遍索引建好了。
 
-**命令行** `luoke-search`：`index`、`search`、`open`、`status`、`settings`、`eval`、`mcp`，和 MCP 工具一一对应，`--json` 的输出和 MCP 的答复同一个格式。`--index` 指定索引目录，`LUOKE_HUB_SOCKET` 指定主控，开发和测试不碰正式的索引和正在用的主控。
+**命令行** `luoke-search`：`index`、`search`、`open`、`status`、`settings`、`eval`、`mcp`，和 MCP 工具对应，`--json` 的输出和 MCP 的答复同一个格式；只给 agent 用的 `search_open_system_settings`、`search_request_access`、`outbox_ack` 没有命令（命令行不读照片图库）。`--index` 指定索引目录，`LUOKE_HUB_SOCKET` 指定主控，开发和测试不碰正式的索引和正在用的主控。发布版（.app 里的）只接 `serve`、`index`、`status`、`search`、`open`、`settings`、`mcp`，`--index` 这类开发开关一律拒绝启动。
 
-**配件清单**（草案）：
+**配件清单**（`Resources/luoke-accessory.json`，10-28 的 main）：
 
 ```json
-{"contract": 1, "accessory": "luoke-search", "bundle_id": "ai.luoke.search", "name": "螺壳深度搜索",
- "type": "app", "entry": [], "resident": true, "memory": false, "ui_element": true,
+{
+ "contract": 1,
+ "accessory": "luoke-search",
+ "bundle_id": "ai.luoke.search",
+ "name": "螺壳深度搜索",
+ "version": "0.1.0",
+ "type": "app",
+ "entry": [],
+ "resident": true,
+ "memory": false,
+ "ui_element": true,
  "tasks": [{"name": "luoke-search.embed", "kind": "embed", "main": true}],
- "data": ["~/.luoke-search"], "min_macos": "26.2",
- "capabilities": {"protocol": 1, "socket": "~/.luoke-search/run/agent.sock", "reports": ["…"], "actions": ["…"]}}
+ "data": ["~/.luoke-search"],
+ "min_macos": "26.2",
+ "capabilities": {
+  "protocol": 1,
+  "socket": "~/.luoke-search/run/agent.sock",
+  "reports": [
+   {"kind": "needs-setup", "title": "深度搜索还没选要搜的地方", "urgency": "normal"},
+   {"kind": "needs-access", "title": "深度搜索需要你允许读取", "urgency": "low"},
+   {"kind": "index-ready", "title": "第一遍索引建好了", "urgency": "low"}
+  ],
+  "actions": [
+   {"name": "search_settings_apply", "title": "改深度搜索的设置（搜哪些文件夹、要不要照片图库）", "writes": true},
+   {"name": "search_open", "title": "在 Mac 上打开搜到的文件，或在访达中显示", "writes": true},
+   {"name": "search_request_access", "title": "请 macOS 问你要不要让深度搜索读照片图库", "writes": true}
+  ],
+  "service": {"summary": true},
+  "permissions": [
+   {"id": "photos", "kind": "system", "tcc": "Photos", "title": "照片图库",
+    "facts": ["只在你让它搜照片时才读", "只读，不改图库里的东西", "只用这台 Mac 上已有的，不从 iCloud 下载", "结果不出这台 Mac"],
+    "without": "degrade", "request": "search_request_access"}
+  ],
+  "listing": {"tagline": "在这台 Mac 上找文件和照片，答案带出处", "category": "效率"}
+ }
+}
 ```
 
 **评测集**（交给 luoke-core）：
@@ -61,7 +97,7 @@
 | 依赖 | 用来做什么 | 现状 |
 |---|---|---|
 | luoke-core | 嵌入任务 `luoke-search.embed`（`POST /tasks/luoke-search.embed/v1/embed`）、`GET /tasks`；安装、在登录时拉起常驻 | 接口已有（原 `digup.embed`，ADR 0018）；改名和分档前要补的见下（luoke-core#16） |
-| luoke-agent | 唯一的入口：调 MCP 工具、画结果卡片、转达 outbox | 工具协议版本 1 已有；本工具的接口待商定 |
+| luoke-agent | 唯一的入口：调 MCP 工具、画结果卡片、转达 outbox | 照工具协议版本 1（含 §1a 的 `service`、`permissions`、`listing`）接好了；全局搜索的 `service.ask.search`、统一的结果形状、缩略图等 luoke-agent#3 定 |
 | luoke-mem | 第二步：读记录和依据原文 | 第一版不用 |
 | luoke-mail | 第二步：搜全部邮件 | 待商定 |
 | macOS | Vision（OCR）、PDFKit、AVFoundation、PhotoKit、FSEvents | 系统自带 |
@@ -96,5 +132,5 @@
 - **凭证出去时遮**（ADR 0013，10-22 修订）：名字像密码、密钥、证书的文件不读；读到的文件里的完整证件号、卡号等原样进本机索引、原样送主控算向量，拿完整号码能搜到；结果、卡片、片段、标题交给 agent 时再遮：卡号、证件号只留后四位，密码、验证码、密钥整串遮。outbox 里不放凭证。
 - **日志只记元数据**：不记搜索词、片段和文件内容。
 - **只读用户的文件**：不改、不移动、不上传。
-- **不主动找用户**（ADR 0014）：只经 agent 的 outbox 报两类事；改设置只在用户在卡片上点了以后（工具协议 §5）。
+- **不主动找用户**（ADR 0014）：只经 agent 的 outbox 报三类事；改设置、打开文件、请 macOS 问照片权限，都只在用户在卡片上点了以后（工具协议 §5）。
 - 开发时把 MCP 接到用云端模型的客户端上，搜到的片段会离开本机，所以这样用时只对着合成的测试语料。
