@@ -42,3 +42,4 @@
 
 - **内部版换到单独的公开仓库 `luokelabs/luoke-internal-builds`**（主人定，luoke-core#36）：`luoke-releases` 只放 beta 和正式版，发布页不再和内部版混在一起，外部的人不容易误装内部版。新仓库要公开，因为螺壳检查更新不带令牌；它不从官网链出去。螺壳按渠道查对应的仓库（内部版查 `luoke-internal-builds`，beta 和正式版查 `luoke-releases`）。过渡：第一版改好的内部版同时发两个仓库，让还在 `luoke-releases` 里找内部版的旧版能升上来，之后只发新仓库。旧的内部版先不删。
 - **检查更新翻页**：螺壳检查更新不再只看最新一页的发布，避免 beta 被挤出第一页后测试者查不到更新；随 beta1.1。
+- **第一批四个组件开源**（主人定）：luoke-core、luoke-mail、luoke-mem、luoke-ime 用原名建公开仓库，各从一个新的初始提交开始（作者 Luoke Labs），旧历史和团队的 issue 留在改名后的私有仓库 `<名>-private`，团队照旧在那里开发。许可：luoke-core、luoke-ime 用 Apache-2.0（输入法另有 NOTICE），luoke-mail、luoke-mem 用 MIT。公开的树由各项目的导出工具从私有仓库生成，去掉写给 AI 会话的文件、测试机名、人名、私有链接和真实数据；往公开仓库同步时在公开的 main 上追加提交、不改写历史，每次先问主人。原定开测时公开，提前到输入法发出以后：外面的人已经开始提 issue，却看不到代码。

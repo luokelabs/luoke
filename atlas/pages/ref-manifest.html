@@ -66,4 +66,4 @@
 <p>所有档的打分和联想模型为 qwen3.5-0.8b-base-4bit（独立进程，约 2.7 GB）。</p>
 
 <h2>发布清单 <code>release.json</code></h2>
-<p><code>{contract, release, hub_version, built_at, local_only?, items: {&lt;名&gt;: {kind: model | engine | accessory | hub, version, dir, files: [{path, size, sha256}], urls, license?, accessory?, bundle_id?, type?, name?, memory?, installer?, min_macos?, listing?}}, installers?}</code>（<code>installers</code> 只在另出应用安装包时有；发布页只放螺壳的 <code>Luoke.dmg</code>）。模型有 ModelScope 和 Hugging Face 两个镜像，安装包放在 GitHub 的 <code>luokelabs/luoke-releases</code>。主控的"检查更新"从 <code>items.hub</code> 取 DMG。</p>
+<p><code>{contract, release, hub_version, built_at, local_only?, items: {&lt;名&gt;: {kind: model | engine | accessory | hub, version, dir, files: [{path, size, sha256}], urls, license?, accessory?, bundle_id?, type?, name?, memory?, installer?, min_macos?, listing?}}, installers?}</code>（<code>installers</code> 只在另出应用安装包时有；发布页只放螺壳的 <code>Luoke.dmg</code>）。模型有 ModelScope 和 Hugging Face 两个镜像，安装包放在 GitHub 上：beta 和正式版在 <code>luokelabs/luoke-releases</code>，内部版在 <code>luokelabs/luoke-internal-builds</code>。主控的"检查更新"从 <code>items.hub</code> 取 DMG。</p>
