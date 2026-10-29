@@ -42,7 +42,7 @@
 ## 依赖
 
 - 推理引擎：钉住版本、不改代码的 oMLX，打成引擎包，由实验室重签公证（ADR 0001）。
-- 模型由实验室量化、托管在 ModelScope 和 Hugging Face；安装包和引擎包发在 GitHub 的 luoke-releases。
+- 模型由实验室量化、托管在 ModelScope 和 Hugging Face；安装包和引擎包发在 GitHub 的 luoke-releases，gitlab.com 上有同名镜像，连不上 GitHub 时螺壳查更新、下载都改走镜像（beta1.1 起）。
 - 记忆：luoke-mem（打进主控的那份按发布钉住的提交）。
 
 ## 使用方
