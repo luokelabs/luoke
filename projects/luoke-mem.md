@@ -54,6 +54,7 @@
 - **luoke-ime**：`ime-commit`（用户 / 陈述，`data.app`，`data.context` 是光标前的前文、标成 `third_party`）、`ime-correction`、`ime-forget`（不要的候选）。按应用、按时间段删用 `forget_records`；用户设了保留期就 `forget_records(..., keep_cited=True)`。常用说法由记忆归纳，只数用户自己打的。
 - **luoke-agent**：想问的、建议从 `asks()` 读，依据从 `note(about_note)["cites"]` 读，回答一律 `reply`；习惯建议（`action.capability == "habit"`）给"好 / 不用 / 别再提"。
 - **luoke-audit**（luoke-mem#7 商定，0.26.0 起有）：体检是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-audit`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`audit-cleaned`（user / receipt）、`audit-ignored`（user / statement）、`audit-auto-cleaned`（system / activity，`by=rule`）、`audit-malware`（user / receipt）、`audit-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康。
+- **luoke-peek**（螺壳探头，luoke-mem-private#3 商定，beta1 之后做，还没开工）：记录 `web-event-*`（不记 `web-event-seen`），网页上抽的字段放 `data.event`、标 `event_from: "page"`；来源 `sender = "site:<主机名>"`、`category = page_type`；链接只留主机名和路径，路径里像令牌的一段由记忆遮掉；agent 上线前由探头自己显示 `asks(tool="luoke-peek")`。
 - **用户对理解说的话归记忆**：`state`、`confirm`、`reject`、`revise`、`later`、`was`、`reply` 记在 luoke-mem 名下，`data` 是 `{"via": 调用的工具}`；卸载某个工具时，用户确认过、否定过、亲口写的留着。
 - **升版通知**：luoke-mem 升版时告诉用到它的会话，说清接口有没有变；接口只加不改，主控换了新库，旧的调用照样能用。
 
