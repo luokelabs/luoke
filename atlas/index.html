@@ -66,7 +66,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 </style>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-29 16:54</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-30 11:53</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -634,13 +634,13 @@ sequenceDiagram
 <section class="page" id="ime" data-title="输入法 luoke-ime">
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。个人化组件把上屏写入记忆，并把打分和联想请求转给主控。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.23（build 26）· bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.32（build 35）· bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
 <tr><th>部分</th><th>实现</th><th>职责</th></tr>
 <tr><td>壳</td><td>Swift：<code>LuokeShell</code>（平台无关的状态机和引擎宿主）+ <code>LuokeIME</code>（InputMethodKit 外壳）；另有共用状态机的命令行版</td><td>按键、组字、候选窗、上屏、沙盒、转问</td></tr>
-<tr><td>打字引擎</td><td>自带小鹤双拼 <code>xiaohe</code>、全拼 <code>quanpin</code>（苹果转换引擎和 RIME 出候选）</td><td>出候选，经个人化组件请求打分后重排。小鹤、全拼有评测用的选项 <code>pause</code>（毫秒，默认 0）和 <code>pause_when</code>（<code>slow</code> / <code>always</code>）：键后停顿够久才重排；默认关。</td></tr>
+<tr><td>打字引擎</td><td>自带小鹤双拼 <code>xiaohe</code>、自然码双拼 <code>ziranma</code>、全拼 <code>quanpin</code>（苹果转换引擎和 RIME 出候选）。自然码和小鹤是同一个程序，以 <code>--scheme ziranma</code> 运行，只换韵母键位表，声母、零声母、词库和 RIME 的数据都和小鹤共用（RIME 用雾凇自带的自然码方案）；评测时加 <code>--from-xiaohe</code> 把小鹤的按键换成自然码的，600 句语料上和小鹤一样（先给的 78.8%，重排后 89.8%）</td><td>出候选，经个人化组件请求打分后重排。三个打字引擎都有评测用的选项 <code>pause</code>（毫秒，默认 0）和 <code>pause_when</code>（<code>slow</code> / <code>always</code>）：键后停顿够久才重排；默认关。</td></tr>
 <tr><td>个人化组件</td><td><code>engines/personal</code>（Python，仅标准库），运行在主控自带的 Python 上</td><td>写入记忆；把打分和联想转给主控</td></tr>
 </table></div>
 
@@ -754,8 +754,9 @@ sequenceDiagram
 <li><b>拦截上报</b>：每条拒绝带标签，壳读取系统日志，严重的列入菜单。系统日志订阅（<code>log stream</code>）套在一个 sh 里，输入法退出（含被强制结束）时随之结束。</li>
 </ul>
 
-<h2>安装与输入源</h2>
-<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>registered</code>、<code>added</code>、<code>consent_list</code>、<code>tis_enabled</code>、<code>tis_selectable</code>、<code>current</code>、<code>other_copies</code>（含废纸篓里同一 bundle id 的包）、<code>version</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，调用失败退出码 1，调用成功却没切过去退出码 3；另有 <code>--disable</code>、<code>--current</code>。配件清单的 <code>capabilities.listing</code> 给出「添加应用」时显示的一句话介绍（<code>tagline</code>）和类别「输入」（<code>category</code>），不写 <code>permissions</code>。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。</p>
+<h2>安装与添加</h2>
+<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>registered</code>、<code>added</code>、<code>consent_list</code>、<code>tis_enabled</code>、<code>tis_selectable</code>、<code>current</code>、<code>other_copies</code>（含废纸篓里同一 bundle id 的包）、<code>version</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，调用失败退出码 1，调用成功却没切过去退出码 3；另有 <code>--disable</code>、<code>--current</code>。配件清单的 <code>capabilities.listing</code> 给出「添加应用」时显示的一句话介绍（<code>tagline</code>：「小鹤、自然码双拼和全拼，本机模型帮你挑词、往下联想，从你打的字里学」）和类别「输入」（<code>category</code>），不写 <code>permissions</code>。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。引导和安装、卸载脚本的提示都用系统设置的原词「键盘 → 文字输入 → 输入法 → 编辑…」；引导卡片右上角能点开「图文教程」：三步，每步一张系统设置的截图（简体中文、浅色，缩到 900 宽）配一句话，可以上一步、下一步、返回，加好了自动退出（<code>--render-guide tutorial1|2|3</code> 能单独画出这几页）。螺壳首次设置的完成页用同一套教程。</p>
+<p>自带的 librime 在编译时把源码路径换成相对路径（<code>-ffile-prefix-map</code>），包里的库不带编译机的目录。</p>
 
 <h2>系统要求</h2>
 <p>螺壳只在 macOS 26 起安装输入法（清单 <code>min_macos</code> 26）；LuokeIME.app 本身的最低系统是 14.0，供手动安装验证旧系统。</p>
@@ -1902,6 +1903,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-10-30</h2>
+<ul>
+<li>输入法页按代码复核到 0.1.32：加自然码双拼（和小鹤共用程序和词库，只换韵母键位，评测成绩相同）；添加引导用系统设置的原词并加图文教程，螺壳完成页同用；清单介绍语；自带 librime 不再带编译机路径。「安装与输入源」改名「安装与添加」。</li>
+</ul>
 
 <h2>2026-10-29</h2>
 <ul>
