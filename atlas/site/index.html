@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-28 17:00</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-31 11:55</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -329,7 +329,7 @@ sequenceDiagram
 <li><b>首次运行</b>：步骤条五步：这台 Mac（预检：档位、磁盘、系统版本、照实说明体验；内存不到 16 GB 或系统版本低于引擎要求时停在这一步）→ 选应用 → 确认下载 → 下载安装（逐项进度，主控排第一行；总进度的剩余时间在头 10 秒、下到 2% 以前不估；应用装好即打开，不等模型；含本机试跑）→ 完成；后来加装应用在「应用」窗口那一行里装，不走向导。离开下载页时注册登录项；下载页结束时分几种结局给出下一步：有项没下下来（先继续 / 重试）、试跑没过（重新检查 / 继续）、缺底座、主控没起来（重试会重启主控）。确认页上废纸篓里有旧输入法时提示。完成页：输入法的 <code>--status</code> 答 <code>not_registered</code> 时调一次它的 <code>--register</code>，每秒检查是否已添加；添加后输入法没在跑时在后台拉起它，可试打并一键切换（<code>--select</code>），切过去后试打框重新取得焦点，切不过去、或输入法报告还登记着别的副本时给「重新登记输入法」，重新登记后仍不行则提示注销重新登录；装了邮件助手时有一行写「已经在浏览器里打开了，第一次要连接邮箱。」，给「打开」；列出每个应用的通知权限（经启动器的 <code>--notify-status</code>）：已允许 / 还没问过（按钮发一条测试通知，让系统询问）/ 已关闭（按钮打开该应用的通知设置），未全部允许时每 2 秒刷新。</li>
 <li><b>升级</b>：同一张卡片走完五步：下载安装包 → 核对签名和公证 → 换成新版螺壳 → 补齐推理引擎和模型 → 本机试跑，大小、位置相同。有两条路：菜单「检查更新」（前三步在「检查更新」窗口里），或打开比已装的新的安装器（应用的安装器，或在主控 DMG 里直接双击「螺壳」；第三步在安装器的卡片里）。两条路都先把新版拷到环境目录的 <code>staging.noindex</code> 并核对签名，写 <code>run/upgrade.json</code>，起一个独立的换包脚本，再结束旧主控和记忆进程、自己退出。脚本等它退出（最多 2 分钟），把旧版移入 <code>previous.noindex</code>，把新版换到目标位置并登记，再用 <code>/usr/bin/open</code> 以用户身份打开新版，结果写入 <code>run/swap-result.json</code>。目标位置：已装在 <code>/Applications</code> 的还在那里；装在 <code>~/Applications</code> 的，<code>/Applications</code> 写得进去就搬过去，否则留在原处；名字统一为 <code>螺壳.app</code>。目标目录写不进去（标准账户的 <code>/Applications</code>）时，脚本经系统的管理员授权框以 root 运行；授权框在旧主控退出之前弹出，取消则什么都不动、原来的主控照常用；只有换包两步用 root，打开新版时切回用户身份。换包没成时脚本把旧版放回并重新打开，旧版启动时弹框说明原因；脚本起不来或授权被取消时卡片写原因，给「先用着」和「重试」。新主控读到标记（读后删除）接着显示卡片：常驻配件在卡片一开始就拉起，补齐未装的引擎包和本档缺的模型，等本机试跑通过或推迟后写「已升级到 X」和这一版的更新说明；已装的应用有新版本时列出名字并给「去升级应用」。应用不随主控升级。补齐或试跑没成时卡片写哪一步、为什么，给「先用着」（标记写回，下次主控启动接着补）和「重试」。经应用的安装器顺带升级的，完成后到「应用」窗口那一行里接着装那个应用。</li>
 <li><b>应用</b>：菜单「应用」打开，列出这一版发布清单里的应用（组件配件不列）和清单外已装的应用，每个应用的安装、升级、回到上一版本、卸载都在它那一行里做。没装的标「未安装」，点「安装」由主控按清单下载、核对、放好（读写记忆的应用连同螺壳记忆一起装），装好后经 <code>/usr/bin/open</code> 打开，常驻的以 <code>--resident</code> 在后台拉起，输入法装好后登记一次并提示到系统设置里添加；系统版本不够的写原因、不能装。首次运行没走完时，点「安装」或应用安装器交来预选，都回到首次运行并预选上这个应用。已装且清单版本更新的标「有新版本」、写「旧版 → 新版」，点「升级」只换这一个应用：普通应用先退出、换好后拉起（原来在跑的重新打开）；输入法先换包，再结束旧进程并立即重新拉起。结果写在窗口顶部，没成时旧版照常能用。有可升级的应用时顶部提示「升级螺壳不会顺带升级应用」。「…」菜单里的「卸载」把这个窗口换成卸载确认，完成或取消后回到这里。菜单「应用」一行、「应用」窗口、检查更新窗口和升级完成卡片按同一判断提示应用有新版本：已装版本比发布清单旧、这台 Mac 的系统版本够、不是用户回到上一版本时换下的那一版。</li>
-<li><b>检查更新</b>：菜单「检查更新」打开窗口，按本机主控的渠道（内部版 <code>internal-*</code>、beta <code>beta*</code>）查 <code>luokelabs/luoke-releases</code>，取最新的一版，<code>built_at</code> 更新才算；有新版本时列出发布说明的「更新说明」一节和大小，说明这里只升级主控、应用在「应用」里单独升，给「以后再说」和「升级到 …」。升级时在这个窗口里走前三步：下载主控 DMG（显示进度），核大小、sha256、公证票据，只读挂载后核 .app（<code>螺壳.app</code> 或 <code>螺壳主控.app</code>）的签名和 Team ID，拷到 <code>staging.noindex</code> 再核一次签名，卸下并删掉 DMG，起换包脚本（要管理员授权时在这里弹），然后主控退出，由新版接着显示卡片；连不上、核对不过、某一步失败时给「重试」（升级中失败还给「先用着」），原来的主控不动。螺壳已是最新、但已装的应用有新版本时，窗口里提示并给「去升级应用」。本机版、开发版不查，窗口里说明。默认自动检查（内部版每 3 小时、beta 每天一次；启动 60 秒后，之后每小时看是否到时间，查成了才算；开关在窗口底栏，升级中不显示），发现新版只在菜单「检查更新」一行显示「有新版本」，点它直接显示那一版，不自动安装。</li>
+<li><b>检查更新</b>：菜单「检查更新」打开窗口，按本机主控的渠道查：内部版查 <code>luokelabs/luoke-internal-builds</code> 里的 <code>internal-*</code>，beta 和正式版查 <code>luokelabs/luoke-releases</code> 里的 <code>beta*</code>；每页 100 条往后翻，翻到出现这个渠道的版本为止（最多 10 页），取发布时间最新的一版，<code>built_at</code> 更新才算；有新版本时列出发布说明的「更新说明」一节和大小，说明这里只升级主控、应用在「应用」里单独升，给「以后再说」和「升级到 …」。升级时在这个窗口里走前三步：下载主控 DMG（显示进度），核大小、sha256、公证票据，只读挂载后核 .app（<code>螺壳.app</code> 或 <code>螺壳主控.app</code>）的签名和 Team ID，拷到 <code>staging.noindex</code> 再核一次签名，卸下并删掉 DMG，起换包脚本（要管理员授权时在这里弹），然后主控退出，由新版接着显示卡片；连不上、核对不过、某一步失败时给「重试」（升级中失败还给「先用着」），原来的主控不动。螺壳已是最新、但已装的应用有新版本时，窗口里提示并给「去升级应用」。本机版、开发版不查，窗口里说明。默认自动检查（内部版每 3 小时、beta 每天一次；启动 60 秒后，之后每小时看是否到时间，查成了才算；开关在窗口底栏，升级中不显示），发现新版只在菜单「检查更新」一行显示「有新版本」，点它直接显示那一版，不自动安装。</li>
 <li><b>回到上一版本</b>：「应用」窗口里某个应用在 <code>previous.noindex</code> 里有经过验证的上一版时，它那一行的「…」菜单有「回到上一版本（版本号）」，就在这一行里做：主控先核签名、Team ID、bundle id、公证，两处对调并注销备份目录里的登记；普通应用对调前先结束，输入法对调后再结束旧进程并立即重新拉起（不动输入源）；结果写在窗口顶部。换下的那一版不再算作新版本，再选一次可换回。主控把每个被本版配方认可的配件版本，连同本版当时放行的任务（评测通过的，加上配方里没有评测的，如草稿、每日摘要），记入 <code>verified-history.json</code>（每配件 3 个版本）。换回的版本、以及主控升级后还没升级的应用，只能用记录中的任务；记录外的任务答 <code>task_unavailable</code>，提示到「应用」里升级。无记录的版本不提供回到上一版本。</li>
 <li><b>卸载</b>：入口在「设置 › 关于 › 卸载螺壳」（全部）和「应用」窗口某一行的「…」›「卸载」（该应用），直接到确认页，取消或完成后回到原来的窗口。输入法的输入源还启用时先停用（macOS 26 起不能代停，拦下并请用户在系统设置里移除），删完再核一次，并删除它的临时目录和锁；结束进程；删除 .app 时连同 <code>previous.noindex</code> 里的旧版，并注销同 bundle id 的其他副本（含废纸篓里的）；可选"一起从记忆里忘掉"和"删除数据"（删数据时先跑配件自己的 uninstall 命令）。只删除配件清单 <code>data</code> 中声明且符合配件自身标识的路径；不删除 <code>mem.db</code>。完成页列出还留着的数据和位置。"卸载全部"删除环境目录、登录项、设置和命令行链接，把主控移到废纸篓后退出。</li>
 <li><b>LaunchServices 登记</b>：装配件前先注销同 bundle id 的其他副本（含废纸篓里的）；<code>previous.noindex</code> 里的旧版在换装、回滚后和主控启动时都注销登记；「检查更新」只挂载安装包、不打开里面的主控，拷到暂存处时注销两边；换包脚本注销移入 <code>previous.noindex</code> 的旧版、登记换上的新版。主控和安装器拉起别的应用一律经 <code>/usr/bin/open</code>，不把自己记成被拉起者的父进程（否则 macOS 27 上已退出的父进程会一直留在程序坞）。</li>
@@ -416,6 +416,9 @@ sequenceDiagram
 </table></div>
 <p>被否定（<code>rejected</code>）、被取代（<code>superseded</code>）、以前的事（<code>past</code>）不属于任何一档。工具读取时默认只得到比较确定以上的理解。</p>
 
+<h2>首要原则</h2>
+<p>记忆的每条规则都从宽开始，再由每个用户自己的反馈收紧（0.27 起，代码在 <code>fit.py</code>）。没有「这类不该提」的固定名单；同一条规则对不同的用户可以收到不同的松紧。不归反馈调的有三类：硬线（凭证遮掉、数据不离开本机、健康法律宗教政治只认用户的话、用户说过的不被推翻）；算错了的 bug；用户没表态前，规则不替用户收回已经说过的话。</p>
+
 <h2>定档规则</h2>
 <p>一条推断能否成为"比较确定"，取决于它所依据的<b>记录话题</b>和数量。门槛写作（条数, 不同日子数, 首尾相隔天数）：</p>
 <div class="tbl"><table>
@@ -432,7 +435,9 @@ sequenceDiagram
 <li>名字只有品牌或来源名（如"Zillow""X 相关动态""领域：来源名"）的话题不会成为兴趣，也不会成为精选口味。</li>
 <li><b>第三方来信推出的事实</b>：同一来源 ≥ 6 封、跨 ≥ 3 个月、打开 ≥ 2 封、最近 6 个月内仍有来信时直接生效。</li>
 <li><b>健康、法律、宗教政治</b>相关的推断必须由用户确认。</li>
-<li><b>门槛按用户调整</b>：同一类被否定 ≥ 2 次且多于确认，门槛上调；确认 ≥ 3 次且从未否定，门槛下调。</li>
+<li><b>门槛按用户调整</b>：每类提议从已有的表里现算（<code>fit.tally</code>、<code>fit.standing</code>），不存第二份。「否定」分量 ≥ 2 且多于确认，升一档；≥ 4 且至少是确认的两倍，升两档；确认 ≥ 3 次且从未否定，降一档。分量：否定、在记忆页删掉、建议点「不用」各 1，接受后又撤回、建议点「别再提」各 2，问了一直不答到过期 0.5。删掉的只留每类的条数，不留内容；敏感的连条数也不留。</li>
+<li><b>一类不牵连别的类</b>：处理习惯按「动作 × 邮件类别」分，事实按话题的前缀（如 <code>服务:</code>、<code>账户:</code>），兴趣和口味按来源（打字或邮件），常用说法一类，退订建议一类。</li>
+<li><b>门槛动了什么</b>：处理习惯要的次数（升档后已有的也先不提）；常用说法和打字话题生效要的天数、次数；打字话题升档后不提前问；退订建议要的清理次数；事实升档后，待确认的挪到「观察中」（<code>observed</code>）。默认门槛不变。</li>
 <li><b>以前的事</b>：会变的理解（包括猜测和用户确认过的）最新依据超过 730 天，标为 <code>past</code>，不再使用也不再提问，相关的未答问题撤回；姓名、学校、家人等不会变的不受影响。用户说"现在还是"即恢复为确定；同一类被这样唤回 ≥ 2 次后，这一类的期限加倍为 1460 天。</li>
 <li><b>以前的事再次出现</b>（工具又提出同一条）：只因太久而变成以前的事的，按原样回来——用户确认过的回到确定，否则为猜测、按新依据定档；用户自己说过"以前是，现在不是"的回到猜测，保留表态时间，新依据不能让它自行生效，只能再问用户。</li>
 <li><b>邮件推出的兴趣</b>：关于用户的、由邮件记录撑起的兴趣最多 8 条生效；重新定档时按依据条数保留前 8 条，其余回到猜测。</li>
@@ -457,9 +462,10 @@ sequenceDiagram
 <p>不使用模型，每次归纳任务开头和结尾各执行一次；结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
 <ul>
 <li><b>降档</b>：打字归纳出的兴趣和常用说法，最新依据超过 90 天且用户未表态，回到猜测。</li>
-<li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
+<li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、靠长词里的字母才够门槛的常用说法（拉丁字母按整词数，「hub」不算进「github」；已生效的退回猜测，用户表过态的不动）、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
 <li><b>处理习惯</b>：同一（邮箱, 发件人, 邮件类别, 动作）出现 ≥ 2 次形成一条习惯；来源是 <code>mail-override</code> 的新建议和 <code>mail-acted</code> 的动作，只认 <code>ACTION_NAMES</code> 里的动作（archive、read、trash、spam、flag、keep、label、filter）。来自改建议的按定档规则判定，仅来自亲手处理的为猜测。用户撤销一次自动执行即回到猜测。改建议后当场处理只算一次（<code>mail-acted</code> 的 <code>after_override</code> 覆盖整批，或 10 分钟内同一发件人、同一动作）。</li>
-<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的常用说法和话题；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
+<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的话题（这一类门槛升档后不提前问）；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
+<li><b>常用说法不问用户</b>：只影响候选排序，错了几乎没代价，够门槛自己记下，不要的在记忆页删。</li>
 <li><b>建议</b>：每天最多 3 条。"以后都这样？"（有发件人和类别、动作可自动执行的处理习惯，用户点"好"即成为确定并可自动执行）；"退订？"（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
 <li><b>去重</b>：同一件事已有未答的问题时不再生成；"以后再说"或过期未答 7 天后、已答或"不用"60 天后才可能再问；"别再提"永不再问。</li>
 </ul>
@@ -641,13 +647,13 @@ sequenceDiagram
 <section class="page" id="ime" data-title="输入法 luoke-ime">
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。个人化组件把上屏写入记忆，并把打分和联想请求转给主控。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.23（build 26）· bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.32（build 35）· bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
 <tr><th>部分</th><th>实现</th><th>职责</th></tr>
 <tr><td>壳</td><td>Swift：<code>LuokeShell</code>（平台无关的状态机和引擎宿主）+ <code>LuokeIME</code>（InputMethodKit 外壳）；另有共用状态机的命令行版</td><td>按键、组字、候选窗、上屏、沙盒、转问</td></tr>
-<tr><td>打字引擎</td><td>自带小鹤双拼 <code>xiaohe</code>、全拼 <code>quanpin</code>（苹果转换引擎和 RIME 出候选）</td><td>出候选，经个人化组件请求打分后重排。小鹤、全拼有评测用的选项 <code>pause</code>（毫秒，默认 0）和 <code>pause_when</code>（<code>slow</code> / <code>always</code>）：键后停顿够久才重排；默认关。</td></tr>
+<tr><td>打字引擎</td><td>自带小鹤双拼 <code>xiaohe</code>、自然码双拼 <code>ziranma</code>、全拼 <code>quanpin</code>（苹果转换引擎和 RIME 出候选）。自然码和小鹤是同一个程序，以 <code>--scheme ziranma</code> 运行，只换韵母键位表，声母、零声母、词库和 RIME 的数据都和小鹤共用（RIME 用雾凇自带的自然码方案）；评测时加 <code>--from-xiaohe</code> 把小鹤的按键换成自然码的，600 句语料上和小鹤一样（先给的 78.8%，重排后 89.8%）</td><td>出候选，经个人化组件请求打分后重排。三个打字引擎都有评测用的选项 <code>pause</code>（毫秒，默认 0）和 <code>pause_when</code>（<code>slow</code> / <code>always</code>）：键后停顿够久才重排；默认关。</td></tr>
 <tr><td>个人化组件</td><td><code>engines/personal</code>（Python，仅标准库），运行在主控自带的 Python 上</td><td>写入记忆；把打分和联想转给主控</td></tr>
 </table></div>
 
@@ -761,8 +767,9 @@ sequenceDiagram
 <li><b>拦截上报</b>：每条拒绝带标签，壳读取系统日志，严重的列入菜单。系统日志订阅（<code>log stream</code>）套在一个 sh 里，输入法退出（含被强制结束）时随之结束。</li>
 </ul>
 
-<h2>安装与输入源</h2>
-<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>registered</code>、<code>added</code>、<code>consent_list</code>、<code>tis_enabled</code>、<code>tis_selectable</code>、<code>current</code>、<code>other_copies</code>（含废纸篓里同一 bundle id 的包）、<code>version</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，调用失败退出码 1，调用成功却没切过去退出码 3；另有 <code>--disable</code>、<code>--current</code>。配件清单的 <code>capabilities.listing</code> 给出「添加应用」时显示的一句话介绍（<code>tagline</code>）和类别「输入」（<code>category</code>），不写 <code>permissions</code>。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。</p>
+<h2>安装与添加</h2>
+<p><code>LuokeIME --register</code> 只注册（macOS 26 起不再请求启用，须用户在系统设置里添加）；<code>--status</code> 输出一行 JSON（<code>state</code>：not_registered / not_added / added_not_selectable / ready，另有 <code>registered</code>、<code>added</code>、<code>consent_list</code>、<code>tis_enabled</code>、<code>tis_selectable</code>、<code>current</code>、<code>other_copies</code>（含废纸篓里同一 bundle id 的包）、<code>version</code>），供螺壳的首次运行向导和诊断用；<code>--select</code> 切换后另起进程核对，调用失败退出码 1，调用成功却没切过去退出码 3；另有 <code>--disable</code>、<code>--current</code>。配件清单的 <code>capabilities.listing</code> 给出「添加应用」时显示的一句话介绍（<code>tagline</code>：「小鹤、自然码双拼和全拼，本机模型帮你挑词、往下联想，从你打的字里学」）和类别「输入」（<code>category</code>），不写 <code>permissions</code>。用户自己打开 LuokeIME.app 而还没添加时弹添加引导，每秒检查，加好后提示去任意输入框试打。引导和安装、卸载脚本的提示都用系统设置的原词「键盘 → 文字输入 → 输入法 → 编辑…」；引导卡片右上角能点开「图文教程」：三步，每步一张系统设置的截图（简体中文、浅色，缩到 900 宽）配一句话，可以上一步、下一步、返回，加好了自动退出（<code>--render-guide tutorial1|2|3</code> 能单独画出这几页）。螺壳首次设置的完成页用同一套教程。</p>
+<p>自带的 librime 在编译时把源码路径换成相对路径（<code>-ffile-prefix-map</code>），包里的库不带编译机的目录。</p>
 
 <h2>系统要求</h2>
 <p>螺壳只在 macOS 26 起安装输入法（清单 <code>min_macos</code> 26）；LuokeIME.app 本身的最低系统是 14.0，供手动安装验证旧系统。</p>
@@ -1418,7 +1425,7 @@ sequenceDiagram
 <p>所有档的打分和联想模型为 qwen3.5-0.8b-base-4bit（独立进程，约 2.7 GB）。</p>
 
 <h2>发布清单 <code>release.json</code></h2>
-<p><code>{contract, release, hub_version, built_at, local_only?, items: {&lt;名&gt;: {kind: model | engine | accessory | hub, version, dir, files: [{path, size, sha256}], urls, license?, accessory?, bundle_id?, type?, name?, memory?, installer?, min_macos?, listing?}}, installers?}</code>（<code>installers</code> 只在另出应用安装包时有；发布页只放螺壳的 <code>Luoke.dmg</code>）。模型有 ModelScope 和 Hugging Face 两个镜像，安装包放在 GitHub 的 <code>luokelabs/luoke-releases</code>。主控的"检查更新"从 <code>items.hub</code> 取 DMG。</p>
+<p><code>{contract, release, hub_version, built_at, local_only?, items: {&lt;名&gt;: {kind: model | engine | accessory | hub, version, dir, files: [{path, size, sha256}], urls, license?, accessory?, bundle_id?, type?, name?, memory?, installer?, min_macos?, listing?}}, installers?}</code>（<code>installers</code> 只在另出应用安装包时有；发布页只放螺壳的 <code>Luoke.dmg</code>）。模型有 ModelScope 和 Hugging Face 两个镜像，安装包放在 GitHub 上：beta 和正式版在 <code>luokelabs/luoke-releases</code>，内部版在 <code>luokelabs/luoke-internal-builds</code>。主控的"检查更新"从 <code>items.hub</code> 取 DMG。</p>
 </section>
 <section class="page" id="ref-mem" data-title="记忆接口与表结构">
 <h1>记忆接口与表结构</h1>
@@ -1448,6 +1455,7 @@ sequenceDiagram
 <tr><td><code>propose(kind, text, cites, …)</code></td><td>推测；按定档规则可能直接生效</td></tr>
 <tr><td><code>conclude(kind, text, cites, …)</code></td><td>由用户自己的记录得出；依据须全部来自用户，按定档规则为比较确定或猜测</td></tr>
 <tr><td><code>confirm(nid)</code> / <code>reject(nid)</code> / <code>was(nid)</code> / <code>later(nid)</code> / <code>revise(nid, text)</code></td><td>用户的决定：确认、否定、以前是、以后再说、改写</td></tr>
+<tr><td><code>reject_family(nid)</code></td><td>「这一类都不要」：把这条所在一类里用户还没表态的（待确认和观察中）都标为否定，返回条数</td></tr>
 <tr><td><code>notes(kinds, status, tool, confidence)</code></td><td>默认只返回生效的（比较确定和确定）；每条带 <code>confidence</code>、<code>data</code>、<code>auto</code>、<code>fresh</code></td></tr>
 <tr><td><code>note(nid)</code></td><td>一条理解及其全部依据（含原文）</td></tr>
 <tr><td><code>recent(since, limit)</code></td><td>未经用户表态而直接生效的推断</td></tr>
@@ -1471,7 +1479,7 @@ sequenceDiagram
 <tr><td><code>cites</code></td><td>(note_id, record_id)</td></tr>
 <tr><td><code>asks</code></td><td>id、tool、kind（question / suggestion）、text、why、about_note、about_kind、urgency、answer（JSON）、status、created_at、expires_at、decided_at、answer_record、sensitive、evidence、rank、action（JSON）、key</td></tr>
 <tr><td><code>candidates</code></td><td>id、kind、text、record_ids、first_seen、last_seen（归纳中积累的候选）</td></tr>
-<tr><td><code>learning</code></td><td>name、value：归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
+<tr><td><code>learning</code></td><td>name、value：<code>fit.deleted</code>（用户删掉的理解，按类只记条数）；归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
 <tr><td><code>grants</code></td><td>遗留，不再使用</td></tr>
 </table></div>
 <p>升级只加不改：新表、可空的新列、新索引。版本存于 <code>PRAGMA user_version</code>。</p>
@@ -1482,7 +1490,7 @@ sequenceDiagram
 <tr><td>records.speaker</td><td><code>user</code>、<code>third_party</code>、<code>system</code></td></tr>
 <tr><td>records.kind</td><td><code>statement</code>、<code>activity</code>、<code>receipt</code></td></tr>
 <tr><td>notes.kind</td><td><code>fact</code>、<code>interest</code>、<code>dislike</code>、<code>preference</code>、<code>term</code>、<code>taste</code></td></tr>
-<tr><td>notes.status</td><td><code>proposed</code>、<code>active</code>、<code>rejected</code>、<code>superseded</code>、<code>observed</code>（只读不产生）、<code>past</code></td></tr>
+<tr><td>notes.status</td><td><code>proposed</code>、<code>active</code>、<code>rejected</code>、<code>superseded</code>、<code>observed</code>（观察中：这一类门槛升档后，待确认的事实挪到这里）、<code>past</code></td></tr>
 <tr><td>asks.status</td><td><code>open</code>、<code>answered</code>、<code>dismissed</code>、<code>withdrawn</code>、<code>later</code>、<code>never</code></td></tr>
 <tr><td>preference 的 data</td><td><code>{account, sender, action, name, category, label | filter}</code>；可自动执行的动作 <code>archive</code>、<code>read</code>、<code>label</code>、<code>filter</code></td></tr>
 </table></div>
@@ -1506,7 +1514,7 @@ sequenceDiagram
 </table></div>
 
 <h2>界面</h2>
-<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
+<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
 </section>
 <section class="page" id="ref-tasks" data-title="任务与提示词">
 <h1>任务与提示词</h1>
@@ -1568,10 +1576,10 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
 <tr><td>位置</td><td><code>luoke_mail/triage.py</code>：<code>SYSTEM_PROMPT</code>、<code>build_messages</code>、<code>parse_output</code></td></tr>
-<tr><td>输入</td><td>今天的日期和星期；邮件寄出日期早于今天时，再给寄出日期和星期，并要求没写年份的日期和"明天""下周三"这类说法按寄出日期换算；用户邮箱；记忆的"关于用户 / 处理习惯"块（≤ 600 字）；用户给这个发件人定的规则（有就给）；是否精选来源；发件域名验证结论（16 档不给）；邮件头（发件人、收件人、抄送、时间、主题、附件名 ≤ 10 个）和正文。正文先去掉引用的往来、以 &gt; 开头的行和不可见字符，超过 60 个字符的链接写成 <code>https://域名/…</code>，最多 6000 字；整条消息再按档的字符上限截短（16 / 32 / 128 GB：6000 / 12000 / 32000 字）</td></tr>
+<tr><td>输入</td><td>今天的日期和星期；邮件寄出日期早于今天时，再给寄出日期和星期，并要求没写年份的日期和"明天""下周三"这类说法按寄出日期换算；用户邮箱；用户只在抄送里、不在收件人里时加一句：除非邮件点名要用户做事或回答问题，一般 archive，priority 不超过 medium，回复要点不替用户答应派给别人的事；记忆的"关于用户 / 处理习惯"块（≤ 600 字）；用户给这个发件人定的规则（有就给）；是否精选来源；发件域名验证结论（配方参数 <code>sender_verdict</code>：16、32 档不给，128 档给）；邮件头（发件人、收件人、抄送、时间、主题、附件名 ≤ 10 个）和正文。正文先去掉引用的往来、以 &gt; 开头的行和不可见字符，超过 60 个字符的链接写成 <code>https://域名/…</code>，最多 6000 字；整条消息再按档的字符上限截短（16 / 32 / 128 GB：6000 / 12000 / 32000 字）</td></tr>
 <tr><td>输出</td><td>13 个字段都必填：<code>category</code>（8 选 1）、<code>priority</code>（high / medium / low）、<code>action</code>（reply / schedule / follow_up / archive / ignore）、<code>summary</code>（≤ 40 字）、<code>reason</code>、<code>due_date</code>（只填邮件明写的期限）、5 个 <code>event_*</code>（只在 schedule 时填）、<code>reply_points</code>（≤ 3 条）、<code>suspicious</code>；文字字段用设置的语言</td></tr>
 <tr><td>判断规则</td><td>reply：对方在等用户回信（回答问题、确认时间、发回要的资料都算）；对方还在问能不能来、或请用户从几个时间里挑一个，也是 reply；schedule 只给时间已定的会议、预约和活动；follow_up：要用户做、但不用回信的事（付账单、填表、取件、续费）；只被抄送、且邮件明确让别人处理的，通常 archive；<code>due_date</code> 只填邮件明写的期限，"下周三"这类按今天换算；回复要点不编邮件里没有的人名、名单和数字。用户的规则一般照办，只有明显要用户亲自处理或看起来可疑时才给不同的 action，并在 <code>reason</code> 里说明；"移到垃圾邮件"的规则让模型给 ignore；精选来源的邮件一般 archive</td></tr>
-<tr><td>校验与退路</td><td>解析不出 JSON 或 <code>action</code> 不在枚举：带一句纠正重问一次，再不行报错；<code>category</code> / <code>priority</code> 不在枚举改成 other / medium；日期须 YYYY-MM-DD、时间须 HH:MM，否则置空；只有 schedule 且日期有效才生成日程；<code>suspicious</code> 为真时强制 ignore + phishing；没写年份、又比寄出日期晚 300 天以上的期限和日程日期，按整年往回拉（邮件里写了那一年或"明年"的不拉）</td></tr>
+<tr><td>校验与退路</td><td>解析不出 JSON 或 <code>action</code> 不在枚举：带一句纠正重问一次，再不行报错；<code>category</code> / <code>priority</code> 不在枚举改成 other / medium；日期须 YYYY-MM-DD、时间须 HH:MM，否则置空；只有 schedule 且日期有效才生成日程；<code>suspicious</code> 为真时强制 ignore + phishing；没写年份、又比寄出日期晚 300 天以上的期限和日程日期，按整年往回拉（邮件里写了那一年或"明年"的不拉）；用户只在抄送里的邮件，模型给了 high 也降成 medium</td></tr>
 <tr><td>预算</td><td>输出 320 + 80 token；温度 0</td></tr>
 <tr><td>评测</td><td>48 封（20 封难题，含钓鱼、注入、发件域名验证、长跟踪链接后的期限）；硬性：正常邮件 0 误报，可疑邮件最多漏 1 封。不覆盖规则、记忆块、精选来源、非中文输出，也不评摘要和回复要点</td></tr>
 </table></div>
@@ -1647,7 +1655,7 @@ sequenceDiagram
 <tr><th>项</th><th>要点</th></tr>
 <tr><td>位置</td><td><code>luoke_mail/learn.py</code>：<code>RECEIVED_PROMPT</code>、<code>parse_facts</code></td></tr>
 <tr><td>输入</td><td>三封以上、跨两个月以上、至少打开过一封的机构（问过的不再送）：名称、地址、封数、首末月份、最近 ≤ 6 个主题；一批 ≤ 10 个</td></tr>
-<tr><td>输出</td><td>同上，topic 8 类之一，<code>who</code> 为机构名，<code>text</code> 写明机构和用户的关系</td></tr>
+<tr><td>输出</td><td>同上，topic 8 类之一，<code>who</code> 为机构名，<code>text</code> 写明机构和用户的关系（≤ 30 字，不用人称）。提示词里的例子用虚构的机构名（青禾银行、远帆证券、集贝网），不用「某某…」这种句式：模型会照着例子的句式写，曾把评测题里叫「某某商城」的广告商写成"在某某商城进行购物"</td></tr>
 <tr><td>校验与退路</td><td>同上；只写机构名的丢掉，缺机构名的补上；结果只作猜测，等用户确认</td></tr>
 <tr><td>预算</td><td>每个 60 + 100 token</td></tr>
 <tr><td>评测</td><td>2 组；硬性：只发广告的不能当客户，不能记某一笔金额</td></tr>
@@ -1776,7 +1784,7 @@ sequenceDiagram
 <tr><td>本机版</td><td><code>local-MMDD-HHMM</code></td><td>只在一台机器的档上评测，签名公证、不上传，用于开发机上的快速验证</td></tr>
 <tr><td>beta / 正式</td><td><code>beta*</code></td><td>封闭测试和公开发布</td></tr>
 </table></div>
-<p>安装包发布在 <code>luokelabs/luoke-releases</code>，模型在 ModelScope 和 Hugging Face 各有一份。</p>
+<p>beta 和正式版的安装包发布在 <code>luokelabs/luoke-releases</code>，团队用的内部版发布在 <code>luokelabs/luoke-internal-builds</code>（10-28 起分开；过渡的那一版两边都有）；模型在 ModelScope 和 Hugging Face 各有一份。</p>
 
 <h2>出版流程</h2>
 <ol>
@@ -1820,9 +1828,10 @@ sequenceDiagram
 <tr><td>0014</td><td>分工</td><td>模型在主控，理解在记忆，事情在工具，沟通在 agent；工具之间不互相调用，只有 agent 调用工具的能力；高级用户端点经主控调度。修订（2026-10-21）：日历由主控提供（EventKit 薄接口：按时间段读、写一个事件并返回编号，日历权限挂在主控名下，配方登记哪些配件能用，第三方配件要先得到用户同意，beta1 之后做）；浏览器桥（native messaging host）也放在主控里，插件经它把页面信息交给主控的任务、调用日历接口、写记忆记录，网页内容只接受固定格式。修订（2026-10-24）：用户看到的应用「螺壳」就是主控（<code>螺壳.app</code>，bundle id 仍是 <code>ai.luoke.core</code>）；agent 并进它，对话、卡片、提示从螺壳的窗口和通知出去，agent 作为后台组件保留，分工不变</td></tr>
 <tr><td>0015</td><td>记忆如何形成理解</td><td>工具只记录、记忆读原文下结论；三档把握程度；合理默认、按反馈调整；看依据的时间；空闲时反刍产出提问和建议；不按上下文隔离</td></tr>
 <tr><td>0016</td><td>替用户做事</td><td>能撤回的在确认习惯后自动执行并提示，事后每日复查；不可逆或对外的始终由用户点按；agent 自己的邮箱可按类型放开外发。修订（2026-10-20）：系统检查查出的"会重建的缓存"（npm、uv、pip、Xcode DerivedData、Homebrew 旧版本等）用户确认一次后可对该类自动清理，每次提示，对应应用在用时跳过；其余类别每次由用户点按，删除优先移到废纸篓；只往本机下载的签名规则包、特征库不算数据外传</td></tr>
-<tr><td>0017</td><td>v1 首发</td><td>首发邮件助手和输入法，主控和记忆随装；Apple 芯片、16 GB 起、macOS 26.2+；先封闭测试再公开。修订（2026-10-20）：所有面向用户的界面按同一套设计规范，由品牌负责人在 <code>luoke-brand</code> 牵头制定，各项目照着改；beta1 只修明显的不一致，整体改版在 beta1 之后；顶层仓库公开，各组件仓库仍私有。修订（2026-10-22）：主控的所有窗口和邮件助手的网页在 beta1 前按设计规范整体改，记忆界面、输入法设置、agent 卡片仍在 beta1 之后；封闭测试顺延到 11-02，只做一批，招满 30 位为止，开测时对应的项目在 GitHub 上公开。修订（2026-10-23）：记忆页和输入法设置也在 beta1 前改（agent 卡片仍在之后）；主控里加「应用」窗口，各应用单独安装、升级、换回、卸载，升级主控不再顺带替换应用；「螺壳主控」改名「螺壳」，bundle id、数据目录和命令名不变；版本截止 10-28 20:00，beta1 10-29</td></tr>
+<tr><td>0017</td><td>v1 首发</td><td>首发邮件助手和输入法，主控和记忆随装；Apple 芯片、16 GB 起、macOS 26.2+；先封闭测试再公开。修订（2026-10-20）：所有面向用户的界面按同一套设计规范，由品牌负责人在 <code>luoke-brand</code> 牵头制定，各项目照着改；beta1 只修明显的不一致，整体改版在 beta1 之后；顶层仓库公开，各组件仓库仍私有。修订（2026-10-22）：主控的所有窗口和邮件助手的网页在 beta1 前按设计规范整体改，记忆界面、输入法设置、agent 卡片仍在 beta1 之后；封闭测试顺延到 11-02，只做一批，招满 30 位为止，开测时对应的项目在 GitHub 上公开。修订（2026-10-23）：记忆页和输入法设置也在 beta1 前改（agent 卡片仍在之后）；主控里加「应用」窗口，各应用单独安装、升级、换回、卸载，升级主控不再顺带替换应用；「螺壳主控」改名「螺壳」，bundle id、数据目录和命令名不变；版本截止 10-28 20:00，beta1 10-29。修订（2026-10-28）：内部版换到单独的公开仓库 <code>luokelabs/luoke-internal-builds</code>，<code>luoke-releases</code> 只放 beta 和正式版，螺壳按渠道查对应仓库，过渡的那一版两边都发；检查更新往后翻页，随 beta1.1。螺壳、邮件助手、记忆、输入法四个组件公开：原名是公开仓库，从新的初始提交开始，团队开发和 issue 在 <code>&lt;名&gt;-private</code>，往公开仓库同步每次先问主人</td></tr>
 <tr><td>0018</td><td>推理和权重归主控</td><td>体系内没有脱离主控的模型运行实例；垂类模型也做成主控的任务，对延迟敏感的走优先通道。修订（2026-10-20）：嵌入任务由深度搜索（<code>luoke-search</code>）接手，任务名由 <code>digup.embed</code> 改为 <code>luoke-search.embed</code>，接口、评测和多模态安排不变</td></tr>
 <tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。beta1 之后推进</td></tr>
+<tr><td>0020</td><td>引擎换成自己做的薄引擎</td><td>只服务配方模型，底层用官方 mlx-lm，不换 mlx-serve。先进内部版，beta 线和 11-02 的测试不换；推理和权重仍归主控（ADR 0018）。现在的引擎还是 oMLX。</td></tr>
 </table></div>
 
 <h2>设计原则</h2>
@@ -1849,15 +1858,14 @@ sequenceDiagram
 <h2>质量</h2>
 <ul>
 <li>16 GB 档（9B）的邮件分拣会把正常邮件里的催促语（例如正规商城写"请在某日前上传凭证，逾期退款申请将自动关闭"）判成可疑；32 GB 档判对。还没有专门盯这种情况的评测题。</li>
-<li>话题归纳（<code>luoke-mem.topics</code>）在 16 GB 档未通过评测，暂不开启。</li>
-<li>16 GB 档的打字归纳：beta1 中没开；internal-1027 起评测连过，已打开。</li>
-<li>32 GB 档（9B）的邮件分拣会把真的银行审批通知标成可疑，结论随前文变化；M1 这一代的机器上更容易出现，32 GB 档的发布评测机测不出来。配方和证据里把这一题记为已知问题（<a href="https://github.com/luokelabs/luoke-core/issues/33">luoke-core#33</a>）。</li>
+<li>16 GB 档的打字归纳没开（beta1.1、internal-1031 的配方）。评测时过时不过：内部版和候选版 beta1.1-rc2 里开过，正式的 beta1.1 没开。</li>
+<li>32 GB 档（9B）的邮件分拣会把真的银行审批通知标成可疑，结论随前文变化；M1 这一代的机器上更容易出现，32 GB 档的发布评测机测不出来。beta1 的配方和证据里把这一题记为已知问题；main 上 32 GB 档也改成不给发件域名结论（<code>sender_verdict: false</code>，和 16 GB 档一样），三档分拣都过，随 beta1.1 撤掉这条已知问题。</li>
 <li>32 GB 档的打字归纳偶尔把一次性安排（例如"答辩"）放进话题名，两个候选分数打平；配方里记为已知问题。</li>
 </ul>
 
 <h2>缺陷</h2>
 <ul>
-<li><b>螺壳：先升螺壳、后升应用时，旧版邮件助手写不了草稿和每日摘要</b>：这三个任务没有评测记录，进不了本机的验证历史（<a href="https://github.com/luokelabs/luoke-core/issues/32">luoke-core#32</a>）。beta1 有这个问题；internal-1026-5 起已修，已经写下的旧记录不重写，升一下邮件助手就好。</li>
+<li><b>螺壳：先升螺壳、后升应用时，旧版邮件助手写不了草稿和每日摘要</b>：这三个任务没有评测记录，进不了本机的验证历史。beta1 有这个问题；internal-1026-5 起已修，已经写下的旧记录不重写，升一下邮件助手就好。</li>
 <li><b>螺壳：换引擎后旧引擎留在磁盘上</b>（每份约 1.6 GB）。beta1 有这个问题；main 上已改成新引擎检查通过后删掉别的版本，随 beta1.1。</li>
 <li><b>邮件助手：往返和多段行程只加第一段</b>：分拣只输出一个日程，往返机票、多段行程、系列活动只能挑一个或揉成一个，结束时间可能取成最后一段的（luoke-mail#34）。</li>
 <li><b>记忆：同一机构换了名字仍各成一条</b>：按「机构:」后的名字原样合并，模型给的名称不同（如英文名、带域名、中文名）就不合并；别人来信推出的事实仍是一机构一句。</li>
@@ -1908,6 +1916,24 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-10-31</h2>
+<ul>
+<li>记忆页按代码复核到 0.27.0：加「首要原则」；门槛按每类提议、用户的各种反应现算，分量和门槛动了什么写清；常用说法不再问用户，拉丁字母按整词数。参考页加 <code>reject_family</code>、<code>reject-family</code>、<code>fit.deleted</code>。</li>
+<li>已知问题按 beta1.1 和 internal-1031 安装包里的配方改：话题归纳、机构归纳各档都已开，两条去掉；16 GB 档的打字归纳没开，改正原来写的「已打开」。</li>
+<li>决策页加 0020（引擎换成自己做的薄引擎）。</li>
+</ul>
+
+<h2>2026-10-30</h2>
+<ul>
+<li>输入法页按代码复核到 0.1.32：加自然码双拼（和小鹤共用程序和词库，只换韵母键位，评测成绩相同）；添加引导用系统设置的原词并加图文教程，螺壳完成页同用；清单介绍语；自带 librime 不再带编译机路径。「安装与输入源」改名「安装与添加」。</li>
+</ul>
+
+<h2>2026-10-29</h2>
+<ul>
+<li>提示词页按邮件助手 0.18.19 复核：分拣在用户只在抄送里时多一句提示，模型给 high 也降成 medium；发件域名验证结论 16、32 档都不给；机构归纳的例子换成虚构机构名，说明为什么不用「某某…」。已知问题页加 128 GB 档机构归纳暂时关着。</li>
+<li>按 luoke-core main 复核检查更新：内部版查 <code>luoke-internal-builds</code>、beta 和正式版查 <code>luoke-releases</code>，每页 100 条往后翻（最多 10 页）；运维页、发布清单页同步写明两个发布仓库。决定页补 ADR 0017 的 10-28 修订（内部版换仓库、四个组件开源）。已知问题页去掉指向私有 issue 的链接，32 GB 档银行通知一条写明 beta1.1 起撤掉。</li>
+</ul>
 
 <h2>2026-10-28</h2>
 <ul>

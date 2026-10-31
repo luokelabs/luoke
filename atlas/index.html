@@ -66,7 +66,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 </style>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-30 11:53</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-10-31 11:55</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -409,6 +409,9 @@ sequenceDiagram
 </table></div>
 <p>被否定（<code>rejected</code>）、被取代（<code>superseded</code>）、以前的事（<code>past</code>）不属于任何一档。工具读取时默认只得到比较确定以上的理解。</p>
 
+<h2>首要原则</h2>
+<p>记忆的每条规则都从宽开始，再由每个用户自己的反馈收紧（0.27 起，代码在 <code>fit.py</code>）。没有「这类不该提」的固定名单；同一条规则对不同的用户可以收到不同的松紧。不归反馈调的有三类：硬线（凭证遮掉、数据不离开本机、健康法律宗教政治只认用户的话、用户说过的不被推翻）；算错了的 bug；用户没表态前，规则不替用户收回已经说过的话。</p>
+
 <h2>定档规则</h2>
 <p>一条推断能否成为"比较确定"，取决于它所依据的<b>记录话题</b>和数量。门槛写作（条数, 不同日子数, 首尾相隔天数）：</p>
 <div class="tbl"><table>
@@ -425,7 +428,9 @@ sequenceDiagram
 <li>名字只有品牌或来源名（如"Zillow""X 相关动态""领域：来源名"）的话题不会成为兴趣，也不会成为精选口味。</li>
 <li><b>第三方来信推出的事实</b>：同一来源 ≥ 6 封、跨 ≥ 3 个月、打开 ≥ 2 封、最近 6 个月内仍有来信时直接生效。</li>
 <li><b>健康、法律、宗教政治</b>相关的推断必须由用户确认。</li>
-<li><b>门槛按用户调整</b>：同一类被否定 ≥ 2 次且多于确认，门槛上调；确认 ≥ 3 次且从未否定，门槛下调。</li>
+<li><b>门槛按用户调整</b>：每类提议从已有的表里现算（<code>fit.tally</code>、<code>fit.standing</code>），不存第二份。「否定」分量 ≥ 2 且多于确认，升一档；≥ 4 且至少是确认的两倍，升两档；确认 ≥ 3 次且从未否定，降一档。分量：否定、在记忆页删掉、建议点「不用」各 1，接受后又撤回、建议点「别再提」各 2，问了一直不答到过期 0.5。删掉的只留每类的条数，不留内容；敏感的连条数也不留。</li>
+<li><b>一类不牵连别的类</b>：处理习惯按「动作 × 邮件类别」分，事实按话题的前缀（如 <code>服务:</code>、<code>账户:</code>），兴趣和口味按来源（打字或邮件），常用说法一类，退订建议一类。</li>
+<li><b>门槛动了什么</b>：处理习惯要的次数（升档后已有的也先不提）；常用说法和打字话题生效要的天数、次数；打字话题升档后不提前问；退订建议要的清理次数；事实升档后，待确认的挪到「观察中」（<code>observed</code>）。默认门槛不变。</li>
 <li><b>以前的事</b>：会变的理解（包括猜测和用户确认过的）最新依据超过 730 天，标为 <code>past</code>，不再使用也不再提问，相关的未答问题撤回；姓名、学校、家人等不会变的不受影响。用户说"现在还是"即恢复为确定；同一类被这样唤回 ≥ 2 次后，这一类的期限加倍为 1460 天。</li>
 <li><b>以前的事再次出现</b>（工具又提出同一条）：只因太久而变成以前的事的，按原样回来——用户确认过的回到确定，否则为猜测、按新依据定档；用户自己说过"以前是，现在不是"的回到猜测，保留表态时间，新依据不能让它自行生效，只能再问用户。</li>
 <li><b>邮件推出的兴趣</b>：关于用户的、由邮件记录撑起的兴趣最多 8 条生效；重新定档时按依据条数保留前 8 条，其余回到猜测。</li>
@@ -450,9 +455,10 @@ sequenceDiagram
 <p>不使用模型，每次归纳任务开头和结尾各执行一次；结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
 <ul>
 <li><b>降档</b>：打字归纳出的兴趣和常用说法，最新依据超过 90 天且用户未表态，回到猜测。</li>
-<li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
+<li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、靠长词里的字母才够门槛的常用说法（拉丁字母按整词数，「hub」不算进「github」；已生效的退回猜测，用户表过态的不动）、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
 <li><b>处理习惯</b>：同一（邮箱, 发件人, 邮件类别, 动作）出现 ≥ 2 次形成一条习惯；来源是 <code>mail-override</code> 的新建议和 <code>mail-acted</code> 的动作，只认 <code>ACTION_NAMES</code> 里的动作（archive、read、trash、spam、flag、keep、label、filter）。来自改建议的按定档规则判定，仅来自亲手处理的为猜测。用户撤销一次自动执行即回到猜测。改建议后当场处理只算一次（<code>mail-acted</code> 的 <code>after_override</code> 覆盖整批，或 10 分钟内同一发件人、同一动作）。</li>
-<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的常用说法和话题；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
+<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的话题（这一类门槛升档后不提前问）；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
+<li><b>常用说法不问用户</b>：只影响候选排序，错了几乎没代价，够门槛自己记下，不要的在记忆页删。</li>
 <li><b>建议</b>：每天最多 3 条。"以后都这样？"（有发件人和类别、动作可自动执行的处理习惯，用户点"好"即成为确定并可自动执行）；"退订？"（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
 <li><b>去重</b>：同一件事已有未答的问题时不再生成；"以后再说"或过期未答 7 天后、已答或"不用"60 天后才可能再问；"别再提"永不再问。</li>
 </ul>
@@ -1442,6 +1448,7 @@ sequenceDiagram
 <tr><td><code>propose(kind, text, cites, …)</code></td><td>推测；按定档规则可能直接生效</td></tr>
 <tr><td><code>conclude(kind, text, cites, …)</code></td><td>由用户自己的记录得出；依据须全部来自用户，按定档规则为比较确定或猜测</td></tr>
 <tr><td><code>confirm(nid)</code> / <code>reject(nid)</code> / <code>was(nid)</code> / <code>later(nid)</code> / <code>revise(nid, text)</code></td><td>用户的决定：确认、否定、以前是、以后再说、改写</td></tr>
+<tr><td><code>reject_family(nid)</code></td><td>「这一类都不要」：把这条所在一类里用户还没表态的（待确认和观察中）都标为否定，返回条数</td></tr>
 <tr><td><code>notes(kinds, status, tool, confidence)</code></td><td>默认只返回生效的（比较确定和确定）；每条带 <code>confidence</code>、<code>data</code>、<code>auto</code>、<code>fresh</code></td></tr>
 <tr><td><code>note(nid)</code></td><td>一条理解及其全部依据（含原文）</td></tr>
 <tr><td><code>recent(since, limit)</code></td><td>未经用户表态而直接生效的推断</td></tr>
@@ -1465,7 +1472,7 @@ sequenceDiagram
 <tr><td><code>cites</code></td><td>(note_id, record_id)</td></tr>
 <tr><td><code>asks</code></td><td>id、tool、kind（question / suggestion）、text、why、about_note、about_kind、urgency、answer（JSON）、status、created_at、expires_at、decided_at、answer_record、sensitive、evidence、rank、action（JSON）、key</td></tr>
 <tr><td><code>candidates</code></td><td>id、kind、text、record_ids、first_seen、last_seen（归纳中积累的候选）</td></tr>
-<tr><td><code>learning</code></td><td>name、value：归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
+<tr><td><code>learning</code></td><td>name、value：<code>fit.deleted</code>（用户删掉的理解，按类只记条数）；归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
 <tr><td><code>grants</code></td><td>遗留，不再使用</td></tr>
 </table></div>
 <p>升级只加不改：新表、可空的新列、新索引。版本存于 <code>PRAGMA user_version</code>。</p>
@@ -1476,7 +1483,7 @@ sequenceDiagram
 <tr><td>records.speaker</td><td><code>user</code>、<code>third_party</code>、<code>system</code></td></tr>
 <tr><td>records.kind</td><td><code>statement</code>、<code>activity</code>、<code>receipt</code></td></tr>
 <tr><td>notes.kind</td><td><code>fact</code>、<code>interest</code>、<code>dislike</code>、<code>preference</code>、<code>term</code>、<code>taste</code></td></tr>
-<tr><td>notes.status</td><td><code>proposed</code>、<code>active</code>、<code>rejected</code>、<code>superseded</code>、<code>observed</code>（只读不产生）、<code>past</code></td></tr>
+<tr><td>notes.status</td><td><code>proposed</code>、<code>active</code>、<code>rejected</code>、<code>superseded</code>、<code>observed</code>（观察中：这一类门槛升档后，待确认的事实挪到这里）、<code>past</code></td></tr>
 <tr><td>asks.status</td><td><code>open</code>、<code>answered</code>、<code>dismissed</code>、<code>withdrawn</code>、<code>later</code>、<code>never</code></td></tr>
 <tr><td>preference 的 data</td><td><code>{account, sender, action, name, category, label | filter}</code>；可自动执行的动作 <code>archive</code>、<code>read</code>、<code>label</code>、<code>filter</code></td></tr>
 </table></div>
@@ -1500,7 +1507,7 @@ sequenceDiagram
 </table></div>
 
 <h2>界面</h2>
-<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
+<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
 </section>
 <section class="page" id="ref-tasks" data-title="任务与提示词">
 <h1>任务与提示词</h1>
@@ -1817,6 +1824,7 @@ sequenceDiagram
 <tr><td>0017</td><td>v1 首发</td><td>首发邮件助手和输入法，主控和记忆随装；Apple 芯片、16 GB 起、macOS 26.2+；先封闭测试再公开。修订（2026-10-20）：所有面向用户的界面按同一套设计规范，由品牌负责人在 <code>luoke-brand</code> 牵头制定，各项目照着改；beta1 只修明显的不一致，整体改版在 beta1 之后；顶层仓库公开，各组件仓库仍私有。修订（2026-10-22）：主控的所有窗口和邮件助手的网页在 beta1 前按设计规范整体改，记忆界面、输入法设置、agent 卡片仍在 beta1 之后；封闭测试顺延到 11-02，只做一批，招满 30 位为止，开测时对应的项目在 GitHub 上公开。修订（2026-10-23）：记忆页和输入法设置也在 beta1 前改（agent 卡片仍在之后）；主控里加「应用」窗口，各应用单独安装、升级、换回、卸载，升级主控不再顺带替换应用；「螺壳主控」改名「螺壳」，bundle id、数据目录和命令名不变；版本截止 10-28 20:00，beta1 10-29。修订（2026-10-28）：内部版换到单独的公开仓库 <code>luokelabs/luoke-internal-builds</code>，<code>luoke-releases</code> 只放 beta 和正式版，螺壳按渠道查对应仓库，过渡的那一版两边都发；检查更新往后翻页，随 beta1.1。螺壳、邮件助手、记忆、输入法四个组件公开：原名是公开仓库，从新的初始提交开始，团队开发和 issue 在 <code>&lt;名&gt;-private</code>，往公开仓库同步每次先问主人</td></tr>
 <tr><td>0018</td><td>推理和权重归主控</td><td>体系内没有脱离主控的模型运行实例；垂类模型也做成主控的任务，对延迟敏感的走优先通道。修订（2026-10-20）：嵌入任务由深度搜索（<code>luoke-search</code>）接手，任务名由 <code>digup.embed</code> 改为 <code>luoke-search.embed</code>，接口、评测和多模态安排不变</td></tr>
 <tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。beta1 之后推进</td></tr>
+<tr><td>0020</td><td>引擎换成自己做的薄引擎</td><td>只服务配方模型，底层用官方 mlx-lm，不换 mlx-serve。先进内部版，beta 线和 11-02 的测试不换；推理和权重仍归主控（ADR 0018）。现在的引擎还是 oMLX。</td></tr>
 </table></div>
 
 <h2>设计原则</h2>
@@ -1843,9 +1851,7 @@ sequenceDiagram
 <h2>质量</h2>
 <ul>
 <li>16 GB 档（9B）的邮件分拣会把正常邮件里的催促语（例如正规商城写"请在某日前上传凭证，逾期退款申请将自动关闭"）判成可疑；32 GB 档判对。还没有专门盯这种情况的评测题。</li>
-<li>话题归纳（<code>luoke-mem.topics</code>）在 16 GB 档未通过评测，暂不开启。</li>
-<li>128 GB 档的机构归纳（<code>luoke-mail.learn-orgs</code>）：internal-1029-2 的评测没过一遍，先关掉；邮件助手 0.18.19 换了提示词的例子，之后的内部版重评，连过 3 遍再开。16、32 GB 档没开。</li>
-<li>16 GB 档的打字归纳：beta1 中没开；internal-1027 起评测连过，已打开。</li>
+<li>16 GB 档的打字归纳没开（beta1.1、internal-1031 的配方）。评测时过时不过：内部版和候选版 beta1.1-rc2 里开过，正式的 beta1.1 没开。</li>
 <li>32 GB 档（9B）的邮件分拣会把真的银行审批通知标成可疑，结论随前文变化；M1 这一代的机器上更容易出现，32 GB 档的发布评测机测不出来。beta1 的配方和证据里把这一题记为已知问题；main 上 32 GB 档也改成不给发件域名结论（<code>sender_verdict: false</code>，和 16 GB 档一样），三档分拣都过，随 beta1.1 撤掉这条已知问题。</li>
 <li>32 GB 档的打字归纳偶尔把一次性安排（例如"答辩"）放进话题名，两个候选分数打平；配方里记为已知问题。</li>
 </ul>
@@ -1903,6 +1909,13 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-10-31</h2>
+<ul>
+<li>记忆页按代码复核到 0.27.0：加「首要原则」；门槛按每类提议、用户的各种反应现算，分量和门槛动了什么写清；常用说法不再问用户，拉丁字母按整词数。参考页加 <code>reject_family</code>、<code>reject-family</code>、<code>fit.deleted</code>。</li>
+<li>已知问题按 beta1.1 和 internal-1031 安装包里的配方改：话题归纳、机构归纳各档都已开，两条去掉；16 GB 档的打字归纳没开，改正原来写的「已打开」。</li>
+<li>决策页加 0020（引擎换成自己做的薄引擎）。</li>
+</ul>
 
 <h2>2026-10-30</h2>
 <ul>

@@ -26,6 +26,7 @@
 <tr><td><code>propose(kind, text, cites, …)</code></td><td>推测；按定档规则可能直接生效</td></tr>
 <tr><td><code>conclude(kind, text, cites, …)</code></td><td>由用户自己的记录得出；依据须全部来自用户，按定档规则为比较确定或猜测</td></tr>
 <tr><td><code>confirm(nid)</code> / <code>reject(nid)</code> / <code>was(nid)</code> / <code>later(nid)</code> / <code>revise(nid, text)</code></td><td>用户的决定：确认、否定、以前是、以后再说、改写</td></tr>
+<tr><td><code>reject_family(nid)</code></td><td>「这一类都不要」：把这条所在一类里用户还没表态的（待确认和观察中）都标为否定，返回条数</td></tr>
 <tr><td><code>notes(kinds, status, tool, confidence)</code></td><td>默认只返回生效的（比较确定和确定）；每条带 <code>confidence</code>、<code>data</code>、<code>auto</code>、<code>fresh</code></td></tr>
 <tr><td><code>note(nid)</code></td><td>一条理解及其全部依据（含原文）</td></tr>
 <tr><td><code>recent(since, limit)</code></td><td>未经用户表态而直接生效的推断</td></tr>
@@ -49,7 +50,7 @@
 <tr><td><code>cites</code></td><td>(note_id, record_id)</td></tr>
 <tr><td><code>asks</code></td><td>id、tool、kind（question / suggestion）、text、why、about_note、about_kind、urgency、answer（JSON）、status、created_at、expires_at、decided_at、answer_record、sensitive、evidence、rank、action（JSON）、key</td></tr>
 <tr><td><code>candidates</code></td><td>id、kind、text、record_ids、first_seen、last_seen（归纳中积累的候选）</td></tr>
-<tr><td><code>learning</code></td><td>name、value：归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
+<tr><td><code>learning</code></td><td>name、value：<code>fit.deleted</code>（用户删掉的理解，按类只记条数）；归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
 <tr><td><code>grants</code></td><td>遗留，不再使用</td></tr>
 </table></div>
 <p>升级只加不改：新表、可空的新列、新索引。版本存于 <code>PRAGMA user_version</code>。</p>
@@ -60,7 +61,7 @@
 <tr><td>records.speaker</td><td><code>user</code>、<code>third_party</code>、<code>system</code></td></tr>
 <tr><td>records.kind</td><td><code>statement</code>、<code>activity</code>、<code>receipt</code></td></tr>
 <tr><td>notes.kind</td><td><code>fact</code>、<code>interest</code>、<code>dislike</code>、<code>preference</code>、<code>term</code>、<code>taste</code></td></tr>
-<tr><td>notes.status</td><td><code>proposed</code>、<code>active</code>、<code>rejected</code>、<code>superseded</code>、<code>observed</code>（只读不产生）、<code>past</code></td></tr>
+<tr><td>notes.status</td><td><code>proposed</code>、<code>active</code>、<code>rejected</code>、<code>superseded</code>、<code>observed</code>（观察中：这一类门槛升档后，待确认的事实挪到这里）、<code>past</code></td></tr>
 <tr><td>asks.status</td><td><code>open</code>、<code>answered</code>、<code>dismissed</code>、<code>withdrawn</code>、<code>later</code>、<code>never</code></td></tr>
 <tr><td>preference 的 data</td><td><code>{account, sender, action, name, category, label | filter}</code>；可自动执行的动作 <code>archive</code>、<code>read</code>、<code>label</code>、<code>filter</code></td></tr>
 </table></div>
@@ -84,4 +85,4 @@
 </table></div>
 
 <h2>界面</h2>
-<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
+<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
