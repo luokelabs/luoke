@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-01 17:05</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-01 17:14</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -792,7 +792,7 @@ sequenceDiagram
 <section class="page" id="agent" data-title="agent luoke-agent">
 <h1>agent</h1>
 <p class="lede">螺壳的后台组件，螺壳里唯一主动找用户的部分。以后并进螺壳：不在「应用」列表里单独勾选，随螺壳装好，设置里有「主动提醒」开关；现在的独立开发版「螺壳 agent（开发）」是过渡形态。它把记忆的提问和建议、各工具要报的事合并成卡片和简报，挑时机告诉用户，并代表用户调用工具声明的能力。当前版本不使用模型。</p>
-<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.1 · 自带 <code>luoke_mem</code> 0.23.4 · 按代码 f04a2e0 核对 · 不在 v1 首发中</p>
+<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.1 · 自带 <code>luoke_mem</code> 0.23.4 · 按代码 49f1083 核对 · 不在 v1 首发中</p>
 
 <h2>职责</h2>
 <ul>
@@ -810,7 +810,7 @@ sequenceDiagram
 <ul>
 <li><b>启动</b>：设计上主控按配件清单（<code>resident: true</code>，登录时带 <code>--resident</code>，不开窗口）拉起壳；现在配方和发布流水线里都没有 agent，主控不装也不拉起它。壳起核心的命令是 <code>&lt;python&gt; -B -E -s -m luoke_agent serve --home H --memory M --parent-pid P</code>，可再带 <code>--hub S</code>、<code>--tool 配件=socket</code>（可多个）、<code>--memory-app</code>；环境只给 <code>PATH</code>、<code>HOME</code>、<code>PYTHONDONTWRITEBYTECODE</code>、<code>LUOKE_AGENT_PYTHON</code>，标准错误追加到 <code>&lt;home&gt;/logs/core.log</code>。</li>
 <li><b>借主控的 Python</b>：壳按 bundle id <code>ai.luoke.core</code> 找到主控，用它的 <code>Contents/Resources/python/bin/python3</code>；每次起核心都重新找，主控换版本、改名、挪位置都跟得上。</li>
-<li><b>存活</b>：核心意外退出时壳会重启它，间隔从 2 秒翻倍到 60 秒；核心每 2 秒检查父进程，壳退出时随之退出。核心同时盯着 <code>LUOKE_AGENT_PYTHON</code> 指向的文件：它被换掉（设备号或 inode 变了），或路径消失超过 30 秒，核心以退出码 75 退出，壳立刻重起，不等间隔，并把间隔复位为 2 秒。</li>
+<li><b>存活</b>：核心意外退出时壳会重启它，间隔从 2 秒翻倍到 60 秒；核心每 2 秒检查父进程，壳退出时随之退出。核心同时盯着 <code>LUOKE_AGENT_PYTHON</code> 指向的文件：它被换掉（设备号或 inode 变了），或路径消失超过 30 秒，核心以退出码 75 退出，壳立刻重起，不等间隔，并把间隔复位为 2 秒；核心稳定跑过 60 秒后才退出时，间隔也复位。</li>
 <li><b>壳与核心之间</b>：<code>&lt;home&gt;/run/agent.sock</code> 上的 HTTP/1.1，见「界面协议」。</li>
 <li><b>轮询</b>：核心每 5 秒一个周期；工具 outbox 每 60 秒读一次，记忆和主控每 300 秒各读一次，简报到点前 5 秒起每个周期都读记忆，直到简报发出；窗口打开时立即把全部来源读一遍。一个来源出错不影响其他，暂时不在运行的来源卡片先收起，回来后照旧。</li>
 <li><b>使用的主控接口</b>（只在给了 <code>--hub</code> 时）：<code>GET /accessories</code> 发现已安装的工具（只认 <code>capabilities.protocol</code> 为 1 且有 socket 的，排除自己）；主控没答时保持现有工具，答了而清单里没有的工具算已卸载，卡片撤下、事项记为撤回；<code>--tool</code> 指定的不受影响。核心每次启动时经 <code>GET /tasks</code> 取主控内置的 <code>luoke_mem</code> 路径，取不到或导入失败时用自带的副本。壳正常退出时调 <code>POST /accessory/exiting</code>，告诉主控别再拉起。</li>
@@ -829,15 +829,15 @@ sequenceDiagram
 <tr><td><code>GET /feed</code></td><td>Server-Sent Events，先推全部卡片，再推变化，每 15 秒心跳</td><td>事件 <code>a2ui</code>、<code>feed</code>、<code>notify</code>、<code>busy</code>、<code>result</code></td></tr>
 <tr><td><code>POST /action</code></td><td><code>{surfaceId, sourceComponentId, context}</code></td><td><code>{text, error}</code></td></tr>
 <tr><td><code>POST /presence</code></td><td><code>{idle, locked, asleep}</code>，壳每 30 秒和状态变化时上报</td><td><code>{}</code></td></tr>
-<tr><td><code>POST /window</code></td><td><code>{open}</code></td><td><code>{}</code></td></tr>
+<tr><td><code>POST /window</code></td><td><code>{open, front}</code>，<code>front</code> 表示窗口在最前面，不报就按 <code>open</code></td><td><code>{}</code></td></tr>
 <tr><td><code>POST /notifications</code></td><td><code>{status, alerts}</code>，壳每 30 秒上报系统通知的授权</td><td><code>{}</code>；<code>status</code> 缺失或超过 40 字符答 400</td></tr>
 <tr><td><code>GET /status</code></td><td>—</td><td>只有元数据：<code>items</code>、<code>surfaces</code>、<code>notices</code>、<code>sources</code>（记忆为 missing / ok / too_new，工具为 running / down）、<code>brief_due</code>、<code>window_open</code>、<code>notifications</code>、<code>present</code></td></tr>
 <tr><td><code>POST /say</code></td><td>—</td><td>501（未实现对话）</td></tr>
 </table></div>
 <ul>
 <li><b>事件内容</b>：<code>feed</code> 为 <code>{order, open, notices}</code>；<code>notify</code> 为 <code>{id, title, body, urgent, silent, surfaceId}</code>，同一 <code>id</code> 的通知换掉上一条；<code>busy</code> 为 <code>{surfaceId}</code>；<code>result</code> 为 <code>{surfaceId, text, error, replaced}</code>，<code>replaced</code> 表示卡片已换成结果，界面不再重复写那句话。</li>
-<li><b>窗口里的状态提示</b>（<code>notices</code>）：工具没在运行、螺壳记忆打不开、螺壳记忆比螺壳新请更新、螺壳没在运行暂时找不到工具、系统通知被关掉。</li>
-<li><b>系统通知被关</b>：<code>status</code> 为 <code>denied</code> 或横幅关着时，窗口里说一句怎么在系统设置里打开，不替用户改系统设置；状态变化在 <code>core.log</code> 记一行。</li>
+<li><b>窗口里的状态提示</b>（<code>notices</code>）：工具没在运行、螺壳记忆打不开、螺壳记忆比螺壳新请更新、螺壳没在运行暂时找不到工具、这一版不在螺壳验证过的版本里、系统通知被关掉。</li>
+<li><b>系统通知被关</b>：<code>status</code> 为 <code>denied</code> 或横幅关着时，窗口里说一句怎么在系统设置里打开，不替用户改系统设置；状态变化在 <code>core.log</code> 记一行。通知到不了时的处理见「何时说」。</li>
 <li><b>壳的命令行</b>：<code>--notify-status</code> 打印一行 JSON <code>{authorization, alert}</code>，不发通知、不请求授权、不起核心，10 秒没答复退出 5；<code>--notify &lt;标题&gt; &lt;副标题&gt; &lt;正文&gt; [--open &lt;参数&gt;]</code> 发一条通知，退出码 0 交给系统了、3 没允许、4 系统拒收、5 十秒没答复、64 用法不对。两者和主控启动器的同名参数一致，给主控首次运行的完成页用。</li>
 <li><b>调试子命令</b>：<code>python -m luoke_agent feed|tap|presence|window --home H</code>，用文字看卡片、点按钮、报在场、开关窗口。</li>
 </ul>
@@ -858,10 +858,11 @@ sequenceDiagram
 <tr><td><code>tools/call</code></td><td>调用能力；写调用必须在 <code>_meta</code> 中带 <code>ai.luoke/user-action</code>（<code>{surfaceId, componentId, at}</code>），否则工具返回 <code>needs_user_action</code></td></tr>
 </table></div>
 <ul>
-<li>outbox 事项字段：<code>id</code>、<code>kind</code>、<code>urgency</code>、<code>deadline</code>、<code>expires</code>、<code>created</code>、<code>why_now</code>、<code>title</code>、<code>summary</code>、<code>card</code>。缺 <code>id</code> 或 <code>title</code> 的丢弃；<code>kind</code> 缺省 <code>other</code>；<code>urgency</code> 不合法时用清单里这一类的默认，再没有就是 normal。outbox 是一份完整状态，上一轮有、这一轮没有的事项视为撤回。完成或撤回的编号在记录保留的 30 天内不再显示，工具要重新报同一件事须换新编号。</li>
-<li><b>回执</b>：工具实现了 <code>outbox_ack</code>（看 <code>tools/list</code>）时，agent 在一件事第一次说给用户时回 <code>state: "shown"</code>，每件一次（进了简报、发了急事通知，或窗口开着时进来）；用户答完回 <code>answered</code>，放下回 <code>dismissed</code>。用户不在、简报没发出去时不回 <code>shown</code>。</li>
+<li>outbox 事项字段：<code>id</code>、<code>kind</code>、<code>urgency</code>、<code>deadline</code>、<code>expires</code>、<code>created</code>、<code>why_now</code>、<code>title</code>、<code>summary</code>、<code>card</code>。缺 <code>id</code> 或 <code>title</code> 的丢弃；<code>kind</code> 缺省 <code>other</code>；<code>urgency</code> 不合法时用清单里这一类的默认，再没有就是 normal。outbox 是一份完整状态，上一轮有、这一轮没有的事项视为撤回。完成的编号在记录保留的 30 天内不再显示，工具要重新报同一件事须换新编号；撤回的编号再列出来就恢复，说过的不重说。</li>
+<li><b>回执</b>：工具实现了 <code>outbox_ack</code>（看 <code>tools/list</code>）时，agent 在一件事第一次说给用户时回 <code>state: "shown"</code>，每件一次（进了简报、发了急事通知，或用户正看着窗口时进来）；用户答完回 <code>answered</code>，放下回 <code>dismissed</code>。用户不在、简报没发出去、系统通知到不了时不回 <code>shown</code>。</li>
 <li>调用结果的 <code>structuredContent</code> 可带 <code>card</code>（更新原卡片）、<code>done</code>（事项完成，卡片保留 30 分钟以便撤销）。失败码：<code>needs_user_action</code>、<code>invalid</code>、<code>not_ready</code>、<code>needs_setup</code>、<code>stale</code>、<code>failed</code>。</li>
 <li>撤销是结果卡上的一个写按钮，走同一条点按路径。</li>
+<li><b>打开东西的动作</b>（打开文件、在访达中显示、打开工具自己的页面）一律带 <code>ai.luoke/where: mac</code>，只在用户点了按钮时才调，不管是否只读；<code>readOnlyHint</code> 由工具照实写。</li>
 </ul>
 <h3>卡片（A2UI）</h3>
 <ul>
@@ -900,8 +901,9 @@ sequenceDiagram
 <li><b>每类的方式</b>（<code>modes</code>）：<code>now</code>、<code>brief</code>、<code>window</code>、<code>off</code>；未设置时 urgent 为 <code>now</code>，其余为 <code>brief</code>。</li>
 <li><b>急事</b>：用户在 Mac 前（120 秒内有上报、未锁屏、屏幕未睡、空闲 &lt; 180 秒）时立即通知，不受免打扰时段限制。一轮只有一件时，标题是事项标题、正文是 <code>why_now</code>（没有则用 <code>summary</code>）；同一轮有多件时合成一条，标题「N 件急事」，正文列前 3 个标题，点开定位第一件。</li>
 <li><b>简报</b>：第一件待简报的事项（normal；只有 low 时距上一份 low 简报 ≥ 24 小时）出现后计时 60 分钟，到点后等用户在场且不在免打扰时段才发；每份含全部 normal，最多附 2 件 low；通知正文列前 3 个标题；上一份未打开窗口时新的一份静音。</li>
-<li><b>窗口</b>：窗口打开时，现有事项都算看过，不再为它们发通知；窗口开着时新来的事项也直接算看过。</li>
-<li><b>少说</b>：同一类连续 3 件没有回应，从 <code>brief</code> 降为 <code>window</code>，并给出一张"以后只放在窗口里"的卡片（可点「还是提醒我」）。算没回应的：通知过、到下一份简报时仍没开窗口的事项；通知后过期的事项；用户按「放下」。用户答复才把连续计数清零。</li>
+<li><b>窗口</b>：窗口在最前面、用户也在场时算正看着，现有事项和新来的事项都算看过，不再发通知。窗口开着但最小化、在别的应用后面，或人已离开，都不算。</li>
+<li><b>通知到不了</b>：系统通知被拒或横幅关着时不发、也不算说过，急事和简报都排着，打开后补发；壳还没上报过授权时照常发。</li>
+<li><b>少说</b>：同一类连续 3 次没有回应，从 <code>brief</code> 降为 <code>window</code>，并给出一张"以后只放在窗口里"的卡片，用户点了才收起，核心重启后画回来。同一次说的同类事项只算一次。算没回应的：通知过、到下一份简报时仍没看过的；通知后过期的；用户按「放下」。用户答复或点「还是提醒我」把连续计数清零。</li>
 <li><b>清理</b>：过期事项撤下；窗口关着时，完成的卡片 30 分钟后撤下，完成或撤回超过 30 天的记录连同 <code>contents</code> 一起删除。</li>
 </ul>
 
@@ -929,15 +931,9 @@ sequenceDiagram
 <li><code>deadline</code> 只影响排序，过期不会标记；<code>off</code> 与 <code>window</code> 效果相同。</li>
 <li>设置没有界面；卡片上用户改过的选项只存在壳里，壳重启、核心重启或重新连上时丢失；<code>core.log</code> 不轮转。</li>
 <li>简报通知的正文包含事项标题。</li>
-<li>核心只在启动时取一次主控的 <code>luoke_mem</code> 路径，主控换版本后靠退出码 75 重起再取；那一刻主控没答 <code>/tasks</code>（5 秒超时，不重试）就用自带的副本，直到下次重起。</li>
-<li><b>窗口开着就算看过</b>：壳只在窗口关闭时报 <code>open: false</code>。窗口最小化、被挡住，或人已离开时，新事项仍算看过：不发通知，急事也不发，同时回 <code>outbox_ack shown</code>。</li>
-<li><b>系统通知被拒时仍按说过了记账</b>：事项照样记为已通知、回 <code>shown</code>，用户没开窗口时算没回应，这一类可能因此降到只放窗口。</li>
-<li><b>「少说」按件计数</b>：同类 3 件在一份没打开的简报里就会降级；已计过的事项过期时再计一次。</li>
-<li><b>「少说」卡片不持久</b>：它不存盘，核心重启后消失，<code>modes</code> 里的降级留着，设置又没有界面，这一类就改不回来；点「还是提醒我」也不清连续计数，下一件没回应就再次降级。记忆这一路的卡片写的是具体问题的标题，不是类别名。</li>
-<li><b>来源短暂列空时事项被当成撤回</b>：记忆打不开（如文件不在）时列表为空，开着的问题记为撤回；工具重启时 outbox 短暂列空同理。来源恢复后这些编号在 30 天内不再显示。</li>
-<li><b>改写含密码类内容时提示不对</b>：记忆拒收，agent 显示"这条已经变了"并结束卡片；记忆里问题仍开着，到过期前不再显示。</li>
-<li><b>连主控时要过版本校验</b>：配方的 <code>verified</code> 没有 <code>luoke-agent</code>，主控不答它的请求，窗口却显示"螺壳没在运行"，原因说错了。</li>
-<li>壳重启核心的间隔只在退出码 75 时复位，跑得再久也不清，累计几次后每次都等 60 秒。</li>
+<li>核心只在启动时取一次主控的 <code>luoke_mem</code> 路径，主控换版本后靠退出码 75 重起再取；连不上主控时隔 2 秒重试，共 3 次，都不行就用自带的副本，直到下次重起。</li>
+<li><b>连主控时要过版本校验</b>：配方的 <code>verified</code> 没有 <code>luoke-agent</code>，主控不答它的请求，agent 只能说明这一版用不了工具；主控一侧还没接。</li>
+<li><b>下一版修</b>：本页按仓库主线写，试用版换装后才生效的有：窗口要在最前面才算看过、通知到不了时不算说过、少说按次计数且卡片不丢、来源读不到时事项不丢、改写含密码类内容时提示正确、主控不认版本时单独提示、重启间隔复位。这些修复只有测试，窗口的改动没有在真窗口上试过。</li>
 </ul>
 </section>
 <section class="page" id="search" data-title="深度搜索 luoke-search">
@@ -2072,6 +2068,7 @@ sequenceDiagram
 
 <h2>2026-11-01</h2>
 <ul>
+<li>agent 页跟到 49f1083：窗口在最前面且用户在场才算看过；系统通知到不了时不算说过；少说按次计数、卡片重启后画回来；撤回的编号再列出来就恢复；<code>/window</code> 加 <code>front</code>；打开东西的动作（§5）。已知限制里这些修复标为下一版修。</li>
 <li>agent 页按代码 f04a2e0 复核：自带 <code>luoke_mem</code> 0.23.4；主控换 Python 时核心以 75 退出、壳立刻重起；启动命令和打包形态（现在主控不装它，试用版不连主控）；界面协议补 <code>POST /notifications</code>、<code>/status</code> 字段、事件内容、壳的 <code>--notify</code>；<code>outbox_ack</code> 已发送，去掉过时的已知限制；<code>drop</code> 不是工具字段；A2UI v0.9.1；"以后再说"的准确含义和自由问题的按钮；急事合并、少说按件计、清理只在窗口关着时；新增一节写协议里有、agent 还没做的（§1a、§1b、§5、§8a）；已知限制加读代码核到的缺陷。</li>
 <li>跨页：总览加体检并把 agent 调邮件助手画成虚线（接口默认关闭）；概念、词汇表不再把 agent 算作主控管的配件；文件页改成试用版的实际路径；体检页、深度搜索页写明基础页、对话、螺壳窗口都还没做。</li>
 <li>深度搜索页按代码 2f06213 复核：outbox 三类（加 <code>needs-setup</code>，<code>needs-access</code> 改 low）；工具 8 个（加 <code>search_request_access</code>，<code>search_open</code> 要点按）；资源、照片权限点「继续」才问、发布版判定和搜索范围、遮凭证七类、schema 5、上限表、同主题和规模成绩；主控不认识深度搜索的原因改成配方 <code>verified</code> 没收录（403）；补向量重做媒体在看门狗下。</li>
