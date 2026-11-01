@@ -3,6 +3,8 @@
 
 <h2>2026-11-01</h2>
 <ul>
+<li>agent 页按代码 f04a2e0 复核：自带 <code>luoke_mem</code> 0.23.4；主控换 Python 时核心以 75 退出、壳立刻重起；启动命令和打包形态（现在主控不装它，试用版不连主控）；界面协议补 <code>POST /notifications</code>、<code>/status</code> 字段、事件内容、壳的 <code>--notify</code>；<code>outbox_ack</code> 已发送，去掉过时的已知限制；<code>drop</code> 不是工具字段；A2UI v0.9.1；"以后再说"的准确含义和自由问题的按钮；急事合并、少说按件计、清理只在窗口关着时；新增一节写协议里有、agent 还没做的（§1a、§1b、§5、§8a）；已知限制加读代码核到的缺陷。</li>
+<li>跨页：总览加体检并把 agent 调邮件助手画成虚线（接口默认关闭）；概念、词汇表不再把 agent 算作主控管的配件；文件页改成试用版的实际路径；体检页、深度搜索页写明基础页、对话、螺壳窗口都还没做。</li>
 <li>深度搜索页按代码 2f06213 复核：outbox 三类（加 <code>needs-setup</code>，<code>needs-access</code> 改 low）；工具 8 个（加 <code>search_request_access</code>，<code>search_open</code> 要点按）；资源、照片权限点「继续」才问、发布版判定和搜索范围、遮凭证七类、schema 5、上限表、同主题和规模成绩；主控不认识深度搜索的原因改成配方 <code>verified</code> 没收录（403）；补向量重做媒体在看门狗下。</li>
 <li>文件页加深度搜索的数据目录和环境变量；任务页、总览、概念、词汇表把深度搜索的状态改成未发布。已知问题：16 GB 档打字归纳按 internal-1031-2 的配方更新。</li>
 </ul>

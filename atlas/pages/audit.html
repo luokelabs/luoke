@@ -228,7 +228,7 @@
 <ul>
 <li><b>没接进主控</b>：配方里没有本工具，主控不认 <code>resident_exec</code>。所以定时的一轮、不用点就清、写记忆现在都不会在装好的螺壳上发生。</li>
 <li><b>没有模型参与</b>：<code>explain</code>、<code>identify</code> 只有提示词和评测，程序里还没调用；认不出的目录不会被起名。</li>
-<li><b>没有窗口</b>：主程序是命令行，双击 .app 只报用法后退出。能看的是 agent 窗口里的两页基础页和卡片，以及终端的 <code>report</code>、<code>findings</code>、<code>status</code>、<code>cleaned</code>、<code>system</code>。</li>
+<li><b>没有窗口</b>：主程序是命令行，双击 .app 只报用法后退出。两页基础页要等螺壳的窗口来画，agent 现在不读；卡片在 agent 接入后显示在它的窗口里。现在能看的是终端的 <code>report</code>、<code>findings</code>、<code>status</code>、<code>cleaned</code>、<code>system</code>。</li>
 <li><b>规则写在代码里</b>：规则、门槛、缓存清单都在 Swift 里，没有规则文件；规则包版本只是一个常量。加一条规则要改代码、发新版。</li>
 <li><b>第一轮大概率没有病毒扫描</b>：清单里 <code>scan</code> 排在 <code>update</code> 前，第一轮时病毒库还没下载，下一轮隔一天。</li>
 <li><b>快速扫描可能漏刚写完的文件</b>：120 秒内写过的跳过，这次的事件号却记下了，下次回放看不到它，要等下一轮整轮才扫。</li>
