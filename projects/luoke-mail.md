@@ -108,3 +108,23 @@
 - 「螺壳自己的邮箱」：一键生成「把这类邮件转给它」的 Gmail 过滤器（beta1 之后）。
 - 记录里的来源邮箱从不透明键改成地址（beta1 之后，和 luoke-mem 一起改）。
 - 给 agent 的 `auto-done`、`daily-review`（螺壳发布时）。
+
+### 对齐「先宽后紧」（ARCHITECTURE §4，2026-11-01 核对）
+
+要改的：
+
+- **通知没有反馈通道**：要不要提醒由固定的 `background.NEEDS_YOU` 和 `NOTIFY_WITHIN_DAYS` 决定，用户没法说「这类别提醒」。要加表态，按「发件人 × 类别」收紧，和习惯用同一个粒度。
+- **精选的数量是固定配额**（`editor.WEEK_QUOTA` / `MONTH_QUOTA`）：配额比分数门槛好，这点不退回，但数字改成随这个用户的反应变；反馈现在只影响挑什么，不影响挑多少。提示词里的「2 分以上要克制」和 `digest.PICK` 一起看，要重评。
+- **了解你自己设门槛**：`learner.AGREE`（两封一致才交）和 `learn.FACT_TOPICS` / `LIFE_TOPICS`（列表外静默丢掉）是在工具这边挡，改成都交给记忆，由它的 `fit` 定；和 luoke-mem 商定。
+- **清理的「没勾的记住」只记那一封**：`triage.DELETE_KINDS` 的建议不随反应变。用户反复不勾的「发件人 × 类别」，以后默认不勾。
+- **分拣提示词里的口味**（「ignore」含群发、「重要的人」）：随 ADR 0019 搬提示词时一起改，要重评。
+
+是 bug，先修：
+
+- **订阅体检的已读比例把邮件助手标的已读算成用户读的**：`subscriptions.summarize` 用 IMAP 的 `\Seen`，没有扣 `read_by_us`，0.15 起近期分析过的邮件都算已读，退订建议会变少。
+
+不改：
+
+- 不可逆、对外的：`subscriptions.MIN_COUNT` / `MAX_READ_RATIO`（门槛由记忆的退订建议反馈调，这里不再加）、`triage.KEEP_SENDER_KINDS`（退订）、`triage.KEEP_LABELS`、`App.AUTOMATED`（批量移到垃圾箱的保护）。
+- 安全：`App.SECURITY_WORDS`、习惯不碰可疑和需要用户的邮件。跳过时用户看不到，以后在「今日处理」说明。
+- 预算，不是口味：`learner.RECEIVED_SENDERS`、各处的批大小。
