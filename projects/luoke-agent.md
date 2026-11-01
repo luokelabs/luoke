@@ -17,8 +17,8 @@
 
 ## 对外提供
 
-- **工具协议（版本 1）**：`luoke-agent/docs/工具协议.md`。工具在配件清单的 `capabilities` 里声明能报什么事、能做什么；在自己的 Unix socket 上提供 MCP（2026-07-28 版）数据层的一个子集；用 outbox 列出"现在想告诉用户的事"；卡片用 A2UI v0.9.1 + 组件目录 `ai.luoke/a2ui/agent/1`；会改动东西的调用只来自用户的点按、只执行工具自己出过的方案。§8a "工具自己做了的事"和每天的复查（ADR 0016）已和 luoke-mail 定下，实现等公开发布以后。
-- **协议的参考实现**：`luoke-agent/luoke_agent/` 里的 `mcp.py`、`cards.py`、`a2ui.py`、`fake_tool.py`，只用标准库，有测试。luoke-mail 拷了 `mcp.py`、`cards.py`、`a2ui.py`（e4e4d97 版；公开发布后打开接口时重拷，agent 改它们时告诉 luoke-mail）。
+- **工具协议（版本 1）**：`luoke-agent/docs/工具协议.md`。§1a 基础页和权限（`service` / `permissions` / `listing`，10-27）、§1b 问螺壳和全局搜索（草案，10-28）。agent 第一次把一件事说给用户时回 `outbox_ack shown`（§3）。工具在配件清单的 `capabilities` 里声明能报什么事、能做什么；在自己的 Unix socket 上提供 MCP（2026-07-28 版）数据层的一个子集；用 outbox 列出"现在想告诉用户的事"；卡片用 A2UI v0.9.1 + 组件目录 `ai.luoke/a2ui/agent/1`；会改动东西的调用只来自用户的点按、只执行工具自己出过的方案。§8a "工具自己做了的事"和每天的复查（ADR 0016）已和 luoke-mail 定下，实现等公开发布以后。
+- **协议的参考实现**：`luoke-agent/luoke_agent/` 里的 `mcp.py`、`cards.py`、`a2ui.py`、`fake_tool.py`，只用标准库，有测试。luoke-mail 拷了 `mcp.py`、`cards.py`，`a2ui.py` 只拷进它的测试（e4e4d97 版，已落后；公开发布后打开接口时重拷，agent 改它们时告诉 luoke-mail）。
 - **A2UI 渲染器 `LuokeA2UI`**（Swift 包，`luoke-agent/a2ui/`）：`LuokeA2UICore` 只依赖 Foundation，`LuokeA2UI` 是 SwiftUI 画法。目录 `ai.luoke/a2ui/agent/1`、`ai.luoke/a2ui/ime/1`。输入法公开发布以后接它，按标签拷进自己的仓库。
 - **计划**：agent 本身（Mac 端）；以后手机 app。给 luoke-community 的官网素材（公开发布前给：会做什么、不会做什么、手机上怎么收到，一张示例卡片的图）。
 - **对用户**：各工具不再自己弹系统通知后，所有主动的提醒都从这里出。
@@ -41,9 +41,9 @@
 
 **对 luoke-mail**（公开发布以后实现，接口先定）：
 1. 照工具协议 §8a 报"工具自己做了的事"和每天的复查（ADR 0016）：`auto-done`（一次合成一件、按习惯分组、每组一个 [撤销]，用户撤销交给记忆当反证）和 `daily-review`（每天 20:00 一份，不急）。luoke-mail 2026-10-19 接下，公开发布以后实现。
-2. 公开发布后打开 agent 接口时，照 agent 当时的版本重拷 `mcp.py`、`cards.py`、`a2ui.py`。
+2. 公开发布后打开 agent 接口时，照 agent 当时的版本重拷 `mcp.py`、`cards.py`，测试里的 `a2ui.py` 也一起换。
 
-**对 luoke-core**：agent 有可装的正式版时，列进配件清单、拉起常驻。
+**对 luoke-core**：agent 随螺壳一起装（不单独勾选），由螺壳拉起后台进程；要有可用的版本校验：`luoke-agent` 进配方的 verified（或等价的内置放行），否则 `GET /tasks`、`/accessories` 都会被拒。怎么做 beta1 之后一起定。
 
 ## 在记忆里读写什么
 
