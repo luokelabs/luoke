@@ -27,7 +27,7 @@
 - **用户的网站和博客**：用户在记忆页填写网址，存成「关于你」的一条（`topic=site`），其他工具也能读到；读到的文章记成 `own-site` 记录。
 - **空闲任务**（清单 `jobs`，由主控在安静时刻起进程跑）：`clean`（分拣范围以前的未读邮件，每个邮箱只排一次；判断清理里的旧邮件）、`digest`（读订阅、挑精选）、`learn`（了解你，整理用户自己的资料和阅读记录）。被叫停就停在做完的那一步、退出码 0，下次接着做。
 - **卸载**：清单 `data: ["~/.luoke-mail"]`、`commands.uninstall: ["-m", "luoke_mail", "--forget-secrets"]`（删钥匙串里本工具的授权码），只在用户勾了「同时删除我的数据」时由主控运行。
-- **给 agent 的接口**（luoke-agent 工具协议）：数据目录 `run/agent.sock` 上的 MCP 子集——outbox（要处理的新邮件、可疑邮件）、按用户点按执行方案、撤销、打开页面和日历。v1 首发版关掉（`LUOKE_MAIL_AGENT=1` 才开，清单不声明能力），螺壳发布时打开。已和 luoke-agent 商定、待实现的：`auto-done`（按习惯自动做了什么，合成一件、按习惯分组、每组 `mail.undo {log_id}`）和 `daily-review`（每天的「今日处理」，urgency low，带 expires）。
+- **给 agent 的接口**（luoke-agent 工具协议）：数据目录 `run/agent.sock` 上的 MCP 子集——outbox（要处理的新邮件、可疑邮件）、按用户点按执行方案、撤销、打开页面和日历。v1 首发版关掉（`LUOKE_MAIL_AGENT=1` 才开，清单不声明能力），随 beta 2 的 agent 上线打开（见「以后」的「接 agent」）。已和 luoke-agent 商定、待实现的：`auto-done`（按习惯自动做了什么，合成一件、按习惯分组、每组 `mail.undo {log_id}`）和 `daily-review`（每天的「今日处理」，urgency low，带 expires）。
 
 ## 在记忆里读写什么
 
@@ -107,7 +107,18 @@
 
 - 「螺壳自己的邮箱」：一键生成「把这类邮件转给它」的 Gmail 过滤器（beta1 之后）。
 - 记录里的来源邮箱从不透明键改成地址（beta1 之后，和 luoke-mem 一起改）。
-- 给 agent 的 `auto-done`、`daily-review`（螺壳发布时）。
+
+### 接 agent（beta 2，luoke-ops#29）
+
+主人 11-02 定：邮件助手这边由 luoke-mail 自己做，需求由 luoke-agent 提。代码进 main，接口在 agent 上线前一直默认关，不影响 main 随时出版。都不改分拣提示词，不用重评。
+
+1. 重拷协议帮手（`mcp.py`、`cards.py`、测试里的 `a2ui.py`），从 e4e4d97 换到 luoke-agent 当时的版本。
+2. `mail_search`，登记成 `service.ask.search`：搜本机已有的邮件（分拣范围内的主题、发件人、正文，清理里更早的主题、发件人），不连邮箱、不经模型；`source` 按邮箱分；片段遮凭证（`memory.mask`）；日志不记搜了什么。
+3. 配件清单加 `listing`、`permissions`（luoke-mail-private#39）；`service` 等窗口合并。
+4. 给问螺壳的只读工具：读一封邮件、对选中的邮件出方案；出方案只是出卡片，执行照旧要用户点。
+5. `service.ask.suggest`：等问螺壳的页面编号定了再做。
+6. 工具协议 §8a 的 `auto-done`、`daily-review`。
+7. 随 agent 上线的版本把接口改成默认开、清单声明能力。
 
 ### 对齐「先宽后紧」（ARCHITECTURE §4，2026-11-01 核对）
 
