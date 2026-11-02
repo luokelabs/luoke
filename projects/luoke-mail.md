@@ -117,7 +117,7 @@
 3. 配件清单加 `listing`、`permissions`（luoke-mail-private#39）；`service` 等窗口合并。
 4. 给问螺壳的只读工具：读一封邮件、对选中的邮件出方案；出方案只是出卡片，执行照旧要用户点。
 5. `service.ask.suggest`：等问螺壳的页面编号定了再做。
-6. 工具协议 §8a 的 `auto-done`、`daily-review`。
+6. 工具协议 §8a：`auto-done` 要在 beta 2 走通（Keith 11-02）；`daily-review` 跟着从螺壳自己的邮箱外发走，进不进 beta 2 等主人定。
 7. 随 agent 上线的版本把接口改成默认开、清单声明能力。
 
 ### 对齐「先宽后紧」（ARCHITECTURE §4，2026-11-01 核对）
