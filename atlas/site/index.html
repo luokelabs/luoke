@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-02 16:54</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-02 20:20</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -1972,7 +1972,7 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>编号</th><th>决策</th><th>要点</th></tr>
 <tr><td>0013</td><td>本机就是边界</td><td>数据不离开用户自己的设备（设备之间端到端加密）；本机组件之间不为隐私设限；凭证不进记忆，走钥匙串；高级用户端点的密钥可自定义或留空。修订（2026-10-21）：写进用户自己选定并在用的账户（他的邮箱、日历等）不算外传，内容仍不能发到螺壳自己的服务器和用户没选过的第三方；深度搜索的本机索引可以原样存文件里认出的完整证件号、卡号，也原样送主控的嵌入模型，交给 agent 或画成卡片时再遮（只遮那一串、保留后四位），名字像密码、密钥的文件照旧不读，记忆仍不存凭证的值</td></tr>
-<tr><td>0014</td><td>分工</td><td>模型在主控，理解在记忆，事情在工具，沟通在 agent；工具之间不互相调用，只有 agent 调用工具的能力；高级用户端点经主控调度。修订（2026-10-21）：日历由主控提供（EventKit 薄接口：按时间段读、写一个事件并返回编号，日历权限挂在主控名下，配方登记哪些配件能用，第三方配件要先得到用户同意，beta1 之后做）；浏览器桥（native messaging host）也放在主控里，插件经它把页面信息交给主控的任务、调用日历接口、写记忆记录，网页内容只接受固定格式。修订（2026-10-24）：用户看到的应用「螺壳」就是主控（<code>螺壳.app</code>，bundle id 仍是 <code>ai.luoke.core</code>）；agent 并进它，对话、卡片、提示从螺壳的窗口和通知出去，agent 作为后台组件保留，分工不变</td></tr>
+<tr><td>0014</td><td>分工</td><td>模型在主控，理解在记忆，事情在工具，沟通在 agent；工具之间不互相调用，只有 agent 调用工具的能力；高级用户端点经主控调度。修订（2026-10-21）：日历由主控提供（EventKit 薄接口：按时间段读、写一个事件并返回编号，日历权限挂在主控名下，配方登记哪些配件能用，第三方配件要先得到用户同意，beta1 之后做）；浏览器桥（native messaging host）也放在主控里，插件经它把页面信息交给主控的任务、调用日历接口、写记忆记录，网页内容只接受固定格式。修订（2026-10-24）：用户看到的应用「螺壳」就是主控（<code>螺壳.app</code>，bundle id 仍是 <code>ai.luoke.core</code>）；agent 并进它，对话、卡片、提示从螺壳的窗口和通知出去，agent 作为后台组件保留，分工不变 修订（2026-11-02）：主窗口由 luoke-agent 这边写，写完开 PR 大家一起审，主控不排窗口外壳，也不写 A2UI 渲染；装、升级、换回、卸载仍归主控。</td></tr>
 <tr><td>0015</td><td>记忆如何形成理解</td><td>工具只记录、记忆读原文下结论；三档把握程度；合理默认、按反馈调整；看依据的时间；空闲时反刍产出提问和建议；不按上下文隔离</td></tr>
 <tr><td>0016</td><td>替用户做事</td><td>能撤回的在确认习惯后自动执行并提示，事后每日复查；不可逆或对外的始终由用户点按；agent 自己的邮箱可按类型放开外发。修订（2026-10-20）：系统检查查出的"会重建的缓存"（npm、uv、pip、Xcode DerivedData、Homebrew 旧版本等）用户确认一次后可对该类自动清理，每次提示，对应应用在用时跳过；其余类别每次由用户点按，删除优先移到废纸篓；只往本机下载的签名规则包、特征库不算数据外传</td></tr>
 <tr><td>0017</td><td>v1 首发</td><td>首发邮件助手和输入法，主控和记忆随装；Apple 芯片、16 GB 起、macOS 26.2+；先封闭测试再公开。修订（2026-10-20）：所有面向用户的界面按同一套设计规范，由品牌负责人在 <code>luoke-brand</code> 牵头制定，各项目照着改；beta1 只修明显的不一致，整体改版在 beta1 之后；顶层仓库公开，各组件仓库仍私有。修订（2026-10-22）：主控的所有窗口和邮件助手的网页在 beta1 前按设计规范整体改，记忆界面、输入法设置、agent 卡片仍在 beta1 之后；封闭测试顺延到 11-02，只做一批，招满 30 位为止，开测时对应的项目在 GitHub 上公开。修订（2026-10-23）：记忆页和输入法设置也在 beta1 前改（agent 卡片仍在之后）；主控里加「应用」窗口，各应用单独安装、升级、换回、卸载，升级主控不再顺带替换应用；「螺壳主控」改名「螺壳」，bundle id、数据目录和命令名不变；版本截止 10-28 20:00，beta1 10-29。修订（2026-10-28）：内部版换到单独的公开仓库 <code>luokelabs/luoke-internal-builds</code>，<code>luoke-releases</code> 只放 beta 和正式版，螺壳按渠道查对应仓库，过渡的那一版两边都发；检查更新往后翻页，随 beta1.1。螺壳、邮件助手、记忆、输入法四个组件公开：原名是公开仓库，从新的初始提交开始，团队开发和 issue 在 <code>&lt;名&gt;-private</code>，往公开仓库同步每次先问主人。修订（2026-10-29）：beta 和正式版的发布包在 GitLab 上放一份镜像，GitHub 仍是主渠道；私有仓库留一个和公开仓库 <code>main</code> 完全一样的 <code>public</code> 分支，同步时把导出的树作为一个新提交加在上面，扫过泄漏再推成公开 <code>main</code>，不改写历史。修订（2026-10-31）：公开仓库只在发 beta 或正式版时同步，四个组件一起，是发版流程里的一步；从下一个公开版起，beta 和正式版只钉 <code>public</code> 上的提交，内部版照旧从私有 <code>main</code> 出。公开仓库发现泄漏时立刻修。修订（2026-11-01）：要发给大家用的组件默认开源，体检、agent、深度搜索第一次随 beta 或正式版发布时建公开仓库；agent 和体检一起上，和螺壳窗口进同一个 v1.x，用户看得到清了什么、点得到「放回」之前，体检不开放 修订（2026-11-02）：下一版是 beta 2，以 agent（螺壳主界面）上线为放行标准，体检和深度搜索一起进，这两个的名字可能改；语音输入作为输入法下一个大版本自己演进；会议纪要等放到 beta 2.x 讨论。</td></tr>
@@ -2066,6 +2066,7 @@ sequenceDiagram
 
 <h2>2026-11-02</h2>
 <ul>
+<li>决策页加 ADR 0014 的 11-02 修订：主窗口由 luoke-agent 这边写。</li>
 <li>决策页加 ADR 0021（完全磁盘访问授权给螺壳本身）和 ADR 0017 的 11-02 修订（下一版是 beta 2）；体检、agent、深度搜索页头改成 beta 2。</li>
 <li>体检页按代码 3a6c9cb 复核：第一轮先下病毒库；快速扫描不再漏刚写完的文件；风险高的仅供参考进一轮那一件和 <code>summary</code>；不用点就清在两项之间停、边清边记；缓存没写谁在用的不自动清，受保护文件夹里的缓存没访问时不看；模型和设备支持文件执行前也查改动；<code>needs-access</code> 改 low；一轮卡片列出标题数到的每一条。已知限制去掉五条；页头写明和 agent、螺壳窗口进同一个 v1.x。</li>
 </ul>
