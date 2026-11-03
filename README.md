@@ -56,4 +56,4 @@ git submodule foreach 'git switch main && git pull'
 
 ---
 
-© 2026 螺壳实验室 Luoke Labs。各组件的许可见各自仓库。
+© 2026 螺壳实验室 Luoke Labs。本仓库和螺壳的各组件都用 Apache-2.0 许可（见 LICENSE）；「螺壳」的名字、图标和品牌素材不随许可授予。
