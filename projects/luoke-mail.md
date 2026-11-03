@@ -41,13 +41,13 @@
 |---|---|---|
 | `sent-mail` | 用户 / 陈述 | 发出的邮件里的一件事（ref `<Message-ID>#<话题>`，`data.text` 是用户在那封里写的部分）；用户发起的邮件主题 |
 | `received-mail` | 第三方 / 陈述 | 一个机构多次来信（封数、跨几个月、打开几封、最近一封） |
-| `mail-read` | 用户 / 活动 | 每个订阅每月一条：收到几封、用户打开几封（邮件助手标的已读不算）、`category`；`mails` 是这个月打开过的最新三封原文 {subject, date, text}，事务邮件不带 |
+| `mail-read` | 用户 / 活动 | 每个订阅每月一条：收到几封、用户打开几封（邮件助手标的已读不算）、`category`；`mails` 是这个月打开过的最新三封原文 {subject, date, text, text_by: "sender"}，事务邮件不带（0.19.7 起标 `text_by`，和 luoke-mem 商定） |
 | `mail-acted` | 用户 / 活动 | 用户亲手的处理：`action`（archive / trash / spam / read / label）、`label`、`category`、`count`、`where`（here：在邮件助手里；elsewhere：在 Gmail 网页或手机上，同步时发现） |
 | `mail-override` | 用户 / 陈述 | 用户改过的一条建议（`from`、`to`、`category`） |
 | `mail-auto` | 规则 / 活动 | 按确认过的习惯自动做的（`note_id`、`action`、`label`、`category`） |
 | `mail-undo-auto` | 用户 / 活动 | 用户撤销了一次按习惯做的：反证 |
 | `own-site`、`own-label` | 用户 / 陈述 | 网站上的文章（feed 的发布时间）、用户自己建的邮箱标签（时间是标签下最新一封） |
-| `digest-feedback`、`digest-open` | 用户 / 陈述、活动 | 精选里的收藏、没兴趣、打开（`source`、`text` 是那一条的标题和摘要） |
+| `digest-feedback`、`digest-open` | 用户 / 陈述、活动 | 精选里的收藏、没兴趣、打开（`source`、`text` 是那一条的标题和摘要，0.19.7 起带 `text_by: "sender"`：文字是发件方的） |
 | `mail-cleared` | 用户 / 活动或回执 | 整批移到垃圾箱的一个发件人（类别、封数、`by`） |
 
 **交给记忆的事实**：发出的邮件里两封一致的 `conclude`；机构来信抽出的事实 `propose`，由记忆按证据定档。
