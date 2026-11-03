@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.27.2（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.27.3（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -53,7 +53,7 @@
   - 机构来信推出的事实，话题写「机构:<完整机构名>」，同一机构的不同说法都用它，由记忆并成一条。从邮件原文里抽事实（发出的邮件、机构来信）是邮件助手的观察，照旧调 `conclude` / `propose`，由记忆的表定档；话题、不感兴趣、习惯由记忆归纳。精选读 `notes(kinds=["taste", "interest"])`；自动执行读 `notes(kinds=["preference"], confidence=["sure"])` 里 `auto` 为真的；页面上的想问的和建议读 `asks(tool="luoke-mail")`。
 - **luoke-ime**：`ime-commit`（用户 / 陈述，`data.app`，`data.context` 是光标前的前文、标成 `third_party`）、`ime-correction`、`ime-forget`（不要的候选）。按应用、按时间段删用 `forget_records`；用户设了保留期就 `forget_records(..., keep_cited=True)`。常用说法由记忆归纳，只数用户自己打的。
 - **luoke-agent**：想问的、建议从 `asks()` 读，依据从 `note(about_note)["cites"]` 读，回答一律 `reply`；习惯建议（`action.capability == "habit"`）给"好 / 不用 / 别再提"。
-- **luoke-scan**（原名 luoke-audit，luoke-mem#7 商定，0.26.0 起有，0.27.1 改名）：扫描是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-scan`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`audit-cleaned`（user / receipt）、`audit-ignored`（user / statement）、`audit-auto-cleaned`（system / activity，`by=rule`）、`audit-malware`（user / receipt）、`audit-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康（旧名，留着）。
+- **luoke-scan**（原名 luoke-audit，luoke-mem#7 商定，0.26.0 起有，0.27.1 改名，话题 0.27.3 起是 `scan-*`）：扫描是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-scan`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`scan-cleaned`（user / receipt）、`scan-ignored`（user / statement）、`scan-auto-cleaned`（system / activity，`by=rule`）、`scan-malware`（user / receipt）、`scan-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康（旧名，留着）。
 - **luoke-peek**（螺壳探头，luoke-mem-private#3 商定，beta1 之后做，还没开工）：记录 `web-event-*`（不记 `web-event-seen`），网页上抽的字段放 `data.event`、标 `event_from: "page"`；来源 `sender = "site:<主机名>"`、`category = page_type`；链接只留主机名和路径，路径里像令牌的一段由记忆遮掉；agent 上线前由探头自己显示 `asks(tool="luoke-peek")`。
 - **用户对理解说的话归记忆**：`state`、`confirm`、`reject`、`revise`、`later`、`was`、`reply` 记在 luoke-mem 名下，`data` 是 `{"via": 调用的工具}`；卸载某个工具时，用户确认过、否定过、亲口写的留着。
 - **升版通知**：luoke-mem 升版时告诉用到它的会话，说清接口有没有变；接口只加不改，主控换了新库，旧的调用照样能用。
