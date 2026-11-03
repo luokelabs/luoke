@@ -20,7 +20,7 @@
 	ignore = dirty
 [submodule "luoke-agent"]
 	path = luoke-agent
-	url = https://github.com/luokelabs/luoke-agent.git
+	url = https://github.com/luokelabs/luoke-agent-private.git
 	branch = main
 	ignore = dirty
 [submodule "luoke-community"]
@@ -30,11 +30,11 @@
 	ignore = dirty
 [submodule "luoke-search"]
 	path = luoke-search
-	url = https://github.com/luokelabs/luoke-search.git
+	url = https://github.com/luokelabs/luoke-search-private.git
 	branch = main
 	ignore = dirty
 [submodule "luoke-audit"]
 	path = luoke-audit
-	url = https://github.com/luokelabs/luoke-audit.git
+	url = https://github.com/luokelabs/luoke-scan-private.git
 	branch = main
 	ignore = dirty
