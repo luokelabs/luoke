@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-04 12:10</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-04 12:24</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -495,7 +495,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.12，按代码 7497454 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.15，按代码 e3b11f6 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -524,7 +524,7 @@ sequenceDiagram
 
 <h2>同步与分拣</h2>
 <ol>
-<li>读取收件箱最近 N 天（默认 30）的邮件，新邮件最多取 100 封，每 10 封读一批、读到就入库；连接断了重开一次接着读，再断就保留已读的，下次同步从断处继续。只取前 1 MiB、不改变已读状态；纯文本部分其实是 HTML 源码的按 HTML 读；声明 gb2312、gbk 的按 gb18030 解码。HTML 里读者看不见的元素（hidden、display:none、visibility:hidden、字号 0）不进正文，其中有字的（折叠重复后 20 字以上，最多 300 字）放在正文后面，前一行标明读邮件的人看不到。图片不下载，读 alt 文字并记下图片张数（宽或高为 0、1 的跟踪图不算，<code>items.images</code>）。长于 60 字符的链接写成 <code>https://域名/…</code>；正文去引用后截到 6000 字。没有 Message-ID 的邮件以信头整块的哈希作身份（<code>&lt;nomid-…&gt;</code>），没有 Date 的用服务器的 INTERNALDATE。</li>
+<li>读取收件箱最近 N 天（默认 30）的邮件，新邮件最多取 100 封，每 10 封读一批、读到就入库；连接断了重开一次接着读，再断就保留已读的，下次同步从断处继续。只取前 1 MiB、不改变已读状态；纯文本部分其实是 HTML 源码的按 HTML 读；声明 gb2312、gbk 的按 gb18030 解码。HTML 里读者看不见的元素（hidden、display:none、visibility:hidden、字号 0）不进正文，其中有字的（折叠重复后 20 字以上，最多 300 字）放在正文后面，前一行标明读邮件的人看不到。图片不下载，读 alt 文字并记下图片张数（宽或高为 0、1 的跟踪图不算，<code>items.images</code>）。长于 60 字符的链接写成 <code>https://域名/…</code>；正文去引用后截到 6000 字。去引用、截到 6000 字和按模型上限截短时都只截看得见的部分，看不见的那段始终留在最后。没有 Message-ID 的邮件以信头整块的哈希作身份（<code>&lt;nomid-…&gt;</code>），没有 Date 的用服务器的 INTERNALDATE。</li>
 <li>对照收件箱现状：已不在的标记为完成；推断用户在别处做了什么（归档、删除、读过、加标签，写入 <code>mail-acted</code>，<code>where=elsewhere</code>；每次最多查 30 封的去向）；邮件助手 3 天内操作记录里动过的邮件不算用户的处理，分析后标已读不移动邮件、不在此列；记为已移走却仍在收件箱的放回待处理。已入库却还没有身份或寄出日期的，按上一步的规则补上，补到日期的待处理邮件重新分拣。同一发件人 90 天内 5 封以上、没有群发标记、用户在已发送里从没写信给他的（每次最多查 20 个，查不了已发送就当写过），合成一组按群发显示；主题开头有 [AD] 或末尾有 (AD) 的也算群发。网易邮箱的收件箱里没有 31 天以前的邮件时，记下只开放了最近 30 天。</li>
 <li>邮箱第一次同步时，把收件箱里当时未读、在分拣范围以前的邮件记成一个队列（新的在前，只记这一次）。</li>
 <li>补充发件人校验结论：Gmail、QQ、网易 163/126 只认服务商在最上面加的那条 Authentication-Results（第一段要是这家的标识）。有 DMARC 看 DMARC：Gmail 写的是机构主域名，发件域名是它的子域名也算对上；失败只在策略为 quarantine、reject 时算没通过。只有 DKIM、SPF 时，签名域名和发件域名同主域名算通过，两者都失败算没通过。139 平台自己投递的，以及网易内部投递、发件人是 netease.com 的通知，记为平台投递（<code>platform</code>）；其他自定义 IMAP 没有校验。已分拣、还在等用户的邮件补到结论后，判了可疑却通过校验或是平台投递的、没判可疑却没通过的，重新分拣（每次最多 100 封）。另外补充用户最近 7 天自己归档但可能仍需处理的邮件（Gmail，最多 50 封）。</li>
@@ -556,7 +556,7 @@ sequenceDiagram
 <p>系统通知由后台整理在每个邮箱同步后发出。agent 正在读 outbox 时（10 分钟内读过），新邮件、快到期、精选、清理分析完、今日处理这五类不再发通知，交给 agent。收件箱中的旧邮件全部分析完时通知一次建议归档、移到垃圾箱、待确认各几封，点开进入清理。</p>
 <ul>
 <li>需要回复、加入日程、待跟进的新邮件（3 天内到达、非可疑）：封数和最急的两封。</li>
-<li>按习惯自动处理后：处理了几封，点开进入"今日处理"。</li>
+<li>自动处理后（按习惯，以及螺壳自己的邮箱）：「已自动处理 N 封」，点开进入"今日处理"。</li>
 <li>截止日期在明天及以前的：每件只提醒一次。</li>
 <li>精选：每周一 08:00 之后的第一次后台整理；今日处理：每晚 20:00 之后一次。</li>
 <li><b>通知权限</b>：经应用的启动器（<code>--notify-status</code>）查询 macOS 是否允许本应用通知，缓存 1 分钟。设置的"后台整理"一行：被拒绝或提醒关闭时显示警告和"打开通知设置"（打开系统设置中本应用的通知页，回到页面时重新检查）；从未询问过时提示点"发送测试通知"并选"允许"。"发送测试通知"发一条测试通知并说明结果。</li>
@@ -2046,8 +2046,6 @@ sequenceDiagram
 <ul>
 <li><b>螺壳：先升螺壳、后升应用时，旧版邮件助手写不了草稿和每日摘要</b>：这三个任务没有评测记录，进不了本机的验证历史。beta1 有这个问题；internal-1026-5 起已修，已经写下的旧记录不重写，升一下邮件助手就好。</li>
 <li><b>螺壳：换引擎后旧引擎留在磁盘上</b>（每份约 1.6 GB）。beta1 有这个问题；beta1.1 起新引擎检查通过后删掉别的版本。</li>
-<li><b>邮件助手：长邮件和带转发、引用的邮件里，设为不显示的文字读不到</b>：这段文字接在正文后面，正文去引用、截到 6000 字时一起被去掉，藏在里面写给 AI 的话不会让邮件被判为可疑。</li>
-<li><b>邮件助手：agent 接口打开时，读 outbox 会把卡片上的日程记成已加入日历</b>：同一预约的其他邮件因此显示「已在日程中」、不进快到期，Gmail 多日程邮件的「添加」按钮也不见了。接口默认关，只影响试 agent 的人。</li>
 <li><b>记忆：同一机构换了名字仍各成一条</b>：按「机构:」后的名字原样合并，模型给的名称不同（如英文名、带域名、中文名）就不合并；别人来信推出的事实仍是一机构一句。</li>
 <li><b>记忆：「其他:」话题下的人和机构可能并成一条</b>：旧版邮件助手把机构来信放在「其他:机构名」下，所以「其他:」仍按机构合并；发出邮件里写的「其他:某人」若和机构同名会被并进去。</li>
 <li><b>记忆：改建议并当场处理被算成两次时形成的处理习惯不重算</b>，仍按原依据保留。</li>
@@ -2099,6 +2097,7 @@ sequenceDiagram
 
 <h2>2026-11-04</h2>
 <ul>
+<li>邮件助手页跟到 e3b11f6（0.19.15）：截短时看不见的文字留在最后；自动处理的通知写「已自动处理 N 封」。已知问题去掉当天记的两条邮件助手缺陷（已修）。</li>
 <li>邮件助手页按代码 7497454（0.19.12）复核：许可 Apache-2.0；一封最多 4 个日程、票据算日程、.ics 含全部日程；读信补 gb18030、看不见的文字、图片张数、没有 Message-ID 或 Date 的邮件；发件人校验扩到 QQ、网易，加平台投递，<code>sender_verdict</code> 为 false 时只不给「通过」；分拣的图片和金额兜底、可疑的新判断规则；收件箱按建议 / 按时间、多日程卡片、草稿里原信没有的联系方式；订阅体检的已读和退订建议范围；群发合组、139 和 QQ 的邮箱差异；agent 接口单列一节（仍默认关闭）。已知问题：多段行程一条已修去掉，加两条邮件助手缺陷（不显示的文字被截掉、agent 读 outbox 把日程记成已加入），催促语一条改写。</li>
 </ul>
 
