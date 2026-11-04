@@ -9,11 +9,11 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.28.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.28.1（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
-- **Python 库 `luoke_mem`**：只用标准库，Python 3.9 起。各配件优先用主控里那一份（见下「和使用方定下的」）。自带一份的应用带 `__init__.py`、`memory.py`、`sensitive.py` 和 `prompts/labels.json`（0.28 起记忆片段的标题 `LABELS` 在这个文件里，缺了导入不了）。
+- **Python 库 `luoke_mem`**：只用标准库，Python 3.9 起。各配件优先用主控里那一份（见下「和使用方定下的」）。自带一份的应用照旧只带 `__init__.py`、`memory.py`、`sensitive.py`（0.28.1 起没有 `prompts/labels.json` 也能导入，标题用 `memory` 里一样的那份）。
   - 写：`record`（库在写入前遮掉凭证）、`state`、`propose`、`conclude`（按"什么记录能推出什么理解"的表定档）、`confirm`、`reject`、`revise`、`later`、`was`（以前是，现在不是）、`redate`（改正本工具记录的时间）。
   - 读：`notes`（默认给比较确定以上；`confidence=[...]` 按档读；每条带 `confidence`、`data`、`auto`、`fresh`）、`note`（全部依据的原文和 `data`）、`records`（默认本工具的，`tool=` 别的工具的，`tool=None` 全部）、`context`、`counts`、`recent`。
   - 合并和拆开：同一机构的事实是一条（话题「机构:<名>」）；`merged(nid)` 列出并进来的说法，`WholeMemory.split(nid)` 拆出来。
