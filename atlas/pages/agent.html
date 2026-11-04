@@ -52,7 +52,7 @@
 </ul>
 
 <h2>工具协议</h2>
-<p>工具在配件清单的 <code>capabilities</code> 中声明协议版本（1）、socket 路径、可报事项（<code>reports[]</code>：kind、title、默认 urgency）和动作（<code>actions[]</code>），并在自己的 Unix socket 上提供 MCP 子集。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。目前没有已发布的配件声明 <code>capabilities.protocol</code>：输入法的清单只有 <code>listing</code>，agent 跳过它；邮件助手的实现默认关闭，声明单放在 <code>packaging/agent-capabilities.json</code>，不进发布清单；体检和深度搜索已实现协议并在清单中声明，但都未发布。agent 实际只有记忆一个来源。</p>
+<p>工具在配件清单的 <code>capabilities</code> 中声明协议版本（1）、socket 路径、可报事项（<code>reports[]</code>：kind、title、默认 urgency）和动作（<code>actions[]</code>），并在自己的 Unix socket 上提供 MCP 子集。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。目前没有已发布的配件声明 <code>capabilities.protocol</code>：输入法的清单只有 <code>listing</code>，agent 跳过它；邮件助手的实现默认关闭，声明单放在 <code>packaging/agent-capabilities.json</code>，不进发布清单；螺壳扫描和螺壳搜索已实现协议并在清单中声明，但都未发布。agent 实际只有记忆一个来源。</p>
 <h3>传输</h3>
 <ul>
 <li>每个请求一条连接：<code>POST /mcp</code>，请求体为一条 JSON-RPC 2.0 消息，上限 1 MB；MCP 协议版本 <code>2026-07-28</code>，在 <code>params._meta</code> 中携带。</li>
@@ -82,11 +82,11 @@
 </ul>
 <h3>协议里有、agent 还没做的</h3>
 <ul>
-<li><b>基础页和权限（§1a，已定）</b>：工具可在 <code>capabilities</code> 里加 <code>service</code>（<code>summary</code>、<code>pages</code>、<code>ui</code>）、<code>permissions</code>、<code>listing</code>；对应资源 <code>summary</code>、<code>page/&lt;id&gt;</code>、<code>permissions</code> 用相对 id。权限分四种：<code>system</code>、<code>account</code>、<code>delegate</code>、<code>each-time</code>，状态由工具照实报。窗口归螺壳.app 画，agent 供内容；主控和 agent 现在都不读这些字段，体检和深度搜索已实现工具一侧（基础页只有体检有）。</li>
+<li><b>基础页和权限（§1a，已定）</b>：工具可在 <code>capabilities</code> 里加 <code>service</code>（<code>summary</code>、<code>pages</code>、<code>ui</code>）、<code>permissions</code>、<code>listing</code>；对应资源 <code>summary</code>、<code>page/&lt;id&gt;</code>、<code>permissions</code> 用相对 id。权限分四种：<code>system</code>、<code>account</code>、<code>delegate</code>、<code>each-time</code>，状态由工具照实报。窗口归螺壳.app 画，agent 供内容；主控和 agent 现在都不读这些字段，螺壳扫描和螺壳搜索已实现工具一侧（基础页只有螺壳扫描有）。</li>
 <li><b>问螺壳（§1b，草案）</b>：<code>service.ask</code> 的 <code>suggest</code>、<code>search</code> 两个只读动作，只在用户点开或打字问时才调。<code>search</code> 回 <code>hits</code>：固定形状的数据，不是 A2UI，由 <code>LuokeA2UI</code> 里只给窗口用的 <code>HitsList</code> 画。草案还给目录加 <code>Image</code>，现在不在目录里。主控、agent 都没有实现。</li>
-<li><b>不从卡片发起的调用（§5，草案）</b>：用户在对话里问时，只读工具的结果带一张新卡片，不进 outbox 和简报。agent 没有对话，未实现；深度搜索已按此回。</li>
+<li><b>不从卡片发起的调用（§5，草案）</b>：用户在对话里问时，只读工具的结果带一张新卡片，不进 outbox 和简报。agent 没有对话，未实现；螺壳搜索已按此回。</li>
 <li><b><code>ai.luoke/where: mac</code>（§5）</b>：标明只在 Mac 上有意义的工具，手机上不调。agent 没有手机端，不读它。</li>
-<li><b>工具自己做了的事（§8a，已定）</b>：<code>auto-done</code>（normal，能撤销给撤销，撤不回给「以后别自动做」）和 <code>daily-review</code>（low，每天一份）。agent 不需要专门处理，按普通事项走。体检已报 <code>auto-done</code>；邮件助手未实现。</li>
+<li><b>工具自己做了的事（§8a，已定）</b>：<code>auto-done</code>（normal，能撤销给撤销，撤不回给「以后别自动做」）和 <code>daily-review</code>（low，每天一份）。agent 不需要专门处理，按普通事项走。螺壳扫描已报 <code>auto-done</code>；邮件助手未实现。</li>
 </ul>
 
 <h2>与记忆的交互</h2>

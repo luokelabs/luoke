@@ -54,7 +54,7 @@
 <tr><td><code>service.log</code>、<code>app.log</code></td><td>日志</td></tr>
 </table></div>
 
-<h2>深度搜索 <code>~/.luoke-search/</code>（未发布）</h2>
+<h2>螺壳搜索 <code>~/.luoke-search/</code>（未发布）</h2>
 <div class="tbl"><table>
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td>目录本身</td><td>700，整个排除出 Time Machine</td></tr>
@@ -64,7 +64,7 @@
 <tr><td><code>run/agent.sock</code></td><td>MCP socket，0600，目录 700</td></tr>
 <tr><td><code>run/stopped-file.json</code></td><td>看门狗停下时正在读的文件，下次记入索引后删除</td></tr>
 </table></div>
-<p>字段见<a href="#search">深度搜索</a>页。</p>
+<p>字段见<a href="#search">螺壳搜索</a>页。</p>
 
 <h2>钥匙串</h2>
 <p><code>luoke-mail:imap</code>（邮箱授权码）、<code>luoke-mail:engine</code>（直连模型服务的密钥）。</p>
@@ -77,7 +77,7 @@
 <tr><td><code>LUOKE_MAIL_HOME</code></td><td>邮件助手数据目录</td></tr>
 <tr><td><code>LUOKE_MAIL_PORT</code></td><td>邮件助手网页端口（未用 <code>--port</code> 时）</td></tr>
 <tr><td><code>LUOKE_MAIL_AGENT</code></td><td>设为 1 时开启邮件助手的 agent 接口</td></tr>
-<tr><td><code>LUOKE_SEARCH_HOME</code></td><td>深度搜索数据目录（发布版拒绝启动）</td></tr>
-<tr><td><code>LUOKE_SEARCH_EMBED_TASK</code>、<code>LUOKE_SEARCH_OPENER</code>、<code>LUOKE_SEARCH_PHOTOS</code></td><td>深度搜索开发用的开关（发布版删掉，<code>LUOKE_SEARCH_DEV_APP</code> 只在构建时用），见<a href="#search">深度搜索</a>页</td></tr>
+<tr><td><code>LUOKE_SEARCH_HOME</code></td><td>螺壳搜索数据目录（发布版拒绝启动）</td></tr>
+<tr><td><code>LUOKE_SEARCH_EMBED_TASK</code>、<code>LUOKE_SEARCH_OPENER</code>、<code>LUOKE_SEARCH_PHOTOS</code></td><td>螺壳搜索开发用的开关（发布版删掉，<code>LUOKE_SEARCH_DEV_APP</code> 只在构建时用），见<a href="#search">螺壳搜索</a>页</td></tr>
 <tr><td><code>PI_CODING_AGENT_DIR</code></td><td><code>luoke launch pi</code> 写入配置的位置</td></tr>
 </table></div>
