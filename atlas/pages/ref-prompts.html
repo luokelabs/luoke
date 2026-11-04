@@ -1,6 +1,6 @@
 <!-- id: ref-prompts | nav: 提示词 | group: 参考 -->
 <h1>提示词</h1>
-<p class="lede">每个生成任务的提示词要点：送进去什么、要求输出什么、代码怎么校验、失败时怎么退。只做摘要，原文在各配件仓库。任务名、种类和各档开关见「任务与提示词」。</p>
+<p class="lede">每个生成任务的提示词要点：送进去什么、要求输出什么、代码怎么校验、失败时怎么退。只做摘要，原文在各配件仓库（记忆的在 <code>luoke_mem/prompts/</code>）。任务名、种类和各档开关见「任务与提示词」。</p>
 
 <h2>共同做法</h2>
 <ul>
@@ -116,27 +116,28 @@
 </table></div>
 
 <h2>记忆</h2>
+<p>两个任务的提示词是 luoke-mem 包里的文件 <code>luoke_mem/prompts/</code>：每个任务 <code>.system.txt</code>（固定说明）、<code>.user.txt</code>（输入的措辞和顺序：<code>{{名字}}</code> 由代码填，<code>{{#名字}}…{{/名字}}</code> 是可选段，名字为空时整段不出）、<code>.schema.json</code>（输出格式）；文件末尾的换行不算。<code>prompt_files</code> 加载时核对占位符：代码填的和文件里的对不上（没填、多填、认不出的 <code>{{…}}</code>），或固定说明里出现占位符，导入时就报错。两个任务都不重问，没有 <code>.retry.txt</code>，也没有 <code>_shared.txt</code>。每段打字、每个来源怎么拼成一行（编号、截短、「讲的是：」）在代码里。评测结果带 <code>prompt_sha256</code>（这个任务全部提示词文件的指纹）和 <code>prompt_files</code>。</p>
 
 <h3><code>luoke-mem.typing</code> 常用说法和话题</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td><code>luoke_mem/learn.py</code>：<code>PROMPT</code>、<code>messages</code>、<code>parse</code>、<code>_term</code>、<code>_interest</code></td></tr>
-<tr><td>输入</td><td>已记下的话题、还在观察的话题、用户否定过的、用户在输入法里删掉的候选；打的字每段 ≤ 300 字，一批 ≤ 40 段、≤ 6000 字</td></tr>
-<tr><td>输出</td><td><code>terms[{text, evidence}]</code>（2–12 字，照用户的写法）；<code>interests[{text, evidence}]</code>（≤ 20 字，至少两段依据，最多 3 个）</td></tr>
-<tr><td>校验与退路</td><td>编号越界丢掉，兴趣不足两段丢掉；常用说法由代码在近 90 天的打字记录里数：见到 2 次起作猜测问用户，满 3 天、5 次才生效，词长、常用词表、凭证、否定过的拦掉；兴趣依据跨 3 天才生效，之前是猜测。回答不完整（被截断，或不是含两个列表的 JSON）时这批不算读过：下次每批减半重来，同一批两次不行才跳过</td></tr>
+<tr><td>位置</td><td>提示词 <code>luoke_mem/prompts/typing.system.txt</code>、<code>typing.user.txt</code>（<code>{{known}}</code>、<code>{{watching}}</code>、<code>{{rejected}}</code>、<code>{{dismissed}}</code> 是可选段，<code>{{segments}}</code> 是打的字）、<code>typing.schema.json</code>；代码 <code>luoke_mem/learn.py</code> 的 <code>messages</code>（填占位符，每段一行）、<code>parse</code>、<code>_term</code>、<code>_interest</code></td></tr>
+<tr><td>输入</td><td>已记下的关注话题（生效和待确认的，≤ 30）、还在观察的话题（候选里最新的 ≤ 30）、用户否定过的说法和话题（只列这批里出现的，没有就列前 20 条）、用户在输入法里删掉的候选（只列这批里出现的）；打的字按时间编号，每段合并空白后 ≤ 300 字，不含输入法替用户自动上屏的；一批 ≤ 40 段、≤ 6000 字（配方的 <code>batch</code>、<code>max_chars</code>）</td></tr>
+<tr><td>输出</td><td><code>terms[{text, evidence}]</code>（2–12 字，照用户的写法）；<code>interests[{text, evidence}]</code>（≤ 20 字，至少两段依据，最多 3 个；个数是提示词的要求，代码不另截）</td></tr>
+<tr><td>校验与退路</td><td>编号越界丢掉，兴趣不足两段丢掉；常用说法由代码在近 90 天的打字记录里数（拉丁字母按整词数）：见到 2 次起记为猜测（不问用户），满 3 天、5 次才生效；不在 2–12 字、在常用词表里、含凭证、否定过的、输入法里删掉的拦掉。兴趣超过 20 字、含凭证、否定过的拦掉，依据在近 90 天里跨 3 天才生效，之前是猜测，只有一段的留作候选。回答不完整（被截断，或不是含两个列表的 JSON）时这批不算读过：下次每批减半（至少 5 段、1500 字）重来，同一批两次不行才跳过；主控报错同样处理</td></tr>
 <tr><td>预算</td><td>每段 8 + 300 token</td></tr>
-<tr><td>评测</td><td>24 例；硬性：一次性安排、别人的事、删掉的候选、秘密不能出现；底线：说法召回 70、话题召回 60、每例普通词误收 ≤ 0.5；32 GB 档有一条已知问题：一例的话题名里带上一次性安排的"答辩"</td></tr>
+<tr><td>评测</td><td>24 例；硬性：一次性安排、别人的事、删掉的候选、秘密不能出现；底线：说法召回 70、话题召回 60、每例普通词误收 ≤ 0.5；32 GB 档有一条已知问题：一例的话题名里带上一次性安排的"答辩"；结果带评测集和提示词的指纹（<code>set_sha256</code>、<code>prompt_sha256</code>、<code>prompt_files</code>）</td></tr>
 </table></div>
 
 <h3><code>luoke-mem.topics</code> 邮件里的话题</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td><code>luoke_mem/topics.py</code>：<code>PROMPT</code>、<code>sources</code>、<code>parse</code>、<code>take</code></td></tr>
-<tr><td>输入</td><td>已记下的话题（≤ 30）和否定过的（≤ 20）；按来源汇总的邮件助手记录（一年内、用户自己的、非事务邮件），每个来源 ≤ 1200 字：名称、往来次数（来信、打开、精选里读过 / 有用 / 没兴趣）、邮件助手说过的"讲的是"、最近 ≤ 3 封原文开头（各 ≤ 280 字）；一批 ≤ 40 个来源，16 档 ≤ 20 个、≤ 3000 字</td></tr>
-<tr><td>输出</td><td><code>interests</code> ≤ 5 个，写成"领域：具体对象"（≤ 30 字）；<code>dislikes</code> ≤ 3 个，只认精选里说的"没兴趣"</td></tr>
-<tr><td>校验与退路</td><td>超过 60 字、没有有效来源编号、含凭证的丢掉；只是品牌或来源名的丢掉：整条只有拉丁字母；没有"领域：对象"、又以"动态 / 通知 / 资讯 / 更新 / 消息"结尾；或冒号后只剩来源名、只剩拉丁字母加"动态"之类。写出领域和具体对象的（哪怕以"动态"结尾）保留；跨轮累计 ≥ 2 条记录才算；每个话题立即作为精选口味，作为"关注的话题"要过记忆的表且最多 8 个；不感兴趣要有两条以上精选里点"没兴趣"的记录（收藏、标签、清理、没打开都不算）。回答不完整时这批来源留到下次（每批减半），同一批两次不行才跳过；提示词换版本时全部重读</td></tr>
+<tr><td>位置</td><td>提示词 <code>luoke_mem/prompts/topics.system.txt</code>、<code>topics.user.txt</code>（<code>{{known}}</code>、<code>{{rejected}}</code> 是可选段，<code>{{sources}}</code> 是来源）、<code>topics.schema.json</code>，版本 <code>topics.VERSION</code> = 6；代码 <code>luoke_mem/topics.py</code> 的 <code>sources</code>（每个来源拼成一行）、<code>messages</code>、<code>parse</code>、<code>take</code></td></tr>
+<tr><td>输入</td><td>已记下的话题（生效的关注话题和精选口味，≤ 30）和否定过的（≤ 20）；按来源汇总的邮件助手记录（一年内、用户自己的、<code>data.by</code> 是 user、非事务邮件），每个来源一行：名称、往来次数（来信、打开、精选里读过 / 有用 / 没兴趣）、邮件助手说过的"讲的是"（≤ 80 字）、最近 ≤ 3 封原文（《主题》≤ 40 字，正文各 ≤ 280 字），没有原文的记录写它那一行文字（各 ≤ 120 字，≤ 3 条）；每个来源 ≤ 1200 字，且不超过一批可用字数的一半（16 GB 档约 960 字）；一批 ≤ 40 个来源、≤ 6000 字，16 GB 档 ≤ 20 个、≤ 3000 字</td></tr>
+<tr><td>输出</td><td><code>interests</code> ≤ 5 个，写成"领域：具体对象"（≤ 30 字）；<code>dislikes</code> ≤ 3 个，只认精选里说的"没兴趣"，说过两次以上才算</td></tr>
+<tr><td>校验与退路</td><td>超过 60 字、没有有效来源编号、含凭证的丢掉；只是品牌或来源名的丢掉：去掉结尾的"动态 / 通知 / 资讯 / 更新 / 消息"后只剩拉丁字母（含数字和常见符号）或什么都不剩；整条就是所依据的来源名；没有"领域：对象"、又以这些词结尾；或冒号后只剩来源名、什么都不剩、只剩拉丁字母加"动态"之类。写出领域和具体对象的（哪怕以"动态"结尾）保留；跨轮累计 ≥ 2 条记录才算；每个话题立即作为精选口味，作为"关注的话题"要过记忆的表且最多 8 个；不感兴趣要有两条以上精选里点"没兴趣"的记录（收藏、标签、清理、没打开都不算）。回答不完整时这批来源留到下次（每批减半），同一批两次不行才跳过；提示词换版本（<code>topics.VERSION</code>）时，在有这个任务的 Mac 上全部重读，旧版本出的、用户没表态的话题、口味、不感兴趣让位</td></tr>
 <tr><td>预算</td><td>每个来源 8 + 300 token</td></tr>
-<tr><td>评测</td><td>3 个虚构的人共 12 例；硬性：话题名和不感兴趣里不能有一次性的事、别人的事、健康、凭证，话题只是来源名或纯拉丁字母算失败；另用 5 个该留、6 个该丢的固定话题名检查品牌筛选，错一个也算硬性失败；另记话题召回、是否具体、不感兴趣的召回，和没有"没兴趣"依据的不感兴趣</td></tr>
+<tr><td>评测</td><td>3 个虚构的人共 12 例；硬性：话题名和不感兴趣里不能有一次性的事、别人的事、健康、凭证，话题只是来源名或纯拉丁字母算失败；另用 5 个该留、6 个该丢的固定话题名检查品牌筛选，错一个也算硬性失败；另记话题召回、是否具体、不感兴趣的召回，和没有"没兴趣"依据的不感兴趣；结果带评测集和提示词的指纹（<code>set_sha256</code>、<code>prompt_sha256</code>、<code>prompt_files</code>）</td></tr>
 </table></div>
 
 <h2>没有提示词的任务</h2>

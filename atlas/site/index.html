@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-04 12:24</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-04 17:10</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -378,7 +378,7 @@ sequenceDiagram
 <section class="page" id="mem" data-title="记忆 luoke-mem">
 <h1>记忆</h1>
 <p class="lede">螺壳各组件共用的本机记忆：一个 SQLite 文件。工具写入"发生了什么"（记录）；记忆是唯一形成结论的地方，从记录归纳出带依据、分三档把握程度的理解，并在空闲时整理，产出想问用户的问题和建议。</p>
-<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.23.4 · schema 7 · 接口和表结构见「参考 · 记忆」</p>
+<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.28.2，按代码 5827734 核对 · 许可 Apache-2.0 · schema 7 · 接口和表结构见「参考 · 记忆」</p>
 
 <h2>职责</h2>
 <ul>
@@ -393,20 +393,22 @@ sequenceDiagram
 <tr><td>库</td><td>工具进程内 <code>Memory(path, tool)</code></td><td>WAL、<code>secure_delete</code>、10 秒锁等待；工具使用主控内置的那份 <code>luoke_mem</code></td></tr>
 <tr><td>归纳任务</td><td>主控空闲任务：<code>python -m luoke_mem --path {memory} learn</code>，最短间隔 120 分钟、超时 30 分钟、不在电池上跑</td><td>文件锁 <code>mem.db-learn.lock</code> 保证同一份记忆只跑一个；收到 SIGTERM 时已完成的批次保留；记忆文件不存在时什么都不做也不创建；主控不可达或任务报错时退出码 1，标准错误只写计数和原因码</td></tr>
 <tr><td>界面</td><td><code>luoke://memory</code> → 主控执行 <code>-m luoke_mem app</code></td><td>独立进程，监听 127.0.0.1 随机端口，带令牌；600 秒无请求退出</td></tr>
-<tr><td>命令行</td><td><code>python -m luoke_mem …</code></td><td><code>sources</code>、<code>forget-tool</code>、<code>ui</code>、<code>app</code>、<code>learn</code></td></tr>
+<tr><td>命令行</td><td><code>python -m luoke_mem …</code></td><td><code>sources</code>、<code>forget-tool</code>、<code>ui</code>、<code>app</code>、<code>learn</code>、<code>record --tool &lt;工具&gt;</code>（替没有 Python 的工具写记录，螺壳扫描用）</td></tr>
 </table></div>
+
+<p>工具只需带 <code>__init__</code>、<code>memory</code>、<code>sensitive</code> 三个模块。各工具提示词里记忆片段（<code>context()</code>）的标题——关于用户、关注的话题、不感兴趣、处理习惯、常用说法、订阅精选的口味——在 <code>luoke_mem/prompts/labels.json</code>，<code>memory</code> 直接读，不经 <code>prompt_files</code>；没有 <code>prompts/</code> 时 <code>memory</code> 用自己同样的一份（测试核对两边一致，改标题两处一起改）。</p>
 
 <h2>记录与理解</h2>
 <h3>记录</h3>
-<p>每条记录有写入的工具、说话人（<code>user</code>、<code>third_party</code>、<code>system</code>）、性质（<code>statement</code>、<code>activity</code>、<code>receipt</code>）、话题（如 <code>mail-read</code>、<code>ime-commit</code>）、正文、结构化数据 <code>data</code>（可含原文）和真实发生时间 <code>happened_at</code>。</p>
+<p>每条记录有写入的工具、说话人（<code>user</code>、<code>third_party</code>、<code>system</code>）、性质（<code>statement</code>、<code>activity</code>、<code>receipt</code>）、话题（如 <code>mail-read</code>、<code>ime-commit</code>）、正文、结构化数据 <code>data</code>（可含原文）和真实发生时间 <code>happened_at</code>。<code>happened_at</code> 写 YYYY-MM、YYYY-MM-DD 或带时间；读不出的（如"yesterday"），以及 <code>topic</code>、<code>ref</code> 不是文字的，写入时拒收。</p>
 <h3>理解的类别</h3>
 <div class="tbl"><table>
 <tr><th>类别</th><th>含义</th><th>谁用</th></tr>
 <tr><td><code>fact</code></td><td>关于用户的事实</td><td>邮件分拣、起草</td></tr>
-<tr><td><code>interest</code></td><td>关注的话题</td><td>输入法、agent</td></tr>
+<tr><td><code>interest</code></td><td>关注的话题</td><td>邮件助手订阅精选（还没有精选口味时）</td></tr>
 <tr><td><code>dislike</code></td><td>不感兴趣</td><td>精选</td></tr>
 <tr><td><code>preference</code></td><td>处理习惯（发件人 × 邮件类别 → 动作）</td><td>邮件助手自动执行</td></tr>
-<tr><td><code>term</code></td><td>常用说法</td><td>输入法候选加分</td></tr>
+<tr><td><code>term</code></td><td>常用说法</td><td>输入法候选加分（输入法目前还不读理解，见「已知问题」）</td></tr>
 <tr><td><code>taste</code></td><td>精选口味，不算对用户的了解，不提问</td><td>精选</td></tr>
 </table></div>
 <h3>三档把握程度</h3>
@@ -420,7 +422,7 @@ sequenceDiagram
 <p>被否定（<code>rejected</code>）、被取代（<code>superseded</code>）、以前的事（<code>past</code>）不属于任何一档。工具读取时默认只得到比较确定以上的理解。</p>
 
 <h2>首要原则</h2>
-<p>记忆的每条规则都从宽开始，再由每个用户自己的反馈收紧（0.27 起，代码在 <code>fit.py</code>）。没有「这类不该提」的固定名单；同一条规则对不同的用户可以收到不同的松紧。不归反馈调的有三类：硬线（凭证遮掉、数据不离开本机、健康法律宗教政治只认用户的话、用户说过的不被推翻）；算错了的 bug；用户没表态前，规则不替用户收回已经说过的话。</p>
+<p>记忆的每条规则都从宽开始，再由每个用户自己的反馈收紧（代码在 <code>fit.py</code>，类别的划分和分量在 <code>memory.py</code>）。没有「这类不该提」的固定名单；同一条规则对不同的用户可以收到不同的松紧。不归反馈调的有三类：硬线（凭证遮掉、数据不离开本机、健康法律宗教政治只认用户的话、用户说过的不被推翻）；算错了的 bug；用户没表态前，规则不替用户收回已经说过的话。</p>
 
 <h2>定档规则</h2>
 <p>一条推断能否成为"比较确定"，取决于它所依据的<b>记录话题</b>和数量。门槛写作（条数, 不同日子数, 首尾相隔天数）：</p>
@@ -434,13 +436,14 @@ sequenceDiagram
 <tr><td>taste</td><td>用户的任何记录</td></tr>
 </table></div>
 <ul>
-<li>表中没有的组合（如 <code>own-label</code>、<code>mail-cleared</code>、<code>mail-acted</code>）最多是猜测。规则自动执行的记录（<code>data.by</code> 不是 user）和事务邮件的打开不算依据。</li>
-<li>名字只有品牌或来源名（如"Zillow""X 相关动态""领域：来源名"）的话题不会成为兴趣，也不会成为精选口味。</li>
+<li>表中没有的组合（如 <code>own-label</code>、<code>mail-cleared</code>、<code>mail-acted</code>）最多是猜测。<code>data.by</code> 不是 user 的记录（规则自动做的、接受建议做的），以及事务邮件的打开、标签、清理，都不算依据。</li>
+<li>名字只有品牌或来源名（如"Homefinch""X 相关动态""领域：来源名"）的话题不会成为兴趣，也不会成为精选口味。</li>
 <li><b>第三方来信推出的事实</b>：同一来源 ≥ 6 封、跨 ≥ 3 个月、打开 ≥ 2 封、最近 6 个月内仍有来信时直接生效。</li>
 <li><b>健康、法律、宗教政治</b>相关的推断必须由用户确认。</li>
 <li><b>门槛按用户调整</b>：每类提议从已有的表里现算（<code>fit.tally</code>、<code>fit.standing</code>），不存第二份。「否定」分量 ≥ 2 且多于确认，升一档；≥ 4 且至少是确认的两倍，升两档；确认 ≥ 3 次且从未否定，降一档。分量：否定、在记忆页删掉、建议点「不用」各 1，接受后又撤回、建议点「别再提」各 2，问了一直不答到过期 0.5。删掉的只留每类的条数，不留内容；敏感的连条数也不留。</li>
-<li><b>一类不牵连别的类</b>：处理习惯按「动作 × 邮件类别」分，事实按话题的前缀（如 <code>服务:</code>、<code>账户:</code>），兴趣和口味按来源（打字或邮件），常用说法一类，退订建议一类。</li>
+<li><b>一类不牵连别的类</b>：处理习惯按「动作 × 邮件类别」分，事实按话题冒号前的部分（如 <code>服务:</code>、<code>账户:</code>，全角冒号同样认），兴趣和口味按来源（打字或邮件），常用说法一类，退订建议一类。</li>
 <li><b>门槛动了什么</b>：处理习惯要的次数（升档后已有的也先不提）；常用说法和打字话题生效要的天数、次数；打字话题升档后不提前问；退订建议要的清理次数；事实升档后，待确认的挪到「观察中」（<code>observed</code>）。默认门槛不变。</li>
+<li><b>定档表也按反馈调</b>：某类理解里引用某个记录话题的，用户表过态的否定 ≥ 2 且多于确认时，这一格要的条数和日子数各多 1、相隔天数翻倍（至少 7 天）；确认 ≥ 3 次且从未否定时，条数和日子数各少 1（至少 1）、相隔天数减半（日子数降到 1 时为 0）。</li>
 <li><b>以前的事</b>：会变的理解（包括猜测和用户确认过的）最新依据超过 730 天，标为 <code>past</code>，不再使用也不再提问，相关的未答问题撤回；姓名、学校、家人等不会变的不受影响。用户说"现在还是"即恢复为确定；同一类被这样唤回 ≥ 2 次后，这一类的期限加倍为 1460 天。</li>
 <li><b>以前的事再次出现</b>（工具又提出同一条）：只因太久而变成以前的事的，按原样回来——用户确认过的回到确定，否则为猜测、按新依据定档；用户自己说过"以前是，现在不是"的回到猜测，保留表态时间，新依据不能让它自行生效，只能再问用户。</li>
 <li><b>邮件推出的兴趣</b>：关于用户的、由邮件记录撑起的兴趣最多 8 条生效；重新定档时按依据条数保留前 8 条，其余回到猜测。</li>
@@ -451,23 +454,25 @@ sequenceDiagram
 <p>归纳任务每次依次执行：反刍、打字线、话题线、再反刍一次。反刍不用模型、很快，放在最前面，任务被主控提前收掉时也照样产出提问和建议。两条线都通过主控的后台生成任务调用模型，结果的数量和依据由代码判定，模型只负责提名。</p>
 <div class="tbl"><table>
 <tr><th></th><th>打字线（<code>luoke-mem.typing</code>）</th><th>话题线（<code>luoke-mem.topics</code>）</th></tr>
-<tr><td>输入</td><td>输入法的 <code>ime-commit</code>（排除输入法自动上屏的），每段 ≤ 300 字</td><td>邮件助手的用户记录（排除规则执行的、事务邮件），最近 365 天，按来源聚合，每来源最新 3 封原文各 ≤ 280 字、合计 ≤ 1200 字</td></tr>
+<tr><td>输入</td><td>输入法的 <code>ime-commit</code>（排除输入法自动上屏的），每段 ≤ 300 字</td><td>邮件助手的用户记录（排除 <code>data.by</code> 不是 user 的和事务邮件），最近 365 天，按来源聚合，每来源最新 3 封原文各 ≤ 280 字、合计 ≤ 1200 字</td></tr>
 <tr><td>触发</td><td>新增 ≥ 80 段，或有新增且距上次 ≥ 1 天</td><td>上次没读完的来源立即继续；否则新增 ≥ 20 条，或有新增且距上次 ≥ 1 天；提示词版本变化时从头重新归纳</td></tr>
 <tr><td>开跑前</td><td colspan="2">先查 <code>GET /tasks</code>：这一档没有该任务、或任务状态不是 available 时不发请求，记下原因</td></tr>
-<tr><td>产出</td><td>常用说法（2–12 字）、关注的话题（≤ 20 字）</td><td>关注的话题（"领域：具体对象"，≤ 24 字，每批 ≤ 5 个）、精选口味、不感兴趣（只来自精选里的"没兴趣"，≥ 2 条记录）</td></tr>
-<tr><td>定档</td><td>说法：最近 90 天出现 ≥ 2 次为猜测，3 天 5 次生效；话题：依据跨 3 天生效，不足为猜测。说法只出现 1 次的留作候选，下次再数</td><td>依据 ≥ 2 条记录的话题成为精选口味（直接生效）；同时按定档规则判断能否成为关于用户的兴趣（邮件推出的最多 8 条）；只有品牌或来源名的丢弃</td></tr>
+<tr><td>产出</td><td>常用说法（2–12 字）、关注的话题（≤ 20 字）</td><td>关注的话题（"领域：具体对象"，提示词要求 ≤ 30 字，代码丢掉超过 60 字的；每批 ≤ 5 个）、精选口味、不感兴趣（只来自精选里的"没兴趣"，≥ 2 条记录）</td></tr>
+<tr><td>定档</td><td>说法：最近 90 天出现 ≥ 2 次为猜测，3 天 5 次生效；话题：至少 2 段依据，最近 90 天里跨 3 天生效，不足为猜测，只有 1 段的留作候选。说法只出现 1 次的留作候选，下次再数</td><td>依据 ≥ 2 条记录的话题成为精选口味（直接生效）；同时按定档规则判断能否成为关于用户的兴趣（邮件推出的最多 8 条）；只有品牌或来源名的丢弃</td></tr>
 <tr><td>进度</td><td>每批完成后推进游标，被叫停时从未读的段继续</td><td>一开始就把要读的来源记入 <code>learning</code> 表 <code>topics.pending</code>，每批完成划掉一批，被叫停时下次从没读完的来源继续</td></tr>
-<tr><td>提示词</td><td><code>luoke_mem/learn.py</code> PROMPT</td><td><code>luoke_mem/topics.py</code> PROMPT（版本 5）</td></tr>
+<tr><td>提示词</td><td><code>luoke_mem/prompts/typing.system.txt</code>、<code>.user.txt</code>、<code>.schema.json</code></td><td><code>luoke_mem/prompts/topics.</code> 同样三个（版本 <code>topics.VERSION</code> = 6）</td></tr>
 </table></div>
 <p>主控答"忙""暂停""被打断"等表示稍后再来时，当前这条线停下，已完成的批次保留；主控因其他后台任务或能耗模式的歇息而忙时，打字线最多原地等 300 秒。</p>
+
+<p>两个任务的提示词是包里的文件 <code>luoke_mem/prompts/</code>：每个任务 <code>.system.txt</code>（固定说明）、<code>.user.txt</code>（输入的措辞和顺序：<code>{{名字}}</code> 由代码填，<code>{{#名字}}…{{/名字}}</code> 是可选段，名字为空时整段不出）、<code>.schema.json</code>（输出格式）；文件末尾的换行不算。<code>prompt_files</code> 加载时核对占位符：代码填的和文件里的对不上（没填、多填、认不出的 <code>{{…}}</code>），或固定说明里出现占位符，导入时就报错。两个任务都不重问，没有 <code>.retry.txt</code>，也没有 <code>_shared.txt</code>。每段打字、每个来源怎么拼成一行（编号、截短、「讲的是：」）在代码里。评测结果带 <code>prompt_sha256</code>（这个任务全部提示词文件的指纹）和 <code>prompt_files</code>。<code>tests/test_prompts.py</code> 把评测拼出的每条请求和快照逐字节比对：改提示词要在同一提交里更新快照、升版本号、三档重评；改 <code>luoke_mem/prompts/</code> 走 PR，要作者以外的一位成员 Approve，附三档评测改动前后的逐题对比。话题线的问法变了时 <code>topics.VERSION</code> 加一，已有话题从头归纳。</p>
 
 <h2>反刍</h2>
 <p>不使用模型，每次归纳任务开头和结尾各执行一次；结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
 <ul>
-<li><b>降档</b>：打字归纳出的兴趣和常用说法，最新依据超过 90 天且用户未表态，回到猜测。</li>
+<li><b>降档</b>：记忆自己归纳的兴趣（打字和邮件两条线）和常用说法，最新依据超过 90 天且用户未表态，回到猜测。</li>
 <li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、靠长词里的字母才够门槛的常用说法（拉丁字母按整词数，「hub」不算进「github」；已生效的退回猜测，用户表过态的不动）、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
 <li><b>处理习惯</b>：同一（邮箱, 发件人, 邮件类别, 动作）出现 ≥ 2 次形成一条习惯；来源是 <code>mail-override</code> 的新建议和 <code>mail-acted</code> 的动作，只认 <code>ACTION_NAMES</code> 里的动作（archive、read、trash、spam、flag、keep、label、filter）。来自改建议的按定档规则判定，仅来自亲手处理的为猜测。用户撤销一次自动执行即回到猜测。改建议后当场处理只算一次（<code>mail-acted</code> 的 <code>after_override</code> 覆盖整批，或 10 分钟内同一发件人、同一动作）。</li>
-<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的话题（这一类门槛升档后不提前问）；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
+<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的话题（天数只算最近 90 天；这一类门槛升档后不提前问）；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
 <li><b>常用说法不问用户</b>：只影响候选排序，错了几乎没代价，够门槛自己记下，不要的在记忆页删。</li>
 <li><b>建议</b>：每天最多 3 条。"以后都这样？"（有发件人和类别、动作可自动执行的处理习惯，用户点"好"即成为确定并可自动执行）；"退订？"（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
 <li><b>去重</b>：同一件事已有未答的问题时不再生成；"以后再说"或过期未答 7 天后、已答或"不用"60 天后才可能再问；"别再提"永不再问。</li>
@@ -477,8 +482,9 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>组件</th><th>写入的记录</th><th>读取</th></tr>
 <tr><td>邮件助手</td><td><code>mail-read</code>、<code>mail-acted</code>、<code>mail-override</code>、<code>mail-auto</code>、<code>mail-undo-auto</code>、<code>mail-cleared</code>、<code>sent-mail</code>、<code>received-mail</code>、<code>digest-open</code>、<code>digest-feedback</code>、<code>own-label</code>、<code>own-site</code></td><td>事实和习惯（分拣、起草）、可自动执行的习惯、口味、给它的 asks</td></tr>
-<tr><td>输入法</td><td><code>ime-commit</code>、<code>ime-correction</code>、<code>ime-forget</code></td><td>常用说法；可读全部记录</td></tr>
+<tr><td>输入法</td><td><code>ime-commit</code>、<code>ime-correction</code>、<code>ime-forget</code></td><td>目前只读自己写的 <code>ime-commit</code>（个人化组件还不读理解）；可读全部记录</td></tr>
 <tr><td>agent</td><td>只经 <code>reply</code> 交回回答</td><td>asks 和全文依据</td></tr>
+<tr><td>螺壳扫描</td><td>经命令行 <code>record --tool luoke-scan</code>：<code>scan-cleaned</code>、<code>scan-ignored</code>、<code>scan-auto-cleaned</code>、<code>scan-malware</code>、<code>scan-autoclean</code></td><td>—</td></tr>
 </table></div>
 <p>任何组件都能读取全部记录和依据；删除其他工具写入的内容只能在记忆自己的界面中进行。</p>
 
@@ -1594,11 +1600,11 @@ sequenceDiagram
 </section>
 <section class="page" id="ref-mem" data-title="记忆接口与表结构">
 <h1>记忆接口与表结构</h1>
-<p class="lede">Python 包 <code>luoke_mem</code>（仅标准库，3.9+）。工具只需 <code>__init__</code>、<code>memory</code>、<code>sensitive</code> 三个模块；运行在主控里的配件应使用 <code>GET /tasks</code> 返回的 <code>luoke_mem.path</code>。</p>
+<p class="lede">Python 包 <code>luoke_mem</code>（仅标准库，3.9+）。工具只需 <code>__init__</code>、<code>memory</code>、<code>sensitive</code> 三个模块（不用带 <code>prompts/</code>：没有 <code>prompts/labels.json</code> 时，<code>memory</code> 用自带的同一份片段标题）；运行在主控里的配件应使用 <code>GET /tasks</code> 返回的 <code>luoke_mem.path</code>。</p>
 
 <h2>打开</h2>
 <ul>
-<li><code>Memory(path=None, tool="luoke")</code>：工具使用。默认路径 <code>$LUOKE_HOME/mem.db</code>，未设置时为 <code>~/.luoke/mem.db</code>。文件 0600，目录 0700；记忆文件或其 <code>-wal</code>、<code>-shm</code>、<code>-journal</code> 是符号链接时拒绝打开。文件不存在时创建（0600）；只看不改的入口（命令行 <code>sources</code>、<code>forget-tool</code>、<code>learn</code>）不创建。</li>
+<li><code>Memory(path=None, tool="luoke")</code>：工具使用。默认路径 <code>$LUOKE_HOME/mem.db</code>，未设置时为 <code>~/.luoke/mem.db</code>。文件 0600，目录 0700；记忆文件或其 <code>-wal</code>、<code>-shm</code>、<code>-journal</code> 是符号链接时拒绝打开。文件不存在时创建（0600）；命令行 <code>sources</code>、<code>forget-tool</code>、<code>learn</code> 在文件不存在时不创建（<code>record</code> 会创建）。</li>
 <li><code>WholeMemory(path=None)</code>：整份记忆，供记忆自己的界面、命令行和归纳任务使用；打开时执行重新定档（只降不升）、以前的事、相近话题合并。第一次定档前把整份记忆复制为 <code>mem.db.before-0.18</code>，14 天后或有内容被忘掉时删除。</li>
 <li>文件 schema 比库新得多（千位不同）时抛 <code>TooNew</code>。</li>
 </ul>
@@ -1607,8 +1613,8 @@ sequenceDiagram
 <h3>记录</h3>
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
-<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
-<tr><td><code>redate(rid, happened_at)</code></td><td>修正本工具一条记录的发生时间</td></tr>
+<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY-MM、YYYY-MM-DD 或带时间（不填为当前时间），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
+<tr><td><code>redate(rid, happened_at)</code></td><td>修正本工具一条记录的发生时间（时间格式同 <code>record</code>）</td></tr>
 <tr><td><code>records(*, tool="", topic, kind, speaker, ref, since, limit)</code></td><td><code>tool=""</code> 为本工具，传工具名读该工具，<code>None</code> 读全部</td></tr>
 <tr><td><code>forget_records(*, topics, since, until, match, keep_cited)</code></td><td>删除本工具的部分记录，只依赖这些记录的理解一并删除</td></tr>
 <tr><td><code>forget_tool(tool=None, *, dry_run)</code></td><td>删除本工具写入的全部内容；用户说过的话和表过态的理解转到记忆名下保留</td></tr>
@@ -1617,14 +1623,14 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
 <tr><td><code>state(kind, text, …)</code></td><td>用户亲口说的，直接为"确定"</td></tr>
-<tr><td><code>propose(kind, text, cites, …)</code></td><td>推测；按定档规则可能直接生效</td></tr>
+<tr><td><code>propose(kind, text, cites, …)</code></td><td>推测，为猜测；事实的依据里有来信够多（同一来源 ≥ 6 封、跨 ≥ 3 个月、打开 ≥ 2 封、6 个月内仍有，<code>EVIDENCE</code>）且不涉健康、法律、宗教政治时直接生效</td></tr>
 <tr><td><code>conclude(kind, text, cites, …)</code></td><td>由用户自己的记录得出；依据须全部来自用户，按定档规则为比较确定或猜测</td></tr>
 <tr><td><code>confirm(nid)</code> / <code>reject(nid)</code> / <code>was(nid)</code> / <code>later(nid)</code> / <code>revise(nid, text)</code></td><td>用户的决定：确认、否定、以前是、以后再说、改写</td></tr>
 <tr><td><code>reject_family(nid)</code></td><td>「这一类都不要」：把这条所在一类里用户还没表态的（待确认和观察中）都标为否定，返回条数</td></tr>
 <tr><td><code>notes(kinds, status, tool, confidence)</code></td><td>默认只返回生效的（比较确定和确定）；每条带 <code>confidence</code>、<code>data</code>、<code>auto</code>、<code>fresh</code></td></tr>
 <tr><td><code>note(nid)</code></td><td>一条理解及其全部依据（含原文）</td></tr>
 <tr><td><code>recent(since, limit)</code></td><td>未经用户表态而直接生效的推断</td></tr>
-<tr><td><code>context(kinds, limit=600)</code></td><td>按类别拼成供模型使用的一段文字</td></tr>
+<tr><td><code>context(kinds, limit=600, labels=None)</code></td><td>按类别拼成供模型使用的一段文字；每段标题取 <code>LABELS</code>（<code>luoke_mem/prompts/labels.json</code>，没有这个文件时用 <code>memory</code> 里同样的一份），<code>labels</code> 可逐个换掉</td></tr>
 <tr><td><code>forget(nid)</code></td><td>删除理解、其历史版本及只被它引用的记录</td></tr>
 </table></div>
 <h3>想问的和建议</h3>
@@ -1643,8 +1649,8 @@ sequenceDiagram
 <tr><td><code>notes</code></td><td>id、tool、kind、text、origin（user / inferred）、status、superseded_by、valid_from、valid_to、formed_at、decided_at、why、topic、sensitive、data_json</td></tr>
 <tr><td><code>cites</code></td><td>(note_id, record_id)</td></tr>
 <tr><td><code>asks</code></td><td>id、tool、kind（question / suggestion）、text、why、about_note、about_kind、urgency、answer（JSON）、status、created_at、expires_at、decided_at、answer_record、sensitive、evidence、rank、action（JSON）、key</td></tr>
-<tr><td><code>candidates</code></td><td>id、kind、text、record_ids、first_seen、last_seen（归纳中积累的候选）</td></tr>
-<tr><td><code>learning</code></td><td>name、value：<code>fit.deleted</code>（用户删掉的理解，按类只记条数）；归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、一次性修复标记</td></tr>
+<tr><td><code>candidates</code></td><td>id、kind、text、record_ids、first_seen、last_seen（归纳中积累的候选；kind：打字线 <code>term</code>、<code>interest</code>，话题线 <code>mail-interest</code>、<code>mail-dislike</code>）</td></tr>
+<tr><td><code>learning</code></td><td>name、value：<code>fit.deleted</code>（用户删掉的理解，按类只记条数）；归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>last_attempt</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>）、被截断后减半的标记（<code>typing.small</code>、<code>topics.small</code>）、同一批连续出错的次数（<code>typing.failed</code>、<code>topics.failed</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>）、第一次定档降下来的理解和备份名（<code>regrade.0.18</code>）、一次性修复标记（<code>repair.*</code>）</td></tr>
 <tr><td><code>grants</code></td><td>遗留，不再使用</td></tr>
 </table></div>
 <p>升级只加不改：新表、可空的新列、新索引。版本存于 <code>PRAGMA user_version</code>。</p>
@@ -1665,6 +1671,7 @@ sequenceDiagram
 <tr><th>工具</th><th>topic</th></tr>
 <tr><td>邮件助手</td><td><code>mail-read</code>、<code>mail-acted</code>、<code>mail-override</code>、<code>mail-auto</code>、<code>mail-undo-auto</code>、<code>mail-cleared</code>、<code>sent-mail</code>、<code>received-mail</code>、<code>own-label</code>、<code>own-site</code>、<code>digest-open</code>、<code>digest-feedback</code></td></tr>
 <tr><td>输入法</td><td><code>ime-commit</code>、<code>ime-correction</code>、<code>ime-forget</code></td></tr>
+<tr><td>螺壳扫描</td><td><code>scan-cleaned</code>、<code>scan-ignored</code>、<code>scan-auto-cleaned</code>、<code>scan-malware</code>、<code>scan-autoclean</code>（经 <code>record --tool luoke-scan</code>）</td></tr>
 <tr><td>记忆</td><td><code>note:&lt;kind&gt;</code>（用户亲口说的）、<code>note-decision</code>、<code>note-later</code>、<code>ask-answer</code>、<code>ask-dismissed</code></td></tr>
 </table></div>
 
@@ -1675,11 +1682,12 @@ sequenceDiagram
 <tr><td><code>forget-tool &lt;tool&gt; [--dry-run]</code></td><td>忘掉某工具写入的内容；<code>luoke-mem</code> 被拒绝（说明原因，退出码 1）</td></tr>
 <tr><td><code>ui [--open] [--note N] [--view recent]</code></td><td>打印界面地址</td></tr>
 <tr><td><code>app [--note N] [--view recent]</code></td><td>在浏览器中打开界面（<code>luoke://memory</code> 的入口）</td></tr>
-<tr><td><code>learn [--force] [--again] [--hub SOCK]</code></td><td>运行一次归纳；<code>--force</code> 有新记录就跑；<code>--again</code> 从头重新归纳（打字记下的不重复，话题线用户没表态的话题重来）；已有一个在跑时直接返回</td></tr>
+<tr><td><code>learn [--force] [--again] [--hub SOCK]</code></td><td>运行一次归纳；<code>--force</code> 有新记录就跑；<code>--again</code> 从头重新归纳（打字记下的不重复；话题线从头读，用户没表态的话题只在有 topics 任务的 Mac 上换成新归纳的，没有这个任务的 Mac 保留原有的）；已有一个在跑时直接返回</td></tr>
+<tr><td><code>record --tool &lt;工具&gt;</code></td><td>替没有 Python 的工具写记录（螺壳扫描用）：标准输入一行一条 JSON，字段同 <code>record()</code>，没给 <code>sensitive</code> 时按文字标；标准输出一行对一行回 <code>{"id"}</code> 或 <code>{"error"}</code>，一行出错不影响其他行；有失败的行退出 1，工具名不对或记忆打不开退出 2；不能以 <code>luoke-mem</code> 的名义写</td></tr>
 </table></div>
 
 <h2>界面</h2>
-<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise；修改文字 ≤ 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
+<p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise、split（把并进来的一条拆出来）；修改文字截到 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
 </section>
 <section class="page" id="ref-tasks" data-title="任务与提示词">
 <h1>任务与提示词</h1>
@@ -1722,7 +1730,7 @@ sequenceDiagram
 </section>
 <section class="page" id="ref-prompts" data-title="提示词">
 <h1>提示词</h1>
-<p class="lede">每个生成任务的提示词要点：送进去什么、要求输出什么、代码怎么校验、失败时怎么退。只做摘要，原文在各配件仓库。任务名、种类和各档开关见「任务与提示词」。</p>
+<p class="lede">每个生成任务的提示词要点：送进去什么、要求输出什么、代码怎么校验、失败时怎么退。只做摘要，原文在各配件仓库（记忆的在 <code>luoke_mem/prompts/</code>）。任务名、种类和各档开关见「任务与提示词」。</p>
 
 <h2>共同做法</h2>
 <ul>
@@ -1838,27 +1846,28 @@ sequenceDiagram
 </table></div>
 
 <h2>记忆</h2>
+<p>两个任务的提示词是 luoke-mem 包里的文件 <code>luoke_mem/prompts/</code>：每个任务 <code>.system.txt</code>（固定说明）、<code>.user.txt</code>（输入的措辞和顺序：<code>{{名字}}</code> 由代码填，<code>{{#名字}}…{{/名字}}</code> 是可选段，名字为空时整段不出）、<code>.schema.json</code>（输出格式）；文件末尾的换行不算。<code>prompt_files</code> 加载时核对占位符：代码填的和文件里的对不上（没填、多填、认不出的 <code>{{…}}</code>），或固定说明里出现占位符，导入时就报错。两个任务都不重问，没有 <code>.retry.txt</code>，也没有 <code>_shared.txt</code>。每段打字、每个来源怎么拼成一行（编号、截短、「讲的是：」）在代码里。评测结果带 <code>prompt_sha256</code>（这个任务全部提示词文件的指纹）和 <code>prompt_files</code>。</p>
 
 <h3><code>luoke-mem.typing</code> 常用说法和话题</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td><code>luoke_mem/learn.py</code>：<code>PROMPT</code>、<code>messages</code>、<code>parse</code>、<code>_term</code>、<code>_interest</code></td></tr>
-<tr><td>输入</td><td>已记下的话题、还在观察的话题、用户否定过的、用户在输入法里删掉的候选；打的字每段 ≤ 300 字，一批 ≤ 40 段、≤ 6000 字</td></tr>
-<tr><td>输出</td><td><code>terms[{text, evidence}]</code>（2–12 字，照用户的写法）；<code>interests[{text, evidence}]</code>（≤ 20 字，至少两段依据，最多 3 个）</td></tr>
-<tr><td>校验与退路</td><td>编号越界丢掉，兴趣不足两段丢掉；常用说法由代码在近 90 天的打字记录里数：见到 2 次起作猜测问用户，满 3 天、5 次才生效，词长、常用词表、凭证、否定过的拦掉；兴趣依据跨 3 天才生效，之前是猜测。回答不完整（被截断，或不是含两个列表的 JSON）时这批不算读过：下次每批减半重来，同一批两次不行才跳过</td></tr>
+<tr><td>位置</td><td>提示词 <code>luoke_mem/prompts/typing.system.txt</code>、<code>typing.user.txt</code>（<code>{{known}}</code>、<code>{{watching}}</code>、<code>{{rejected}}</code>、<code>{{dismissed}}</code> 是可选段，<code>{{segments}}</code> 是打的字）、<code>typing.schema.json</code>；代码 <code>luoke_mem/learn.py</code> 的 <code>messages</code>（填占位符，每段一行）、<code>parse</code>、<code>_term</code>、<code>_interest</code></td></tr>
+<tr><td>输入</td><td>已记下的关注话题（生效和待确认的，≤ 30）、还在观察的话题（候选里最新的 ≤ 30）、用户否定过的说法和话题（只列这批里出现的，没有就列前 20 条）、用户在输入法里删掉的候选（只列这批里出现的）；打的字按时间编号，每段合并空白后 ≤ 300 字，不含输入法替用户自动上屏的；一批 ≤ 40 段、≤ 6000 字（配方的 <code>batch</code>、<code>max_chars</code>）</td></tr>
+<tr><td>输出</td><td><code>terms[{text, evidence}]</code>（2–12 字，照用户的写法）；<code>interests[{text, evidence}]</code>（≤ 20 字，至少两段依据，最多 3 个；个数是提示词的要求，代码不另截）</td></tr>
+<tr><td>校验与退路</td><td>编号越界丢掉，兴趣不足两段丢掉；常用说法由代码在近 90 天的打字记录里数（拉丁字母按整词数）：见到 2 次起记为猜测（不问用户），满 3 天、5 次才生效；不在 2–12 字、在常用词表里、含凭证、否定过的、输入法里删掉的拦掉。兴趣超过 20 字、含凭证、否定过的拦掉，依据在近 90 天里跨 3 天才生效，之前是猜测，只有一段的留作候选。回答不完整（被截断，或不是含两个列表的 JSON）时这批不算读过：下次每批减半（至少 5 段、1500 字）重来，同一批两次不行才跳过；主控报错同样处理</td></tr>
 <tr><td>预算</td><td>每段 8 + 300 token</td></tr>
-<tr><td>评测</td><td>24 例；硬性：一次性安排、别人的事、删掉的候选、秘密不能出现；底线：说法召回 70、话题召回 60、每例普通词误收 ≤ 0.5；32 GB 档有一条已知问题：一例的话题名里带上一次性安排的"答辩"</td></tr>
+<tr><td>评测</td><td>24 例；硬性：一次性安排、别人的事、删掉的候选、秘密不能出现；底线：说法召回 70、话题召回 60、每例普通词误收 ≤ 0.5；32 GB 档有一条已知问题：一例的话题名里带上一次性安排的"答辩"；结果带评测集和提示词的指纹（<code>set_sha256</code>、<code>prompt_sha256</code>、<code>prompt_files</code>）</td></tr>
 </table></div>
 
 <h3><code>luoke-mem.topics</code> 邮件里的话题</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td><code>luoke_mem/topics.py</code>：<code>PROMPT</code>、<code>sources</code>、<code>parse</code>、<code>take</code></td></tr>
-<tr><td>输入</td><td>已记下的话题（≤ 30）和否定过的（≤ 20）；按来源汇总的邮件助手记录（一年内、用户自己的、非事务邮件），每个来源 ≤ 1200 字：名称、往来次数（来信、打开、精选里读过 / 有用 / 没兴趣）、邮件助手说过的"讲的是"、最近 ≤ 3 封原文开头（各 ≤ 280 字）；一批 ≤ 40 个来源，16 档 ≤ 20 个、≤ 3000 字</td></tr>
-<tr><td>输出</td><td><code>interests</code> ≤ 5 个，写成"领域：具体对象"（≤ 30 字）；<code>dislikes</code> ≤ 3 个，只认精选里说的"没兴趣"</td></tr>
-<tr><td>校验与退路</td><td>超过 60 字、没有有效来源编号、含凭证的丢掉；只是品牌或来源名的丢掉：整条只有拉丁字母；没有"领域：对象"、又以"动态 / 通知 / 资讯 / 更新 / 消息"结尾；或冒号后只剩来源名、只剩拉丁字母加"动态"之类。写出领域和具体对象的（哪怕以"动态"结尾）保留；跨轮累计 ≥ 2 条记录才算；每个话题立即作为精选口味，作为"关注的话题"要过记忆的表且最多 8 个；不感兴趣要有两条以上精选里点"没兴趣"的记录（收藏、标签、清理、没打开都不算）。回答不完整时这批来源留到下次（每批减半），同一批两次不行才跳过；提示词换版本时全部重读</td></tr>
+<tr><td>位置</td><td>提示词 <code>luoke_mem/prompts/topics.system.txt</code>、<code>topics.user.txt</code>（<code>{{known}}</code>、<code>{{rejected}}</code> 是可选段，<code>{{sources}}</code> 是来源）、<code>topics.schema.json</code>，版本 <code>topics.VERSION</code> = 6；代码 <code>luoke_mem/topics.py</code> 的 <code>sources</code>（每个来源拼成一行）、<code>messages</code>、<code>parse</code>、<code>take</code></td></tr>
+<tr><td>输入</td><td>已记下的话题（生效的关注话题和精选口味，≤ 30）和否定过的（≤ 20）；按来源汇总的邮件助手记录（一年内、用户自己的、<code>data.by</code> 是 user、非事务邮件），每个来源一行：名称、往来次数（来信、打开、精选里读过 / 有用 / 没兴趣）、邮件助手说过的"讲的是"（≤ 80 字）、最近 ≤ 3 封原文（《主题》≤ 40 字，正文各 ≤ 280 字），没有原文的记录写它那一行文字（各 ≤ 120 字，≤ 3 条）；每个来源 ≤ 1200 字，且不超过一批可用字数的一半（16 GB 档约 960 字）；一批 ≤ 40 个来源、≤ 6000 字，16 GB 档 ≤ 20 个、≤ 3000 字</td></tr>
+<tr><td>输出</td><td><code>interests</code> ≤ 5 个，写成"领域：具体对象"（≤ 30 字）；<code>dislikes</code> ≤ 3 个，只认精选里说的"没兴趣"，说过两次以上才算</td></tr>
+<tr><td>校验与退路</td><td>超过 60 字、没有有效来源编号、含凭证的丢掉；只是品牌或来源名的丢掉：去掉结尾的"动态 / 通知 / 资讯 / 更新 / 消息"后只剩拉丁字母（含数字和常见符号）或什么都不剩；整条就是所依据的来源名；没有"领域：对象"、又以这些词结尾；或冒号后只剩来源名、什么都不剩、只剩拉丁字母加"动态"之类。写出领域和具体对象的（哪怕以"动态"结尾）保留；跨轮累计 ≥ 2 条记录才算；每个话题立即作为精选口味，作为"关注的话题"要过记忆的表且最多 8 个；不感兴趣要有两条以上精选里点"没兴趣"的记录（收藏、标签、清理、没打开都不算）。回答不完整时这批来源留到下次（每批减半），同一批两次不行才跳过；提示词换版本（<code>topics.VERSION</code>）时，在有这个任务的 Mac 上全部重读，旧版本出的、用户没表态的话题、口味、不感兴趣让位</td></tr>
 <tr><td>预算</td><td>每个来源 8 + 300 token</td></tr>
-<tr><td>评测</td><td>3 个虚构的人共 12 例；硬性：话题名和不感兴趣里不能有一次性的事、别人的事、健康、凭证，话题只是来源名或纯拉丁字母算失败；另用 5 个该留、6 个该丢的固定话题名检查品牌筛选，错一个也算硬性失败；另记话题召回、是否具体、不感兴趣的召回，和没有"没兴趣"依据的不感兴趣</td></tr>
+<tr><td>评测</td><td>3 个虚构的人共 12 例；硬性：话题名和不感兴趣里不能有一次性的事、别人的事、健康、凭证，话题只是来源名或纯拉丁字母算失败；另用 5 个该留、6 个该丢的固定话题名检查品牌筛选，错一个也算硬性失败；另记话题召回、是否具体、不感兴趣的召回，和没有"没兴趣"依据的不感兴趣；结果带评测集和提示词的指纹（<code>set_sha256</code>、<code>prompt_sha256</code>、<code>prompt_files</code>）</td></tr>
 </table></div>
 
 <h2>没有提示词的任务</h2>
@@ -2009,7 +2018,7 @@ sequenceDiagram
 <tr><td>0016</td><td>替用户做事</td><td>能撤回的在确认习惯后自动执行并提示，事后每日复查；不可逆或对外的始终由用户点按；agent 自己的邮箱可按类型放开外发。修订（2026-10-20）：系统检查查出的"会重建的缓存"（npm、uv、pip、Xcode DerivedData、Homebrew 旧版本等）用户确认一次后可对该类自动清理，每次提示，对应应用在用时跳过；其余类别每次由用户点按，删除优先移到废纸篓；只往本机下载的签名规则包、特征库不算数据外传</td></tr>
 <tr><td>0017</td><td>v1 首发</td><td>首发邮件助手和输入法，主控和记忆随装；Apple 芯片、16 GB 起、macOS 26.2+；先封闭测试再公开。修订（2026-10-20）：所有面向用户的界面按同一套设计规范，由品牌负责人在 <code>luoke-brand</code> 牵头制定，各项目照着改；beta1 只修明显的不一致，整体改版在 beta1 之后；顶层仓库公开，各组件仓库仍私有。修订（2026-10-22）：主控的所有窗口和邮件助手的网页在 beta1 前按设计规范整体改，记忆界面、输入法设置、agent 卡片仍在 beta1 之后；封闭测试顺延到 11-02，只做一批，招满 30 位为止，开测时对应的项目在 GitHub 上公开。修订（2026-10-23）：记忆页和输入法设置也在 beta1 前改（agent 卡片仍在之后）；主控里加「应用」窗口，各应用单独安装、升级、换回、卸载，升级主控不再顺带替换应用；「螺壳主控」改名「螺壳」，bundle id、数据目录和命令名不变；版本截止 10-28 20:00，beta1 10-29。修订（2026-10-28）：内部版换到单独的公开仓库 <code>luokelabs/luoke-internal-builds</code>，<code>luoke-releases</code> 只放 beta 和正式版，螺壳按渠道查对应仓库，过渡的那一版两边都发；检查更新往后翻页，随 beta1.1。螺壳、邮件助手、记忆、输入法四个组件公开：原名是公开仓库，从新的初始提交开始，团队开发和 issue 在 <code>&lt;名&gt;-private</code>，往公开仓库同步每次先问主人。修订（2026-10-29）：beta 和正式版的发布包在 GitLab 上放一份镜像，GitHub 仍是主渠道；私有仓库留一个和公开仓库 <code>main</code> 完全一样的 <code>public</code> 分支，同步时把导出的树作为一个新提交加在上面，扫过泄漏再推成公开 <code>main</code>，不改写历史。修订（2026-10-31）：公开仓库只在发 beta 或正式版时同步，四个组件一起，是发版流程里的一步；从下一个公开版起，beta 和正式版只钉 <code>public</code> 上的提交，内部版照旧从私有 <code>main</code> 出。公开仓库发现泄漏时立刻修。修订（2026-11-01）：要发给大家用的组件默认开源，体检、agent、深度搜索第一次随 beta 或正式版发布时建公开仓库；agent 和体检一起上，和螺壳窗口进同一个 v1.x，用户看得到清了什么、点得到「放回」之前，体检不开放 修订（2026-11-02）：下一版是 beta 2，以 agent（螺壳主界面）上线为放行标准，体检和深度搜索一起进，这两个的名字可能改；语音输入作为输入法下一个大版本自己演进；会议纪要等放到 beta 2.x 讨论。 修订（2026-11-03）：开源许可统一用 Apache-2.0（邮件助手、记忆从 beta 2 起换）；输入法这类应用的新功能做好了可以单独发给测试者，不必等螺壳整体的 beta。</td></tr>
 <tr><td>0018</td><td>推理和权重归主控</td><td>体系内没有脱离主控的模型运行实例；垂类模型也做成主控的任务，对延迟敏感的走优先通道。修订（2026-10-20）：嵌入任务由深度搜索（<code>luoke-search</code>）接手，任务名由 <code>digup.embed</code> 改为 <code>luoke-search.embed</code>，接口、评测和多模态安排不变</td></tr>
-<tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。beta1 之后推进</td></tr>
+<tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。修订（2026-11-04）：现在开始搬，Python 配件可以放在包目录里（如 <code>luoke_mem/prompts/</code>），没有重试的不写 retry、没有共用句子的不写 <code>_shared</code>，可选段写 <code>{{#名}}…{{/名}}</code>；改了提示词文件的 PR 要作者以外的一位成员 Approve，安全相关的提示词还要附改动前后三档的逐题对比，只看总分不算数</td></tr>
 <tr><td>0020</td><td>引擎换成自己做的薄引擎</td><td>只服务配方模型，底层用官方 mlx-lm，不换 mlx-serve。先进内部版，beta 线和 11-02 的测试不换；推理和权重仍归主控（ADR 0018）。现在的引擎还是 oMLX。</td></tr>
 <tr><td>0021</td><td>完全磁盘访问授权给螺壳本身</td><td>用户只授权一次，体检、深度搜索复用；本体起主控时 disclaim，主控、引擎、工作进程都脱离；要读全盘的程序由本体核过声明和签名后起；清单按程序写 <code>"permissions": ["fda"]</code>。请求授权的卡片要等主控起 <code>jobs</code> 前核签名和版本、旧版回退、测试机实测都做完才出。代码还没改，现在授权的仍是螺壳体检。</td></tr>
 </table></div>
@@ -2038,7 +2047,8 @@ sequenceDiagram
 <h2>质量</h2>
 <ul>
 <li>16 GB 档（9B）的邮件分拣可能把正常邮件里的催促语（例如正规商城写"请在某日前上传凭证，逾期退款申请将自动关闭"）判成可疑，32 GB 档判对。分拣提示词已写明让用户自己到官网或 App 查看、输入、上传的不算可疑；评测里只有观察题（正规保单续费写「逾期保障将中止」），不计分，还没有计分的题。</li>
-<li>16 GB 档的打字归纳：beta1.1 没开（评测时过时不过，候选版 beta1.1-rc2 开过）；内部版 internal-1031-2 起开了。</li>
+<li>16、32 GB 档（9B）的邮件分拣认不出只给登录链接的仿冒信：发件人是相似域名、发件人校验通过，信里不要卡号和验证码，只叫人在 24 小时内点链接登录，9B 判成不可疑；128 GB 档判对。盯这种信的观察题随邮件助手下一次分拣改动加入，不计分。</li>
+<li>16 GB 档的打字归纳：beta1.1 里关着，内部版开着。</li>
 <li>32 GB 档的打字归纳偶尔把一次性安排（例如"答辩"）放进话题名，两个候选分数打平；配方里记为已知问题。</li>
 </ul>
 
@@ -2046,9 +2056,10 @@ sequenceDiagram
 <ul>
 <li><b>螺壳：先升螺壳、后升应用时，旧版邮件助手写不了草稿和每日摘要</b>：这三个任务没有评测记录，进不了本机的验证历史。beta1 有这个问题；internal-1026-5 起已修，已经写下的旧记录不重写，升一下邮件助手就好。</li>
 <li><b>螺壳：换引擎后旧引擎留在磁盘上</b>（每份约 1.6 GB）。beta1 有这个问题；beta1.1 起新引擎检查通过后删掉别的版本。</li>
-<li><b>记忆：同一机构换了名字仍各成一条</b>：按「机构:」后的名字原样合并，模型给的名称不同（如英文名、带域名、中文名）就不合并；别人来信推出的事实仍是一机构一句。</li>
+<li><b>记忆：同一机构换了名字仍各成一条</b>：按「机构:」后的名字原样（不分大小写，全角冒号也认）合并，模型给的名称不同（如英文名、带域名、中文名）就不合并；别人来信推出的事实仍是一机构一句。</li>
 <li><b>记忆：「其他:」话题下的人和机构可能并成一条</b>：旧版邮件助手把机构来信放在「其他:机构名」下，所以「其他:」仍按机构合并；发出邮件里写的「其他:某人」若和机构同名会被并进去。</li>
 <li><b>记忆：改建议并当场处理被算成两次时形成的处理习惯不重算</b>，仍按原依据保留。</li>
+<li><b>记忆：只写年份（如「2026」）或位数不全的 <code>happened_at</code> 仍被收下</b>：这样的记录被一条已生效的推断引用后，整份记忆打开时出错，记忆页、归纳任务和命令行都打不开；「2026-1」这类还会被读成别的月份。</li>
 </ul>
 
 
@@ -2097,6 +2108,8 @@ sequenceDiagram
 
 <h2>2026-11-04</h2>
 <ul>
+<li>决策页补 ADR 0019 的两条 11-04 修订（现在开始搬、Python 可放包目录；改提示词要别人 Approve、安全相关的附三档逐题对比）。已知问题加一条：16、32 GB 档认不出只给登录链接的仿冒信。</li>
+<li>记忆页、参考页、提示词页的记忆部分按代码 5827734（0.28.2）复核：页头版本改正；提示词改为 <code>luoke_mem/prompts/</code> 的文件，加载时核对占位符，片段标题在 <code>labels.json</code>（缺文件时用代码里同样的一份）；加 <code>record --tool</code> 命令和扫描的记录话题；定档表按反馈调、写入时的时间校验；interest 和常用说法的使用方改正（输入法还不读理解）；话题长度、打字线只数 90 天、常用说法不问用户、topics 输入的截断等细节。已知问题加一条时间格式的缺陷。</li>
 <li>邮件助手页跟到 e3b11f6（0.19.15）：截短时看不见的文字留在最后；自动处理的通知写「已自动处理 N 封」。已知问题去掉当天记的两条邮件助手缺陷（已修）。</li>
 <li>邮件助手页按代码 7497454（0.19.12）复核：许可 Apache-2.0；一封最多 4 个日程、票据算日程、.ics 含全部日程；读信补 gb18030、看不见的文字、图片张数、没有 Message-ID 或 Date 的邮件；发件人校验扩到 QQ、网易，加平台投递，<code>sender_verdict</code> 为 false 时只不给「通过」；分拣的图片和金额兜底、可疑的新判断规则；收件箱按建议 / 按时间、多日程卡片、草稿里原信没有的联系方式；订阅体检的已读和退订建议范围；群发合组、139 和 QQ 的邮箱差异；agent 接口单列一节（仍默认关闭）。已知问题：多段行程一条已修去掉，加两条邮件助手缺陷（不显示的文字被截掉、agent 读 outbox 把日程记成已加入），催促语一条改写。</li>
 </ul>
