@@ -13,7 +13,7 @@
 <h3>记录</h3>
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
-<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY-MM、YYYY-MM-DD 或带时间（不填为当前时间），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
+<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY、YYYY-MM、YYYY-MM-DD 或带时间，位数要全（不填为当前时间；以前收下的读不了的时间按没有日期处理），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
 <tr><td><code>redate(rid, happened_at)</code></td><td>修正本工具一条记录的发生时间（时间格式同 <code>record</code>）</td></tr>
 <tr><td><code>records(*, tool="", topic, kind, speaker, ref, since, limit)</code></td><td><code>tool=""</code> 为本工具，传工具名读该工具，<code>None</code> 读全部</td></tr>
 <tr><td><code>forget_records(*, topics, since, until, match, keep_cited)</code></td><td>删除本工具的部分记录，只依赖这些记录的理解一并删除</td></tr>

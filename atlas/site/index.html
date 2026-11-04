@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-04 17:10</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-04 17:12</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 深度搜索 luoke-search</option><option value="audit">组件 · 螺壳体检 luoke-audit</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -378,7 +378,7 @@ sequenceDiagram
 <section class="page" id="mem" data-title="记忆 luoke-mem">
 <h1>记忆</h1>
 <p class="lede">螺壳各组件共用的本机记忆：一个 SQLite 文件。工具写入"发生了什么"（记录）；记忆是唯一形成结论的地方，从记录归纳出带依据、分三档把握程度的理解，并在空闲时整理，产出想问用户的问题和建议。</p>
-<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.28.2，按代码 5827734 核对 · 许可 Apache-2.0 · schema 7 · 接口和表结构见「参考 · 记忆」</p>
+<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.28.3，按代码 b784cd1 核对 · 许可 Apache-2.0 · schema 7 · 接口和表结构见「参考 · 记忆」</p>
 
 <h2>职责</h2>
 <ul>
@@ -400,7 +400,7 @@ sequenceDiagram
 
 <h2>记录与理解</h2>
 <h3>记录</h3>
-<p>每条记录有写入的工具、说话人（<code>user</code>、<code>third_party</code>、<code>system</code>）、性质（<code>statement</code>、<code>activity</code>、<code>receipt</code>）、话题（如 <code>mail-read</code>、<code>ime-commit</code>）、正文、结构化数据 <code>data</code>（可含原文）和真实发生时间 <code>happened_at</code>。<code>happened_at</code> 写 YYYY-MM、YYYY-MM-DD 或带时间；读不出的（如"yesterday"），以及 <code>topic</code>、<code>ref</code> 不是文字的，写入时拒收。</p>
+<p>每条记录有写入的工具、说话人（<code>user</code>、<code>third_party</code>、<code>system</code>）、性质（<code>statement</code>、<code>activity</code>、<code>receipt</code>）、话题（如 <code>mail-read</code>、<code>ime-commit</code>）、正文、结构化数据 <code>data</code>（可含原文）和真实发生时间 <code>happened_at</code>。<code>happened_at</code> 写 YYYY、YYYY-MM、YYYY-MM-DD 或带时间（只写年份按 1 月 1 日算）；位数不全的（如「2026-1」）和读不出的（如"yesterday"），以及 <code>topic</code>、<code>ref</code> 不是文字的，写入时拒收。</p>
 <h3>理解的类别</h3>
 <div class="tbl"><table>
 <tr><th>类别</th><th>含义</th><th>谁用</th></tr>
@@ -1613,7 +1613,7 @@ sequenceDiagram
 <h3>记录</h3>
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
-<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY-MM、YYYY-MM-DD 或带时间（不填为当前时间），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
+<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY、YYYY-MM、YYYY-MM-DD 或带时间，位数要全（不填为当前时间；以前收下的读不了的时间按没有日期处理），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
 <tr><td><code>redate(rid, happened_at)</code></td><td>修正本工具一条记录的发生时间（时间格式同 <code>record</code>）</td></tr>
 <tr><td><code>records(*, tool="", topic, kind, speaker, ref, since, limit)</code></td><td><code>tool=""</code> 为本工具，传工具名读该工具，<code>None</code> 读全部</td></tr>
 <tr><td><code>forget_records(*, topics, since, until, match, keep_cited)</code></td><td>删除本工具的部分记录，只依赖这些记录的理解一并删除</td></tr>
@@ -2059,7 +2059,6 @@ sequenceDiagram
 <li><b>记忆：同一机构换了名字仍各成一条</b>：按「机构:」后的名字原样（不分大小写，全角冒号也认）合并，模型给的名称不同（如英文名、带域名、中文名）就不合并；别人来信推出的事实仍是一机构一句。</li>
 <li><b>记忆：「其他:」话题下的人和机构可能并成一条</b>：旧版邮件助手把机构来信放在「其他:机构名」下，所以「其他:」仍按机构合并；发出邮件里写的「其他:某人」若和机构同名会被并进去。</li>
 <li><b>记忆：改建议并当场处理被算成两次时形成的处理习惯不重算</b>，仍按原依据保留。</li>
-<li><b>记忆：只写年份（如「2026」）或位数不全的 <code>happened_at</code> 仍被收下</b>：这样的记录被一条已生效的推断引用后，整份记忆打开时出错，记忆页、归纳任务和命令行都打不开；「2026-1」这类还会被读成别的月份。</li>
 </ul>
 
 
@@ -2108,6 +2107,7 @@ sequenceDiagram
 
 <h2>2026-11-04</h2>
 <ul>
+<li>记忆页跟到 b784cd1（0.28.3）：时间可以只写年份，位数不全的写入时拒收，以前收下的读不了的时间按没有日期处理；已知问题去掉时间格式那条（已修）。</li>
 <li>决策页补 ADR 0019 的两条 11-04 修订（现在开始搬、Python 可放包目录；改提示词要别人 Approve、安全相关的附三档逐题对比）。已知问题加一条：16、32 GB 档认不出只给登录链接的仿冒信。</li>
 <li>记忆页、参考页、提示词页的记忆部分按代码 5827734（0.28.2）复核：页头版本改正；提示词改为 <code>luoke_mem/prompts/</code> 的文件，加载时核对占位符，片段标题在 <code>labels.json</code>（缺文件时用代码里同样的一份）；加 <code>record --tool</code> 命令和扫描的记录话题；定档表按反馈调、写入时的时间校验；interest 和常用说法的使用方改正（输入法还不读理解）；话题长度、打字线只数 90 天、常用说法不问用户、topics 输入的截断等细节。已知问题加一条时间格式的缺陷。</li>
 <li>邮件助手页跟到 e3b11f6（0.19.15）：截短时看不见的文字留在最后；自动处理的通知写「已自动处理 N 封」。已知问题去掉当天记的两条邮件助手缺陷（已修）。</li>
