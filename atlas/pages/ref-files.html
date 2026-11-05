@@ -66,6 +66,21 @@
 </table></div>
 <p>字段见<a href="#search">螺壳搜索</a>页。</p>
 
+<h2>螺壳扫描 <code>~/.luoke-scan/</code>（未发布）</h2>
+<div class="tbl"><table>
+<tr><th>路径</th><th>内容</th></tr>
+<tr><td>目录本身</td><td>700，整个排除出 Time Machine</td></tr>
+<tr><td><code>scan.db</code>（及 <code>-wal</code>、<code>-shm</code>）</td><td>大小历史、增量记录、扫过病毒的文件、重复文件的哈希、见过的常驻项、主控模型的答复</td></tr>
+<tr><td><code>last-report.json</code></td><td>上一轮的报告，0600</td></tr>
+<tr><td><code>agent-state.json</code></td><td>以后别提的、outbox 的回执、自动清的开关和记录、办完的方案，0600</td></tr>
+<tr><td><code>cleaned.jsonl</code></td><td>清理记录，只追加，放回靠它</td></tr>
+<tr><td><code>plans/</code></td><td>出过的方案，30 天后删</td></tr>
+<tr><td><code>clamav/</code>、<code>clamav-quick/</code></td><td>病毒库、快速扫描用的精简库</td></tr>
+<tr><td><code>run/agent.sock</code></td><td>MCP socket，0600，目录 700</td></tr>
+<tr><td><code>round.lock</code>、<code>quick.lock</code>、<code>serve.lock</code></td><td>一轮、快速扫描、服务各只一个</td></tr>
+</table></div>
+<p>字段见<a href="#audit">螺壳扫描</a>页。</p>
+
 <h2>钥匙串</h2>
 <p><code>luoke-mail:imap</code>（邮箱授权码）、<code>luoke-mail:engine</code>（直连模型服务的密钥）。</p>
 

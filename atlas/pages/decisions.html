@@ -12,7 +12,7 @@
 <tr><td>0018</td><td>推理和权重归主控</td><td>体系内没有脱离主控的模型运行实例；垂类模型也做成主控的任务，对延迟敏感的走优先通道。修订（2026-10-20）：嵌入任务由深度搜索（<code>luoke-search</code>）接手，任务名由 <code>digup.embed</code> 改为 <code>luoke-search.embed</code>，接口、评测和多模态安排不变</td></tr>
 <tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。修订（2026-11-04）：现在开始搬，Python 配件可以放在包目录里（如 <code>luoke_mem/prompts/</code>），没有重试的不写 retry、没有共用句子的不写 <code>_shared</code>，可选段写 <code>{{#名}}…{{/名}}</code>；改了提示词文件的 PR 要作者以外的一位成员 Approve，安全相关的提示词还要附改动前后三档的逐题对比，只看总分不算数</td></tr>
 <tr><td>0020</td><td>引擎换成自己做的薄引擎</td><td>只服务配方模型，底层用官方 mlx-lm，不换 mlx-serve。先进内部版，beta 线和 11-02 的测试不换；推理和权重仍归主控（ADR 0018）。现在的引擎还是 oMLX。</td></tr>
-<tr><td>0021</td><td>完全磁盘访问授权给螺壳本身</td><td>用户只授权一次，体检、深度搜索复用；本体起主控时 disclaim，主控、引擎、工作进程都脱离；要读全盘的程序由本体核过声明和签名后起；清单按程序写 <code>"permissions": ["fda"]</code>。请求授权的卡片要等主控起 <code>jobs</code> 前核签名和版本、旧版回退、测试机实测都做完才出。代码还没改，现在授权的仍是螺壳体检。</td></tr>
+<tr><td>0021</td><td>完全磁盘访问授权给螺壳本身</td><td>用户只授权一次，螺壳扫描、螺壳搜索复用；本体起主控时 disclaim，主控、引擎、工作进程都脱离；要读全盘的程序由本体核过声明和签名后起；清单按程序写 <code>"permissions": ["fda"]</code>。请求授权的卡片要等主控起 <code>jobs</code> 前核签名和版本、旧版回退、测试机实测都做完才出。螺壳扫描这边已改（读磁盘的程序跟着螺壳用授权，没有授权时卡片请用户给「螺壳」打开）；主控这边的脱离、起 <code>jobs</code> 前核签名还没做。</td></tr>
 </table></div>
 
 <h2>设计原则</h2>
