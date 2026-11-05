@@ -4,15 +4,15 @@
 
 <div class="tbl"><table>
 <tr><th>任务</th><th>kind</th><th>16</th><th>32</th><th>128</th><th>提示词 / 实现</th></tr>
-<tr><td><code>luoke-mail.triage</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/triage.py</code></td></tr>
-<tr><td><code>luoke-mail.draft</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/triage.py</code>；无评测，沿用</td></tr>
-<tr><td><code>luoke-mail.cleanup</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/triage.py</code></td></tr>
-<tr><td><code>luoke-mail.senders</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/triage.py</code></td></tr>
-<tr><td><code>luoke-mail.digest-read</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/digest.py</code>；无评测，沿用</td></tr>
-<tr><td><code>luoke-mail.digest-pick</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/editor.py</code>；无评测，沿用</td></tr>
-<tr><td><code>luoke-mail.learn-sent</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/learn.py</code></td></tr>
-<tr><td><code>luoke-mail.learn-orgs</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/learn.py</code></td></tr>
-<tr><td><code>luoke-mail.thread</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/threads.py</code></td></tr>
+<tr><td><code>luoke-mail.triage</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/triage.py</code>（邮件那一段在 <code>luoke_mail/prompts/_shared.txt</code>）</td></tr>
+<tr><td><code>luoke-mail.draft</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/draft.*</code>；无评测，沿用</td></tr>
+<tr><td><code>luoke-mail.cleanup</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/cleanup.*</code></td></tr>
+<tr><td><code>luoke-mail.senders</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/senders.*</code></td></tr>
+<tr><td><code>luoke-mail.digest-read</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/digest-read.*</code>；无评测，沿用</td></tr>
+<tr><td><code>luoke-mail.digest-pick</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/digest-pick.*</code>；无评测，沿用</td></tr>
+<tr><td><code>luoke-mail.learn-sent</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/learn-sent.*</code></td></tr>
+<tr><td><code>luoke-mail.learn-orgs</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/learn-orgs.*</code></td></tr>
+<tr><td><code>luoke-mail.thread</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/thread.*</code></td></tr>
 <tr><td><code>luoke-mem.typing</code></td><td>generate</td><td>关</td><td>开</td><td>开</td><td><code>luoke_mem/learn.py</code>；16 档过 1 遍，连过 3 遍才开</td></tr>
 <tr><td><code>luoke-mem.topics</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mem/topics.py</code></td></tr>
 <tr><td><code>luoke-ime.rerank</code></td><td>score</td><td>开</td><td>开</td><td>开</td><td>无提示词（打分）</td></tr>

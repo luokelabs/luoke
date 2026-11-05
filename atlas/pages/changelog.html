@@ -3,6 +3,7 @@
 
 <h2>2026-11-05</h2>
 <ul>
+<li>邮件助手页按代码 d05e80e（0.19.26）复核：agent 接口默认打开（<code>LUOKE_MAIL_AGENT=0</code> 关掉），能力声明并进配件清单，加「谁能连」（打包版只认螺壳.app 自带的 Python、父进程是螺壳.app、签名同一团队；挡不住有意冒充的）；主控任务的提示词改成 <code>luoke_mail/prompts/</code> 的文件。提示词页的邮件助手部分改成文件：加一段格式说明（模板、<code>_shared.txt</code>、选项在 schema 的 <code>x-describe</code>），各任务的位置写到文件和占位符；分拣补 <code>more_events</code>（14 个字段）、机票车票算 schedule、图片里的金额和日期，<code>sender_verdict</code> 改正为只不给「通过」。总览图、文件位置、任务与提示词页跟着改；agent 页改正邮件助手的接口（默认打开、清单里声明）和已报 <code>auto-done</code>。决策页加 ADR 0022（除输入法外的应用收进螺壳.app，跟螺壳一起升级）、0023（螺壳自己的任务协议和统一调度）。已知问题加一条：分拣的日期格式校验被同名正则盖掉。</li>
 <li>决策页 ADR 0021 一行改成现状：扫描这边已改，主控的脱离和核签名还没做；名字改成螺壳扫描、螺壳搜索。</li>
 <li>扫描页按代码 1b3aea6（0.1.4）复核：程序、bundle id、数据目录、MCP 工具、任务名和记忆话题换成新名字（<code>luoke-scan</code>、<code>ai.luoke.scan</code>、<code>~/.luoke-scan</code>、<code>scan_*</code>、<code>luoke-scan.*</code>、<code>scan-*</code>），去掉页头的待复核说明；规则 25 条，加 AI 工具的 skill 和给 AI 看的说明文件两类检查，病毒扫描也扫 skill 里的文件；explain、identify、skills 三个生成任务接上主控，模型说的只附在发现下面；完全磁盘访问授给螺壳本身；socket 只认同一团队签名的程序；自动清默认关，缓存由扫描自己不跟链接地删、不再跑工具的清理命令；freshclam 的配置随包签名；应用图标和提示词进包；评测、测试数字更新。文件位置、任务、提示词页补上扫描；总览图加扫描的生成任务和记录；已知问题加一条主控还不起扫描的常驻服务。</li>
 </ul>

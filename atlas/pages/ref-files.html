@@ -50,7 +50,7 @@
 <tr><td><code>luoke.db</code></td><td>邮件、建议、规则、清理、操作记录、精选</td></tr>
 <tr><td><code>token</code>、<code>server.json</code>、<code>server.lock</code></td><td>页面令牌；运行中实例的端口；单实例锁</td></tr>
 <tr><td><code>idle.lock</code>、<code>resident</code>、<code>account-salt</code></td><td>空闲工作锁；后台整理已开启的标记；邮箱不透明键的随机值</td></tr>
-<tr><td><code>run/agent.sock</code></td><td>agent 接口（默认关闭，<code>LUOKE_MAIL_AGENT=1</code> 时才有）</td></tr>
+<tr><td><code>run/agent.sock</code></td><td>agent 接口（0600，默认打开，<code>LUOKE_MAIL_AGENT=0</code> 时不开）</td></tr>
 <tr><td><code>service.log</code>、<code>app.log</code></td><td>日志</td></tr>
 </table></div>
 
@@ -91,7 +91,7 @@
 <tr><td><code>LUOKE_HOME</code></td><td>记忆所在目录</td></tr>
 <tr><td><code>LUOKE_MAIL_HOME</code></td><td>邮件助手数据目录</td></tr>
 <tr><td><code>LUOKE_MAIL_PORT</code></td><td>邮件助手网页端口（未用 <code>--port</code> 时）</td></tr>
-<tr><td><code>LUOKE_MAIL_AGENT</code></td><td>设为 1 时开启邮件助手的 agent 接口</td></tr>
+<tr><td><code>LUOKE_MAIL_AGENT</code></td><td>设为 0 时关掉邮件助手的 agent 接口（默认打开）</td></tr>
 <tr><td><code>LUOKE_SEARCH_HOME</code></td><td>螺壳搜索数据目录（发布版拒绝启动）</td></tr>
 <tr><td><code>LUOKE_SEARCH_EMBED_TASK</code>、<code>LUOKE_SEARCH_OPENER</code>、<code>LUOKE_SEARCH_PHOTOS</code></td><td>螺壳搜索开发用的开关（发布版删掉，<code>LUOKE_SEARCH_DEV_APP</code> 只在构建时用），见<a href="#search">螺壳搜索</a>页</td></tr>
 <tr><td><code>PI_CODING_AGENT_DIR</code></td><td><code>luoke launch pi</code> 写入配置的位置</td></tr>

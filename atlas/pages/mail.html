@@ -1,7 +1,7 @@
 <!-- id: mail | nav: 邮件助手 luoke-mail | group: 组件 -->
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.15，按代码 e3b11f6 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.26，按代码 d05e80e 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -25,7 +25,7 @@
 <li><b>后台循环</b>：每 30 秒一次（有空闲任务时 5 秒），启动 60 秒后才开始。后台整理默认关闭，开启需确认说明并已连接邮箱、有模型；间隔默认 30 分钟（可选 15、30、60、120），对每个邮箱执行同步流程；一个邮箱失败不影响其他。</li>
 <li><b>主控</b>：经 Unix socket 调用任务（<code>X-Luoke-Accessory: luoke-mail/&lt;版本&gt;</code>，优先级 <code>user-waiting</code> 或 <code>background</code>）；任务状态和参数（<code>max_chars</code>、<code>batch</code>、<code>sender_verdict</code>）从 <code>GET /tasks</code> 读取并缓存 60 秒；页面可见时预热 <code>luoke-mail.triage</code>。打包版只经主控。</li>
 <li><b>记忆</b>：优先使用主控内置的 <code>luoke_mem</code>（<code>GET /tasks</code> 的 <code>luoke_mem.path</code>，要求 ≥ 0.23.0），以 <code>tool="luoke-mail"</code> 打开；记忆比库新时常驻实例以退出码 3 退出并提示更新。</li>
-<li><b>agent 接口</b>：默认关闭。只有环境变量 <code>LUOKE_MAIL_AGENT=1</code> 时，持有实例锁的进程才在 <code>run/agent.sock</code> 上提供 outbox、资源和工具（MCP 子集，见「agent 接口」一节）；配件清单不声明 <code>capabilities</code>，声明放在 <code>packaging/agent-capabilities.json</code>，agent 上线的那一版才放进清单。</li>
+<li><b>agent 接口</b>：默认打开，环境变量 <code>LUOKE_MAIL_AGENT=0</code> 关掉。持有实例锁的进程在 <code>run/agent.sock</code> 上提供 outbox、资源和工具（MCP 子集，见「agent 接口」一节），打包版只接受螺壳的 agent 核心连进来；能力声明在配件清单的 <code>capabilities</code> 里。</li>
 </ul>
 
 <h2>同步与分拣</h2>
@@ -84,17 +84,18 @@
 <p>页面在浏览器的 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
 
 <h2>主控任务</h2>
+<p>提示词是包里的文件 <code>luoke_mail/prompts/</code>（随包打进 .app）：每个任务一组 <code>.system.txt</code>、<code>.user.txt</code>、<code>.schema.json</code>，要重问的另有 <code>.retry.txt</code>，几个任务共用的句子在 <code>_shared.txt</code>；分拣自己的说明和 schema 还在 <code>triage.py</code>。每个任务的要点见<a href="#ref-prompts">提示词</a>页。</p>
 <div class="tbl"><table>
 <tr><th>任务</th><th>提示词</th><th>输入 → 输出</th><th>批量与失败</th></tr>
-<tr><td><code>triage</code></td><td><code>triage.py</code></td><td>一封邮件（含寄出日期、抄送、发件人校验结论、图片张数）、规则、关于用户（≤ 600 字）→ 类别、优先级、动作、摘要、截止日期、日程（最多 4 个）、可疑等</td><td>一次一封；两次失败后记错误，下次同步重试。以前的未读邮件以后台优先级、每批 10 封</td></tr>
-<tr><td><code>draft</code></td><td><code>triage.py</code></td><td>回复要点 + 邮件 → 正文</td><td>一次一封；答复不可用时再问一次，仍不行报错，可重新生成。生成后代码检查原信没有的联系方式</td></tr>
-<tr><td><code>senders</code></td><td><code>triage.py</code></td><td>发件人最近 8 个主题 → 类型</td><td>每批 ≤ 10；答复不可用时不改判；没答到的发件人照收信和阅读情况给建议，页面说明有几个</td></tr>
-<tr><td><code>cleanup</code></td><td><code>triage.py</code></td><td>邮件头 → 归档、删除、保留类别</td><td>每批 ≤ 25；失败一律保留</td></tr>
-<tr><td><code>digest-read</code></td><td><code>digest.py</code></td><td>一封订阅正文（≤ 12000 字）+ 口味 → 条目（≤ 8）、评分、摘要</td><td>一次一封，每次取 3 封排队；模型内存不足时缩到 4000 字重试；格式不对重问一次</td></tr>
-<tr><td><code>digest-pick</code></td><td><code>editor.py</code></td><td>候选条目 → 入选及理由</td><td>每批 ≤ 30；失败按阅读分数排</td></tr>
-<tr><td><code>learn-sent</code></td><td><code>learn.py</code></td><td>用户发出的邮件（只留本人写的部分）→ 事实</td><td>每批 ≤ 8；没有可用答复时减半再问，单独一封仍没有的按出错的间隔再试，3 次后放过</td></tr>
-<tr><td><code>learn-orgs</code></td><td><code>learn.py</code></td><td>往来机构的封数和主题 → 事实（机构名 ≤ 40 字，事实 ≤ 60 字；写入记忆的话题为「机构:名称」，类别只留在邮件助手）</td><td>每批 ≤ 10，最多 30 个机构；没有可用答复时减半再问，单独一个机构仍没有的按出错的间隔再试，3 次后放过</td></tr>
-<tr><td><code>thread</code></td><td><code>threads.py</code></td><td>往来串最后 ≤ 6 封（每封 ≤ 600 字，末尾注明最后一封是谁写的）→ 轮到谁（<code>user_turn</code> / <code>other_turn</code> / <code>done</code>，代码映射为等你 / 在等对方 / 已了结）、从何时、要做什么</td><td>每次同步最多 10 串；两次答案不可用判为已了结；主控忙或出错时停下，下次再问</td></tr>
+<tr><td><code>triage</code></td><td><code>triage.py</code>（邮件那一段在 <code>prompts/_shared.txt</code>）</td><td>一封邮件（含寄出日期、抄送、发件人校验结论、图片张数）、规则、关于用户（≤ 600 字）→ 类别、优先级、动作、摘要、截止日期、日程（最多 4 个）、可疑等</td><td>一次一封；两次失败后记错误，下次同步重试。以前的未读邮件以后台优先级、每批 10 封</td></tr>
+<tr><td><code>draft</code></td><td><code>prompts/draft.*</code></td><td>回复要点 + 邮件 → 正文</td><td>一次一封；答复不可用时再问一次，仍不行报错，可重新生成。生成后代码检查原信没有的联系方式</td></tr>
+<tr><td><code>senders</code></td><td><code>prompts/senders.*</code></td><td>发件人最近 8 个主题 → 类型</td><td>每批 ≤ 10；答复不可用时不改判；没答到的发件人照收信和阅读情况给建议，页面说明有几个</td></tr>
+<tr><td><code>cleanup</code></td><td><code>prompts/cleanup.*</code></td><td>邮件头 → 归档、删除、保留类别</td><td>每批 ≤ 25；失败一律保留</td></tr>
+<tr><td><code>digest-read</code></td><td><code>prompts/digest-read.*</code></td><td>一封订阅正文（≤ 12000 字）+ 口味 → 条目（≤ 8）、评分、摘要</td><td>一次一封，每次取 3 封排队；模型内存不足时缩到 4000 字重试；格式不对重问一次</td></tr>
+<tr><td><code>digest-pick</code></td><td><code>prompts/digest-pick.*</code></td><td>候选条目 → 入选及理由</td><td>每批 ≤ 30；失败按阅读分数排</td></tr>
+<tr><td><code>learn-sent</code></td><td><code>prompts/learn-sent.*</code></td><td>用户发出的邮件（只留本人写的部分）→ 事实</td><td>每批 ≤ 8；没有可用答复时减半再问，单独一封仍没有的按出错的间隔再试，3 次后放过</td></tr>
+<tr><td><code>learn-orgs</code></td><td><code>prompts/learn-orgs.*</code></td><td>往来机构的封数和主题 → 事实（机构名 ≤ 40 字，事实 ≤ 60 字；写入记忆的话题为「机构:名称」，类别只留在邮件助手）</td><td>每批 ≤ 10，最多 30 个机构；没有可用答复时减半再问，单独一个机构仍没有的按出错的间隔再试，3 次后放过</td></tr>
+<tr><td><code>thread</code></td><td><code>prompts/thread.*</code></td><td>往来串最后 ≤ 6 封（每封 ≤ 600 字，末尾注明最后一封是谁写的）→ 轮到谁（<code>user_turn</code> / <code>other_turn</code> / <code>done</code>，代码映射为等你 / 在等对方 / 已了结）、从何时、要做什么</td><td>每次同步最多 10 串；两次答案不可用判为已了结；主控忙或出错时停下，下次再问</td></tr>
 </table></div>
 
 <h2>写入记忆的记录</h2>
@@ -134,17 +135,18 @@
 <tr><td><code>token</code>、<code>server.json</code>、<code>server.lock</code></td><td>页面令牌（0600）；运行中实例的 pid、端口、是否常驻；单实例锁</td></tr>
 <tr><td><code>idle.lock</code>、<code>resident</code></td><td>空闲工作锁（应用和主控的空闲任务不同时做）；后台整理已开启的标记</td></tr>
 <tr><td><code>account-salt</code></td><td>生成邮箱不透明键（写入记忆的 <code>account</code>）的随机值；删除数据目录后邮箱得到新键</td></tr>
-<tr><td><code>run/agent.sock</code>、<code>calendar/</code></td><td>agent 接口，仅在 <code>LUOKE_MAIL_AGENT=1</code> 时存在；经 agent 交给「日历」的 .ics 写在 <code>calendar/</code></td></tr>
+<tr><td><code>run/agent.sock</code>、<code>calendar/</code></td><td>agent 接口（0600；<code>LUOKE_MAIL_AGENT=0</code> 时不开）；经 agent 交给「日历」的 .ics 写在 <code>calendar/</code></td></tr>
 </table></div>
 
-<h2>agent 接口（默认关闭）</h2>
+<h2>agent 接口</h2>
 <ul>
+<li><b>谁能连</b>：<code>run/agent.sock</code> 是 0600，本账户的程序都连得上。打包版每个连接先核对端（<code>agent.Callers</code>）：连上来的进程要是螺壳.app 自带的 Python（<code>Contents/Resources/python/bin/python3</code>），它的父进程是螺壳.app 的主程序，而且装好的那份螺壳.app 签名完好、bundle id 是 <code>ai.luoke.core</code>、和邮件助手是同一个开发者团队签的（<code>codesign</code> 核对；邮件助手自己拿不到团队号时谁都不放）。签名每个螺壳版本核一次，没通过的下次再核，核对出错也当没通过；对不上的连上就断开，每个进程在日志里记一行。源码运行不核。这道核对挡普通程序和连错的，挡不住本账户里有意冒充 agent 的程序：「用户点过」（<code>ai.luoke/user-action</code>）现在是调用方自己写的。</li>
 <li><b>outbox</b>（<code>luoke://luoke-mail/outbox</code>）：每个邮箱报三类事。新邮件分拣好了：要用户处理的最多 8 封各给选项（回复：写草稿 / 待跟进 / 归档 / 先不动；加入日程、待跟进：待跟进 / 归档 / 先不动），其余建议归档或移到垃圾箱的合成一行「照建议处理 / 先不动」，加入日程的另给最多 3 个日历按钮。可疑邮件：每封一张，急，只给「移到垃圾邮件 / 先不动」。按习惯自动处理的：今天还没撤销的合成一张，每批一个「撤销」，撤销习惯做的记成反证。选了「先不动」的邮件一天内不再主动提。</li>
 <li><b>资源</b> <code>permissions</code>：连了邮箱报 <code>mailbox: granted</code>，没连报 <code>ask</code>。</li>
 <li><b>要用户在卡片上点过才执行的</b>（没有 <code>ai.luoke/user-action</code> 就拒绝）：<code>mail_apply_plan</code>、<code>mail_undo</code>、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
 <li><b>只读、不用点的</b>：<code>outbox_ack</code>；<code>mail_search</code>（只搜本机已存的邮件，近期的按主题、发件人和正文，更早的只按信头，不含已移到垃圾箱、垃圾邮件的；不连邮箱、不经模型、不记日志；默认 20 条，最多 50）；<code>mail_read</code>（一封的正文，遮凭证，最多 4000 字，标 <code>untrusted</code>；只有信头的旧邮件现取、不标已读，取到的 Message-ID 对不上就不给）；<code>mail_plan</code>（对同一邮箱里还在待处理的最多 8 封出一张方案卡片，不改邮箱）；<code>mail_open</code>、<code>mail_open_settings</code>、<code>mail_open_page</code>。</li>
 <li>只执行邮件助手自己做出的方案、只用卡片给出的选项，执行前再核对邮件仍在待处理；移到垃圾箱、垃圾邮件合计超过 1 封要处理模式；退订和开启处理模式不经 agent。</li>
-<li><b>能力声明</b>（<code>packaging/agent-capabilities.json</code>）：报告 <code>new-mail</code>、<code>suspicious</code>（urgent）、<code>auto-done</code>；写入动作就是上面要点按的五个；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
+<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告 <code>new-mail</code>、<code>suspicious</code>（urgent）、<code>auto-done</code>；写入动作就是上面要点按的五个；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
 </ul>
 
 <h2>可靠性</h2>
@@ -163,4 +165,5 @@
 <li>在别的邮件客户端里把邮件助手标的已读改回未读、之后再打开的，仍算邮件助手标的已读，订阅体检和每月阅读记录都不计入打开。</li>
 <li>正文只有图片的邮件，模型看不到图里的字。一封邮件最多识别 4 个日程。</li>
 <li>网易默认只开放最近 30 天的邮件给 IMAP。</li>
+<li>agent.sock 的对端核对挡不住本账户里有意冒充螺壳 agent 的程序（见「agent 接口」）。</li>
 </ul>

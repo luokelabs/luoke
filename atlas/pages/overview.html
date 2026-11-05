@@ -39,7 +39,7 @@ flowchart LR
   mem -- "理解" --> mail
   mem -- "理解" --> ime
   mem -- "提问、建议" --> agent
-  agent -.->|"调用能力（接口默认关闭）"| mail
+  agent -.->|调用能力| mail
   agent -.->|MCP 工具| search
   agent -.->|MCP 工具| audit
   audit -.->|生成任务| engine
