@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-05 17:07</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-05 17:20</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -503,7 +503,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.26，按代码 d05e80e 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.27，按代码 7ae9e5f 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -2130,7 +2130,6 @@ sequenceDiagram
 <li><b>记忆：同一机构换了名字仍各成一条</b>：按「机构:」后的名字原样（不分大小写，全角冒号也认）合并，模型给的名称不同（如英文名、带域名、中文名）就不合并；别人来信推出的事实仍是一机构一句。</li>
 <li><b>记忆：「其他:」话题下的人和机构可能并成一条</b>：旧版邮件助手把机构来信放在「其他:机构名」下，所以「其他:」仍按机构合并；发出邮件里写的「其他:某人」若和机构同名会被并进去。</li>
 <li><b>记忆：改建议并当场处理被算成两次时形成的处理习惯不重算</b>，仍按原依据保留。</li>
-<li><b>邮件助手：分拣的日期格式校验被同名的正则盖掉</b>：<code>triage.py</code> 里核对草稿联系方式用的 <code>_DATE</code> 和校验日期的 <code>_DATE</code> 同名，后定义的那个生效，模型写成 <code>2026-11-5</code>、<code>2026-11-05T09:00</code> 这类的截止日期和日程日期不再置空。这样的日程在生成日历链接时出错：页面上加入日历报错，agent 读 outbox 整个失败。</li>
 </ul>
 
 
@@ -2179,6 +2178,7 @@ sequenceDiagram
 
 <h2>2026-11-05</h2>
 <ul>
+<li>邮件助手页跟到 7ae9e5f（0.19.27）：已知问题去掉分拣日期校验那条（已修，已存的坏日期启动时丢掉）。</li>
 <li>邮件助手页按代码 d05e80e（0.19.26）复核：agent 接口默认打开（<code>LUOKE_MAIL_AGENT=0</code> 关掉），能力声明并进配件清单，加「谁能连」（打包版只认螺壳.app 自带的 Python、父进程是螺壳.app、签名同一团队；挡不住有意冒充的）；主控任务的提示词改成 <code>luoke_mail/prompts/</code> 的文件。提示词页的邮件助手部分改成文件：加一段格式说明（模板、<code>_shared.txt</code>、选项在 schema 的 <code>x-describe</code>），各任务的位置写到文件和占位符；分拣补 <code>more_events</code>（14 个字段）、机票车票算 schedule、图片里的金额和日期，<code>sender_verdict</code> 改正为只不给「通过」。总览图、文件位置、任务与提示词页跟着改；agent 页改正邮件助手的接口（默认打开、清单里声明）和已报 <code>auto-done</code>。决策页加 ADR 0022（除输入法外的应用收进螺壳.app，跟螺壳一起升级）、0023（螺壳自己的任务协议和统一调度）。已知问题加一条：分拣的日期格式校验被同名正则盖掉。</li>
 <li>决策页 ADR 0021 一行改成现状：扫描这边已改，主控的脱离和核签名还没做；名字改成螺壳扫描、螺壳搜索。</li>
 <li>扫描页按代码 1b3aea6（0.1.4）复核：程序、bundle id、数据目录、MCP 工具、任务名和记忆话题换成新名字（<code>luoke-scan</code>、<code>ai.luoke.scan</code>、<code>~/.luoke-scan</code>、<code>scan_*</code>、<code>luoke-scan.*</code>、<code>scan-*</code>），去掉页头的待复核说明；规则 25 条，加 AI 工具的 skill 和给 AI 看的说明文件两类检查，病毒扫描也扫 skill 里的文件；explain、identify、skills 三个生成任务接上主控，模型说的只附在发现下面；完全磁盘访问授给螺壳本身；socket 只认同一团队签名的程序；自动清默认关，缓存由扫描自己不跟链接地删、不再跑工具的清理命令；freshclam 的配置随包签名；应用图标和提示词进包；评测、测试数字更新。文件位置、任务、提示词页补上扫描；总览图加扫描的生成任务和记录；已知问题加一条主控还不起扫描的常驻服务。</li>
