@@ -27,7 +27,7 @@
 - **用户的网站和博客**：用户在记忆页填写网址，存成「关于你」的一条（`topic=site`），其他工具也能读到；读到的文章记成 `own-site` 记录。
 - **空闲任务**（清单 `jobs`，由主控在安静时刻起进程跑）：`clean`（分拣范围以前的未读邮件，每个邮箱只排一次；判断清理里的旧邮件）、`digest`（读订阅、挑精选）、`learn`（了解你，整理用户自己的资料和阅读记录）。被叫停就停在做完的那一步、退出码 0，下次接着做。
 - **卸载**：清单 `data: ["~/.luoke-mail"]`、`commands.uninstall: ["-m", "luoke_mail", "--forget-secrets"]`（删钥匙串里本工具的授权码），只在用户勾了「同时删除我的数据」时由主控运行。
-- **给 agent 的接口**（luoke-agent 工具协议）：数据目录 `run/agent.sock` 上的 MCP 子集——outbox（要处理的新邮件、可疑邮件）、按用户点按执行方案、撤销、打开页面和日历。v1 首发版关掉（`LUOKE_MAIL_AGENT=1` 才开，清单不声明能力），随 beta 2 的 agent 上线打开（见「以后」的「接 agent」）。
+- **给 agent 的接口**（luoke-agent 工具协议）：数据目录 `run/agent.sock` 上的 MCP 子集——outbox（要处理的新邮件、可疑邮件）、按用户点按执行方案、撤销、打开页面和日历。v1 首发版关掉；0.19.26 起随 beta 2 的 agent 上线默认开（`LUOKE_MAIL_AGENT=0` 关），清单 `capabilities` 声明能力。.app 里 accept 后核对连上来的像不像螺壳的 agent 核心（螺壳.app 自带的 Python、父进程是螺壳.app、签名完好且和邮件助手同一团队，拿不到团队号时谁都不放）：挡普通程序和连错的，挡不住本账户里有意冒充的程序；agent 签发点按凭据以后改成验凭据。
 
 ## 在记忆里读写什么
 
@@ -123,7 +123,7 @@
 1. `service.summary`、`service.pages`、`service.ask.suggest`：等窗口合并、页面编号定。
 2. `daily-review`：跟着从螺壳自己的邮箱外发走，进不进 beta 2 等主人定。
 3. 打开类工具带 `ai.luoke/where: mac`：等 luoke-agent 的帮手支持 `_meta`。
-4. 随 agent 上线的版本把接口改成默认开、清单声明能力。
+4. ~~随 agent 上线的版本把接口改成默认开、清单声明能力~~：0.19.26 已进 main（11-05），连同 agent.sock 的调用方核对（安全审查 S2 邮件这一半）。
 
 ### 对齐「先宽后紧」（ARCHITECTURE §4，2026-11-01 核对）
 
