@@ -13,7 +13,7 @@
 - 起草回复，只放进草稿箱；
 - 「今日处理」：每天处理过的每一封和它的结果，逐封撤销或修改。
 
-支持 Gmail、QQ、网易 163/126 和自定义 IMAP，可以同时连接多个邮箱。形态是只监听 127.0.0.1 的本机网页，打包成签名公证的「螺壳邮件助手.app」（`ai.luoke.mail`），由主控在登录时拉起、保活。
+支持 Gmail、QQ、网易 163/126 和自定义 IMAP，可以同时连接多个邮箱。形态是只监听 127.0.0.1 的本机网页。0.19.28 起收进螺壳.app（顶层 ADR 0022）：代码进螺壳自带的 Python，清单在 `Contents/Resources/mail/luoke-accessory.json`，由螺壳本体起一个常驻进程（`-m luoke_mail --resident --parent-pid`），经 stdin / stdout 一行一个 JSON 和本体说话；不再有单独的「螺壳邮件助手.app」（`scripts/package-app.sh` 在流水线切换前还留着）。
 
 **替用户做事的边界**（顶层 ADR 0016）：
 - 能撤回的先做、事后复查：分析过的邮件标为已读；记忆里确认过的习惯（按「发件人 × 类别」）自动归档、标已读或加标签。每封都列在「今日处理」里，能撤销，撤销记成反证。
@@ -66,8 +66,8 @@
 |---|---|---|
 | 主控 luoke-core | 本机模型 | .app 只走主控的任务层：调用写任务名和条目数，字符上限和批大小从 `GET /tasks` 读，按 `retry_after` 等；源码运行也可直连 OpenAI 兼容的服务（开发用） |
 | 记忆 luoke-mem | 读写记录和理解 | .app 先用主控 `GET /tasks` 报的 `luoke_mem.path`，没有再用自带的兜底那份；要求 0.23 或更新；数据在 `~/.luoke/mem.db`，归用户 |
-| 邮箱 | 读写邮件 | IMAP + 应用专用密码 / 授权码，存在 macOS 钥匙串（`luoke-mail:imap`，每个邮箱一条）；不需要任何云端授权 |
-| macOS | 常驻、通知 | 由主控在登录时拉起、保活（`PUT /accessory/resident`），通知经 .app 的启动器 |
+| 邮箱 | 读写邮件 | IMAP + 应用专用密码 / 授权码，存在 macOS 钥匙串（`luoke-mail:imap`，每个邮箱一条；数据目录不是 `~/.luoke-mail` 的副本另记 `luoke-mail:imap:<8 位>`，0.19.30）；不需要任何云端授权 |
+| macOS | 常驻、通知 | 螺壳.app 里由本体起、保活，通知经管道交给本体以螺壳的名义发（0.19.28）；旧的单独 .app 由主控拉起（`PUT /accessory/resident`）、通知经 .app 的启动器 |
 
 ## 对主控的需求：任务
 
