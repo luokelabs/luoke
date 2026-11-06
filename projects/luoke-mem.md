@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.28.3（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.29.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -29,7 +29,8 @@
   - 任务：`luoke-mem.typing`（从打字归纳常用说法和话题）、`luoke-mem.topics`（从邮件助手的记录和原文归纳话题、口味、不感兴趣），都是后台生成任务；评测 `bench/run_typing.py`、`bench/run_topics.py`。
   - 空闲任务：`learn`（归纳、反刍：重新定档、以前的事、习惯、想问的、建议）。
   - 命令：`forget-tool <工具> [--dry-run]`。
-- **命令行**：`python3 -m luoke_mem [--path P] ui | sources | forget-tool <工具> [--dry-run] | learn [--force] [--again] [--hub S] | app [--note N] [--view recent] | record --tool <工具>`（`record` 给没有 Python 的工具写记录，标准输入一行一条 JSON）。
+- **命令行**：`python3 -m luoke_mem [--path P] ui | sources | forget-tool <工具> [--dry-run] | learn [--force] [--again] [--hub S] | app [--note N] [--view recent] | record --tool <工具> | mcp [--clock T]`（`record` 给没有 Python 的工具写记录，标准输入一行一条 JSON；`mcp` 见下「工具协议」）。
+- **工具协议**（0.29，luoke-agent `docs/工具协议.md` 版本 1，`luoke_mem/agent.py`）：`python3 -m luoke_mem --path {memory} mcp`（清单 `commands.mcp`），由螺壳本体当子进程起，一个请求一个进程（§2a）。outbox `luoke://luoke-mem/outbox`：记忆想问的事和建议，卡片由记忆写，点按交回 `mem_reply`；`summary` 和四页（`overview`、`guesses`、`kept`、`sources`）；写入动作 `mem_reply`、`mem_note`、`mem_forget_tool`、`mem_forget_all` 只认用户的点按，`mem_open` 打开记忆自己的页面。场景样例在 `luoke-mem/fixtures/agent/`（`scripts/record_agent_fixtures.py --check` 守着）。**`capabilities` 还没写进发出去的清单**（代码里 `agent.capabilities()`、样例的 `manifest.json` 里有）：螺壳本体能起记忆以后再写，见「对别的项目的需求」。
 - **多个进程同时读写**：WAL 模式加等待锁；忘掉的从文件里也抹掉（`secure_delete`，清空预写日志）。
 - **版本和兼容**：schema 只加不改，`user_version` 只升不降，旧的库容得下新的列、类别和状态（DESIGN「版本和兼容」）。
 
@@ -42,7 +43,7 @@
 
 - **luoke-mail**：写记录（发出的邮件、机构来信、订阅的打开和原文、精选的打开和反馈、标签、亲手的处理、改过的建议、规则做的、撤回），读理解和确定的习惯，页面上显示和它有关的想问的和建议。见 [luoke-mail.md](luoke-mail.md)。
 - **luoke-ime**：个人化组件写上屏记录（带前文，标成第三方），读常用说法和别的理解做联想。见 [luoke-ime.md](luoke-ime.md)。
-- **luoke-agent**：读想问的和建议（`asks`），卡片上列依据原文（`note()["cites"]`），把回答交回（`reply`）。见 [luoke-agent.md](luoke-agent.md)。
+- **luoke-agent**：读想问的和建议（`asks`），卡片上列依据原文（`note()["cites"]`），把回答交回（`reply`）；0.29 起记忆自己出卡片和基础页（工具协议），agent 看到清单里有 `capabilities.reports` 就改走记忆的 outbox，不再自己拼。见 [luoke-agent.md](luoke-agent.md)。
 - **luoke-scan**（螺壳扫描，原名螺壳体检 luoke-audit，随 beta 2 接入）：写清了什么、忽略了什么、自动清了什么、报毒怎么处理的、自动清缓存的开关；第一版不读。见 [luoke-audit.md](luoke-audit.md)。
 - **luoke-core**：把 luoke_mem 打进主控、处理 `luoke://memory`、调度 `learn`、跑评测；卸载别的配件时，用户勾了"同时从记忆里忘掉"才调 `forget-tool`。见 [luoke-core.md](luoke-core.md)。
 
@@ -61,4 +62,6 @@
 
 ## 对别的项目的需求
 
+- **luoke-core**：螺壳本体照清单 `commands.mcp`（`-m luoke_mem --path {memory} mcp`，用主控自带的 Python）起记忆，作为本体起的工具（工具协议 §2a）；现在本体起的只有扫描和搜索。能起了告诉记忆，记忆再把 `capabilities`（`transport: "stdio"`）写进清单。
+- **luoke-agent**：记忆的清单里有 `capabilities.reports` 时改走记忆的 outbox，不再自己拼记忆的卡片；「设置 · 提醒」里记忆那一类换成清单的 `reports`；从 `luoke-mem/fixtures/agent/` 拷样例。
 - **luoke-mail**：ADR 0015 说的"必要时向工具要更多原文"还没有通道；beta1 之后商定一个读取接口（比如按发件人取最近几封的正文）。
