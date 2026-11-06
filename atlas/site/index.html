@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-06 12:11</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-06 12:37</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -2113,9 +2113,9 @@ sequenceDiagram
 <tr><td>0018</td><td>推理和权重归主控</td><td>体系内没有脱离主控的模型运行实例；垂类模型也做成主控的任务，对延迟敏感的走优先通道。修订（2026-10-20）：嵌入任务由深度搜索（<code>luoke-search</code>）接手，任务名由 <code>digup.embed</code> 改为 <code>luoke-search.embed</code>，接口、评测和多模态安排不变</td></tr>
 <tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。修订（2026-11-04）：现在开始搬，Python 配件可以放在包目录里（如 <code>luoke_mem/prompts/</code>），没有重试的不写 retry、没有共用句子的不写 <code>_shared</code>，可选段写 <code>{{#名}}…{{/名}}</code>；改了提示词文件的 PR 要作者以外的一位成员 Approve，安全相关的提示词还要附改动前后三档的逐题对比，只看总分不算数</td></tr>
 <tr><td>0020</td><td>引擎换成自己做的薄引擎</td><td>只服务配方模型，底层用官方 mlx-lm，不换 mlx-serve。先进内部版，beta 线和 11-02 的测试不换；推理和权重仍归主控（ADR 0018）。现在的引擎还是 oMLX。</td></tr>
-<tr><td>0021</td><td>完全磁盘访问授权给螺壳本身</td><td>用户只授权一次，螺壳扫描、螺壳搜索复用；本体起主控时 disclaim，主控、引擎、工作进程都脱离；要读全盘的程序由本体核过声明和签名后起；清单按程序写 <code>"permissions": ["fda"]</code>。请求授权的卡片要等主控起 <code>jobs</code> 前核签名和版本、旧版回退、测试机实测都做完才出。螺壳扫描这边已改（读磁盘的程序跟着螺壳用授权，没有授权时卡片请用户给「螺壳」打开）；主控这边的脱离、起 <code>jobs</code> 前核签名还没做。</td></tr>
-<tr><td>0022</td><td>除输入法外的应用都收进螺壳.app</td><td>邮件助手、螺壳搜索、螺壳扫描和以后的 <code>luoke-</code> 应用都合并进螺壳.app（记忆和 agent 已经在里面）；输入法照旧单独一个包，装在 <code>~/Library/Input Methods</code>，由螺壳安装和升级。系统权限已授给螺壳本身（ADR 0021），版本和评测按任务名认、和在不在一个包里无关，只有输入法必须单独成包。合进来以后每个工具对主控和记忆仍是一个配件、一个身份，工具之间不互相调用（ADR 0014）；通知改由螺壳发出，从单独的 .app 换过来的用户要重新允许一次。怎么打包、什么时候合还没定。修订（2026-11-05）：收进来的应用跟螺壳一起升级，不按组件单独升级，哪个应用有新版就出一版新螺壳；输入法、引擎、模型照旧单独下载、单独换。</td></tr>
-<tr><td>0023</td><td>螺壳自己的任务协议和统一调度</td><td>给整个螺壳定一套自己的任务协议：任务声明优先级、权限、资源等，有注册流程，螺壳自己的组件和外来的应用都走这一套，外来应用接入不另做一套；由引擎层统一排序，同一优先级默认按时间先后；可以做一个任务队列组件，让用户看到当前的队列、拖动调整顺序。推理仍归主控（ADR 0018）。协议和调度的方案、放在主控还是引擎层、现在的 <code>user-waiting</code> / <code>background</code> 两档优先级和空闲任务怎么迁过去、外来应用的任务能不能排到官方任务前面、协议名都还没定。</td></tr>
+<tr><td>0021</td><td>完全磁盘访问授权给螺壳本身</td><td>用户只授权一次，螺壳扫描、螺壳搜索复用；本体起主控时 disclaim，主控、引擎、工作进程都脱离；要读全盘的程序由本体核过声明和签名后起；清单按程序写 <code>"permissions": ["fda"]</code>。请求授权的卡片要等主控起 <code>jobs</code> 前核签名和版本、旧版回退、测试机实测都做完才出。螺壳扫描这边已改（读磁盘的程序跟着螺壳用授权，没有授权时卡片请用户给「螺壳」打开）；主控这边的脱离还没做；起螺壳里的程序时只核螺壳扫描的签名和版本。修订（2026-11-06）：组件不直接向系统要权限，向螺壳请求，用户同意后螺壳先查自己有没有、没有再向系统要；螺壳扫描这类要敏感权限的，在「应用」里开启以后由螺壳拉起一次，当场把权限要到，不在跑的时候突然弹窗。哪几条跟着改、授权卡片跟不跟 beta 2 还没定。</td></tr>
+<tr><td>0022</td><td>除输入法外的应用都收进螺壳.app</td><td>邮件助手、螺壳搜索、螺壳扫描和以后的 <code>luoke-</code> 应用都合并进螺壳.app（记忆和 agent 已经在里面）；输入法照旧单独一个包，装在 <code>~/Library/Input Methods</code>，由螺壳安装和升级。系统权限已授给螺壳本身（ADR 0021），版本和评测按任务名认、和在不在一个包里无关，只有输入法必须单独成包。合进来以后每个工具对主控和记忆仍是一个配件、一个身份，工具之间不互相调用（ADR 0014）；通知改由螺壳发出，从单独的 .app 换过来的用户要重新允许一次。修订（2026-11-05）：收进来的应用跟螺壳一起升级，不按组件单独升级，哪个应用有新版就出一版新螺壳；输入法、引擎、模型照旧单独下载、单独换。修订（2026-11-06）：集成做完，邮件助手、螺壳搜索、螺壳扫描、agent 都在 internal-1106 的螺壳.app 里；螺壳扫描不常驻，用时由螺壳起，起之前核签名和版本的只有它；通知由螺壳本体代发邮件助手和 agent 的。</td></tr>
+<tr><td>0023</td><td>螺壳自己的任务协议和统一调度</td><td>给整个螺壳定一套自己的任务协议：任务声明优先级、权限、资源等，有注册流程，螺壳自己的组件和外来的应用都走这一套，外来应用接入不另做一套；由主控统一排序（2026-11-06 更正，原写引擎层），同一优先级默认按时间先后；可以做一个任务队列组件，让用户看到当前的队列、拖动调整顺序。推理仍归主控（ADR 0018）。外来应用照这套协议自己接入，不用逐个经我们同意；用户接入螺壳没覆盖的模型时要有提示，等于允许自定义配方（优先级不高）。协议和调度的方案、现在的 <code>user-waiting</code> / <code>background</code> 两档优先级和空闲任务怎么迁过去、外来应用的任务能不能排到官方任务前面、协议名都还没定。</td></tr>
 </table></div>
 
 <h2>设计原则</h2>
@@ -2203,6 +2203,7 @@ sequenceDiagram
 
 <h2>2026-11-06</h2>
 <ul>
+<li>决策页：ADR 0021 加 11-06 修订（组件经螺壳请求权限，敏感权限在「应用」里开启后当场要），现状改成只核螺壳扫描的签名；ADR 0022 加集成做完；ADR 0023 改成主控统一调度（11-06 更正），加外来应用自己接入、接入没覆盖的模型要有提示。</li>
 <li>主控页按代码 364e582 复核应用收进螺壳.app 以后的样子：组成表加邮件助手、螺壳搜索、螺壳扫描、agent 核心怎么起（只有扫描起之前核签名和版本，都不 disclaim）；加「螺壳里的应用」「开启、停用」「旧的单独 .app」三条；升级、「应用」窗口、回到上一版本、卸载、通知、首次运行、菜单、再次打开、退出跟着改（整包升级，没有单独回退，通知由螺壳代发）。配件清单页加螺壳里的清单位置和打包布局、<code>data_env</code>、<code>default_on</code>、经 <code>--run-tool</code> 的空闲任务，发布清单只剩输入法；文件位置、运行与发布、总览页跟着改。</li>
 </ul>
 
