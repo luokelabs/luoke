@@ -17,7 +17,7 @@
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td><code>run/hub.sock</code></td><td>任务接口 socket</td></tr>
 <tr><td><code>logs/hub.log</code>、<code>logs/app.log</code>、<code>logs/jobs/</code></td><td>日志（只记元数据）</td></tr>
-<tr><td><code>logs/mail.log</code>、<code>logs/search.log</code>、<code>logs/luoke-scan.log</code>、<code>logs/agent.log</code></td><td>本体起的邮件助手、螺壳搜索、螺壳扫描、agent 核心的标准错误</td></tr>
+<tr><td><code>logs/mail.log</code>、<code>logs/search.log</code>、<code>logs/luoke-scan.log</code>、<code>logs/agent.log</code></td><td>本体起的邮件助手、螺壳搜索、螺壳扫描、agent 核心的标准错误（邮件助手起来后改写进自己数据目录的 <code>service.log</code>，这里只有它起来之前的输出）</td></tr>
 <tr><td><code>engines/&lt;版本&gt;/</code>、<code>engine/&lt;版本&gt;/</code></td><td>引擎包（发布版只留当前版本）；引擎运行目录（含引擎密钥 <code>settings.json</code>（0600）、<code>engine.log</code>、<code>engine.pid.json</code>）</td></tr>
 <tr><td><code>models/</code></td><td>模型；用户登记的模型在 <code>user-&lt;名字&gt;</code></td></tr>
 <tr><td><code>downloads/</code></td><td>下载暂存（应用的包在 <code>downloads/apps/</code>）</td></tr>
@@ -44,14 +44,16 @@
 </table></div>
 
 <h2>邮件助手 <code>~/.luoke-mail/</code></h2>
+<p>不是装好的那份螺壳（例如开发版）里的邮件助手用 <code>~/Library/Application Support/luoke-mail/</code>，结构相同。</p>
 <div class="tbl"><table>
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td><code>config.json</code></td><td>设置</td></tr>
 <tr><td><code>luoke.db</code></td><td>邮件、建议、规则、清理、操作记录、精选</td></tr>
 <tr><td><code>token</code>、<code>server.json</code>、<code>server.lock</code></td><td>页面令牌；运行中实例的端口；单实例锁</td></tr>
-<tr><td><code>idle.lock</code>、<code>resident</code>、<code>account-salt</code></td><td>空闲工作锁；后台整理已开启的标记；邮箱不透明键的随机值</td></tr>
+<tr><td><code>idle.lock</code>、<code>service.pid</code>、<code>account-salt</code></td><td>空闲工作锁；常驻实例的 pid；邮箱不透明键的随机值</td></tr>
 <tr><td><code>run/agent.sock</code></td><td>agent 接口（0600，默认打开，<code>LUOKE_MAIL_AGENT=0</code> 时不开）</td></tr>
-<tr><td><code>service.log</code>、<code>app.log</code></td><td>日志</td></tr>
+<tr><td><code>service.log</code>（及 <code>service.log.1</code>）</td><td>日志（只记元数据，不含邮件内容）</td></tr>
+<tr><td><code>run/notifications.json</code>、<code>run/old-logs-cleared</code></td><td>最近 100 条通知的时间、发送方式和结果；旧版本留下的日志文字已清掉的标记</td></tr>
 </table></div>
 
 <h2>螺壳搜索 <code>~/.luoke-search/</code>（未发布）</h2>
@@ -82,14 +84,14 @@
 <p>字段见<a href="#audit">螺壳扫描</a>页。</p>
 
 <h2>钥匙串</h2>
-<p><code>luoke-mail:imap</code>（邮箱授权码）、<code>luoke-mail:engine</code>（直连模型服务的密钥）。</p>
+<p><code>luoke-mail:imap</code>（邮箱授权码）、<code>luoke-mail:engine</code>（直连模型服务的密钥）。邮件助手的数据目录不是 <code>~/.luoke-mail</code> 时，服务名后面加这个目录的标识（如 <code>luoke-mail:imap:&lt;8 位十六进制&gt;</code>），一份数据目录一份授权码。</p>
 
 <h2>环境变量</h2>
 <div class="tbl"><table>
 <tr><th>变量</th><th>作用</th></tr>
 <tr><td><code>LUOKE_HUB_SOCKET</code></td><td>指定主控 socket（指定后不回退默认位置）</td></tr>
 <tr><td><code>LUOKE_HOME</code></td><td>记忆所在目录</td></tr>
-<tr><td><code>LUOKE_MAIL_HOME</code></td><td>邮件助手数据目录</td></tr>
+<tr><td><code>LUOKE_MAIL_HOME</code></td><td>邮件助手数据目录（螺壳不是装好的那份时，本体和主控设为 <code>~/Library/Application Support/luoke-mail</code>）</td></tr>
 <tr><td><code>LUOKE_MAIL_PORT</code></td><td>邮件助手网页端口（未用 <code>--port</code> 时）</td></tr>
 <tr><td><code>LUOKE_MAIL_AGENT</code></td><td>设为 0 时关掉邮件助手的 agent 接口（默认打开）</td></tr>
 <tr><td><code>LUOKE_SEARCH_HOME</code></td><td>螺壳搜索数据目录（发布版拒绝启动）</td></tr>
