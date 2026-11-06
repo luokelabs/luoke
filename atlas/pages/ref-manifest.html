@@ -2,36 +2,54 @@
 <h1>配件清单与配方</h1>
 
 <h2>配件清单 <code>luoke-accessory.json</code></h2>
-<p>位于配件 .app 的 <code>Contents/Resources/</code>。主控只加载 <code>contract == 1</code> 且有 <code>accessory</code>、<code>bundle_id</code> 的清单。</p>
+<p>单独成包的配件在它 .app 的 <code>Contents/Resources/</code>，主控扫 <code>~/Applications</code> 和 <code>~/Library/Input Methods</code>。螺壳里的应用在 <code>螺壳.app/Contents/Resources/&lt;标识去掉 luoke-&gt;/</code>（<code>mail/</code>、<code>search/</code>、<code>scan/</code>），记忆在 <code>Resources/memory/</code>；主控按 <code>Contents/Helpers/luoke-*</code> 的程序和自带 Python 里的 <code>luoke_*</code> 包找它们，清单的 <code>accessory</code> 要和所在目录对得上，同一个 bundle id 以螺壳里的为准。主控只加载 <code>contract == 1</code> 且有 <code>accessory</code>、<code>bundle_id</code> 的清单。</p>
 <div class="tbl"><table>
 <tr><th>字段</th><th>说明</th></tr>
 <tr><td><code>contract</code>、<code>accessory</code>、<code>bundle_id</code></td><td>必填</td></tr>
 <tr><td><code>name</code>、<code>version</code></td><td>显示名和版本；升级只换比清单旧的版本（按数字比较，不降级）</td></tr>
-<tr><td><code>type</code></td><td><code>app</code>（装在 <code>~/Applications</code>）、<code>input-method</code>（装在 <code>~/Library/Input Methods</code>）、<code>component</code>；只有 app 可常驻</td></tr>
+<tr><td><code>type</code></td><td><code>app</code>（单独成包时装在 <code>~/Applications</code>）、<code>input-method</code>（装在 <code>~/Library/Input Methods</code>）、<code>component</code>；单独成包的 app 才由本体按常驻拉起。螺壳里的应用不按这个字段当 .app 去打开、升级、回滚、拉起，由本体自己起</td></tr>
 <tr><td><code>entry</code></td><td>交给自带 Python 的入口参数</td></tr>
 <tr><td><code>resident</code></td><td>是否常驻（配件也可经 <code>PUT /accessory/resident</code> 声明）</td></tr>
-<tr><td><code>min_macos</code></td><td>可选；这台 Mac 的系统版本低于它时不能装、说明原因（发布清单照抄）</td></tr>
+<tr><td><code>min_macos</code></td><td>可选；这台 Mac 的系统版本低于它时不能装、说明原因（发布清单照抄）；螺壳里的应用低于它时当没带</td></tr>
 <tr><td><code>memory</code></td><td>是否读写记忆；决定卸载时能否"一起忘掉"、首次运行是否需要记忆</td></tr>
 <tr><td><code>tasks</code></td><td>需要主控提供的任务（<code>name</code>、<code>kind</code>、<code>main</code>）</td></tr>
-<tr><td><code>jobs</code></td><td>空闲任务：<code>name</code>、<code>command</code>（可用占位符 <code>{memory}</code>、<code>{tool}</code>）、<code>min_interval_minutes</code>（默认 120）、<code>allow_battery</code>（默认否）、<code>timeout_minutes</code>（默认 30）、<code>exec</code>（可选：不带 Python 的配件用 <code>Contents/MacOS</code> 下的可执行文件名，不能含路径）</td></tr>
+<tr><td><code>jobs</code></td><td>空闲任务：<code>name</code>、<code>command</code>（可用占位符 <code>{memory}</code>、<code>{tool}</code>）、<code>min_interval_minutes</code>（默认 120）、<code>allow_battery</code>（默认否）、<code>timeout_minutes</code>（默认 30）、<code>exec</code>（可选：不带 Python 的配件用 <code>Contents/MacOS</code> 下的可执行文件名，不能含路径；螺壳里的程序写了 <code>exec</code> 的，主控经螺壳的 <code>--run-tool</code> 起，参数要和本体写死的某一条一字不差）</td></tr>
 <tr><td><code>capabilities</code></td><td>给 agent 的能力声明，主控原样转交、不解释（规格见 agent 的工具协议），可含 <code>service</code>、<code>permissions</code>、<code>listing</code>；出版时把 <code>listing</code> 的 <code>tagline</code>、<code>category</code> 和各权限的说明（<code>id</code>、<code>kind</code>、<code>title</code>、<code>facts</code>、<code>without</code>）抄进发布清单的 <code>listing</code>，不抄 <code>size_mb</code>、<code>min_tier</code>、权限的默认值和动作名</td></tr>
 <tr><td><code>data</code></td><td>卸载时可删除的数据路径，只接受与配件自身标识绑定的形式</td></tr>
+<tr><td><code>data_env</code></td><td>螺壳里的应用认数据目录的环境变量（邮件助手是 <code>LUOKE_MAIL_HOME</code>）：螺壳不是装好的那份（例如开发版）时，主控把 <code>data</code> 里的路径换成 <code>~/Library/Application Support/&lt;标识&gt;</code>，跑它的命令和空闲任务时用这个变量把新位置交给它</td></tr>
+<tr><td><code>default_on</code></td><td>螺壳里的应用在用户没开启、停用过时算不算开着（默认否；邮件助手写了 true）</td></tr>
 <tr><td><code>commands</code></td><td><code>uninstall</code>（删除数据前运行）、<code>forget-tool</code>（从记忆中忘掉本工具写入的内容）</td></tr>
 <tr><td><code>icon</code>、<code>ui_element</code></td><td>打包用</td></tr>
 </table></div>
 
 <h3>打包布局</h3>
+<p>单独成包的 Python 配件：</p>
 <pre class="mono">&lt;名字&gt;.app/Contents/MacOS/&lt;配件标识&gt;             启动器
 &lt;名字&gt;.app/Contents/Resources/luoke-accessory.json
 &lt;名字&gt;.app/Contents/Resources/python/bin/python3   钉住版本的 python-build-standalone
 &lt;名字&gt;.app/Contents/Resources/python/lib/python3.X/site-packages/&lt;包&gt;</pre>
 <p>由 <code>luoke-core/tools/package_python_app.py</code> 生成。</p>
+<p>螺壳里的应用由 <code>app/build_app.sh</code> 按钉住的各组件源码打进 <code>螺壳.app</code>，这一版没带上的就没有它的目录和程序：</p>
+<pre class="mono">螺壳.app/Contents/MacOS/LuokeCore                       本体
+螺壳.app/Contents/Helpers/luoke-search                   螺壳搜索
+螺壳.app/Contents/Helpers/luoke-scan、luoke-scan-admin   螺壳扫描，还有它用的 clamscan、freshclam、sigtool、yara
+螺壳.app/Contents/Frameworks/                            螺壳扫描的程序用的库
+螺壳.app/Contents/Resources/python/                      自带 Python；site-packages 里有 luoke_core、luoke_mem、luoke_mail
+螺壳.app/Contents/Resources/memory/luoke-accessory.json  记忆的清单
+螺壳.app/Contents/Resources/mail/luoke-accessory.json    邮件助手的清单
+螺壳.app/Contents/Resources/search/luoke-accessory.json  螺壳搜索的清单
+螺壳.app/Contents/Resources/scan/                        螺壳扫描的清单、bundled-tools.json、图标
+螺壳.app/Contents/Resources/agent/                       agent 核心（luoke_agent 和它带的 vendor）
+螺壳.app/Contents/Resources/LuokeWindow_LuokeWindow.bundle  主窗口的资源
+螺壳.app/Contents/Resources/licenses/                    各组件的许可
+螺壳.app/Contents/Resources/recipe.json、release.json    配方、发布清单</pre>
 
 <h3>校验</h3>
 <ul>
 <li><b>调用时</b>：版本在配方 <code>verified</code> 中，或在内部版、本机版主控上被本机放行（<code>tools/local_allow.py</code>，只放行配方中已有配件的新版本）；或是本机 <code>verified-history.json</code> 中记录过的已安装版本（只限记录中的任务）。</li>
 <li><b>安装时</b>：代码签名、Team ID <code>NJQ5W3T9K5</code>、bundle id 与清单一致、公证票据有效。</li>
 <li><b>回滚时</b>：旧版同样核签名、Team ID、bundle id、公证票据，不运行它，版本从其清单读取。</li>
+<li><b>起螺壳里的程序时</b>：只核螺壳扫描：停着起，核正在跑的进程是 Developer ID 签的、团队和螺壳自己的一样、标识是写死的那个、签名里的版本等于螺壳 <code>Info.plist</code> 的 <code>LuokeScanVersion</code>，核完才放行（临时签名的开发版、实验室构建不核）。邮件助手、螺壳搜索、agent 核心起之前不核。</li>
 </ul>
 
 <h2>配方 <code>recipe.json</code></h2>
@@ -66,4 +84,4 @@
 <p>所有档的打分和联想模型为 qwen3.5-0.8b-base-4bit（独立进程，约 2.7 GB）。</p>
 
 <h2>发布清单 <code>release.json</code></h2>
-<p><code>{contract, release, hub_version, built_at, local_only?, items: {&lt;名&gt;: {kind: model | engine | accessory | hub, version, dir, files: [{path, size, sha256}], urls, license?, accessory?, bundle_id?, type?, name?, memory?, installer?, min_macos?, listing?}}, installers?}</code>（<code>installers</code> 只在另出应用安装包时有；发布页只放螺壳的 <code>Luoke.dmg</code>）。模型有 ModelScope 和 Hugging Face 两个镜像，安装包放在 GitHub 上：beta 和正式版在 <code>luokelabs/luoke-releases</code>，内部版在 <code>luokelabs/luoke-internal-builds</code>。主控的"检查更新"从 <code>items.hub</code> 取 DMG。</p>
+<p><code>{contract, release, hub_version, built_at, local_only?, items: {&lt;名&gt;: {kind: model | engine | accessory | hub, version, dir, files: [{path, size, sha256}], urls, license?, accessory?, bundle_id?, type?, name?, memory?, installer?, min_macos?, listing?}}, installers?}</code>（<code>installers</code> 只在另出应用安装包时有；发布页只放螺壳的 <code>Luoke.dmg</code>）。模型有 ModelScope 和 Hugging Face 两个镜像，安装包放在 GitHub 上：beta 和正式版在 <code>luokelabs/luoke-releases</code>，内部版在 <code>luokelabs/luoke-internal-builds</code>。主控的"检查更新"从 <code>items.hub</code> 取 DMG。发布流水线现在只把输入法单独成包放进 <code>items</code>（<code>kind</code> 为 <code>accessory</code>）；螺壳里的应用不进清单，跟着 <code>items.hub</code> 的螺壳一起换，清单里要是有螺壳已带的应用，主控不下载、报错。</p>

@@ -4,13 +4,12 @@
 <h2>应用</h2>
 <div class="tbl"><table>
 <tr><th>位置</th><th>内容</th></tr>
-<tr><td><code>/Applications/螺壳.app</code></td><td>主控（也可能在 <code>~/Applications</code>，以实际位置为准；改名前为 <code>螺壳主控.app</code>，升级时换成新名字）（内含自带 Python、记忆代码、<code>luoke</code> 命令行）</td></tr>
-<tr><td><code>~/Applications/螺壳邮件助手.app</code></td><td>邮件助手</td></tr>
-<tr><td><code>~/Applications/螺壳 agent（开发）.app</code></td><td>agent 的试用版（<code>app/install_trial.sh</code> 装，主控不管它）；以后并进螺壳，见决策 0014 的 10-24 修订</td></tr>
+<tr><td><code>/Applications/螺壳.app</code></td><td>主控（也可能在 <code>~/Applications</code>，以实际位置为准；改名前为 <code>螺壳主控.app</code>，升级时换成新名字）（内含自带 Python，记忆、邮件助手和 agent 核心的代码，螺壳搜索、螺壳扫描的程序，<code>luoke</code> 命令行；布局见<a href="#ref-manifest">配件清单与配方</a>页）</td></tr>
 <tr><td><code>~/Library/Input Methods/LuokeIME.app</code></td><td>输入法</td></tr>
 <tr><td><code>$TMPDIR/ai.luoke.inputmethod.Luoke.lock</code></td><td>输入法单实例锁</td></tr>
 <tr><td><code>~/.local/bin/luoke</code></td><td>命令行链接（可选安装）</td></tr>
 </table></div>
+<p>邮件助手、螺壳搜索、螺壳扫描收进螺壳.app 以前各是一个 .app，装在 <code>~/Applications</code>；升到带上它们的螺壳后，旧的被挪进废纸篓，数据目录不动。</p>
 
 <h2>主控 <code>~/Library/Application Support/luoke-core/</code></h2>
 <p>开发版（bundle id <code>ai.luoke.core.dev</code>）用 <code>luoke-core-dev/</code>，结构相同。</p>
@@ -18,16 +17,17 @@
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td><code>run/hub.sock</code></td><td>任务接口 socket</td></tr>
 <tr><td><code>logs/hub.log</code>、<code>logs/app.log</code>、<code>logs/jobs/</code></td><td>日志（只记元数据）</td></tr>
+<tr><td><code>logs/mail.log</code>、<code>logs/search.log</code>、<code>logs/luoke-scan.log</code>、<code>logs/agent.log</code></td><td>本体起的邮件助手、螺壳搜索、螺壳扫描、agent 核心的标准错误</td></tr>
 <tr><td><code>engines/&lt;版本&gt;/</code>、<code>engine/&lt;版本&gt;/</code></td><td>引擎包（发布版只留当前版本）；引擎运行目录（含引擎密钥 <code>settings.json</code>（0600）、<code>engine.log</code>、<code>engine.pid.json</code>）</td></tr>
 <tr><td><code>models/</code></td><td>模型；用户登记的模型在 <code>user-&lt;名字&gt;</code></td></tr>
 <tr><td><code>downloads/</code></td><td>下载暂存（应用的包在 <code>downloads/apps/</code>）</td></tr>
-<tr><td><code>state.json</code></td><td>运行状态：常驻、冒烟、探针、空闲任务、端点用量</td></tr>
+<tr><td><code>state.json</code></td><td>运行状态：常驻、螺壳里的应用开没开（<code>enabled</code>）、冒烟、探针、空闲任务、端点用量</td></tr>
 <tr><td><code>settings.json</code></td><td>能耗模式、电池、档、端点</td></tr>
 <tr><td><code>endpoint-key</code>、<code>user-models.json</code></td><td>端点密钥（0600）；登记的模型</td></tr>
 <tr><td><code>local-verified.json</code></td><td>本机放行</td></tr>
 <tr><td><code>verified-history.json</code></td><td>各配件版本由哪一版发布认可、当时放行哪些任务（每配件 3 个版本），供回到上一版本和主控升级后还没升级的应用使用</td></tr>
 <tr><td><code>downloads/update/</code>、<code>run/update-mount.json</code></td><td>检查更新下载的主控安装包，拷到暂存处后立即删除；<code>run/update-mount.json</code> 只为清理旧版留下的挂载而读</td></tr>
-<tr><td><code>previous.noindex/</code></td><td>换装前的旧版主控（由换包脚本移入，不论原来在 <code>/Applications</code> 还是 <code>~/Applications</code>）和配件；应用可在「应用」窗口里回到上一版本，卸载配件时一并删除</td></tr>
+<tr><td><code>previous.noindex/</code></td><td>换装前的旧版主控（连同它里面的应用；由换包脚本移入，不论原来在 <code>/Applications</code> 还是 <code>~/Applications</code>）和单独成包的配件的旧版；单独成包的应用可在「应用」窗口里回到上一版本，卸载时一并删除</td></tr>
 <tr><td><code>staging.noindex/</code></td><td>升级主控时先放新版、核对签名，再由换包脚本移到装好的位置</td></tr>
 <tr><td><code>run/upgrade.json</code>、<code>run/preselect.json</code></td><td>升级标记（新主控读后删除）；安装器交来的预选应用</td></tr>
 <tr><td><code>run/swap.sh</code>、<code>run/swap-result.json</code>、<code>logs/swap.log</code></td><td>换包脚本、上次换包的结果（下次启动取走）、换包日志</td></tr>
