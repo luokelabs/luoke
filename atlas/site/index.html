@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-06 18:06</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-07 12:11</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -267,7 +267,7 @@ sequenceDiagram
 <tr><td>空闲任务</td><td>主控</td><td>用配件的 Python 运行清单中 <code>jobs</code> 的命令（螺壳里的邮件助手、记忆用螺壳自带的 Python），环境带 <code>LUOKE_HUB_SOCKET</code>。清单写了 <code>exec</code> 的：单独成包的运行它 <code>Contents/MacOS</code> 下的那个程序；螺壳里的程序（螺壳扫描）由主控起螺壳自己的可执行文件带 <code>--run-tool &lt;配件&gt; &lt;参数&gt;</code>，本体照下面「螺壳扫描」一行核过才放行，参数只能是本体写死的几条，开启了才跑，环境只有 <code>HOME</code>、<code>TMPDIR</code>、<code>PATH</code>、<code>LANG</code>（开发版、实验室构建另加 <code>LUOKE_HUB_SOCKET</code>）</td></tr>
 <tr><td>单独成包的常驻配件</td><td>本体</td><td>经 <code>/usr/bin/open</code> 以 <code>--resident</code> 启动；10 分钟内最多自动重启 3 次</td></tr>
 <tr><td>邮件助手</td><td>本体，主控起来以后；开着才起（默认开着）</td><td>螺壳自带的 Python 运行 <code>-B -m luoke_mail --resident --parent-pid &lt;本体&gt;</code>，常驻；要发的通知、打开页面经它的标准输入输出和本体说，一行一个 JSON；起来之前的标准错误进 <code>logs/mail.log</code>，之后它自己写进数据目录的 <code>service.log</code></td></tr>
-<tr><td>螺壳搜索</td><td>本体，主控起来以后；开启了才起</td><td><code>Contents/Helpers/luoke-search --resident --parent-pid &lt;本体&gt;</code>，常驻；标准错误进 <code>logs/search.log</code>。它和邮件助手意外退出时 2 秒后重起，10 分钟内最多 3 次；退出码 3（这份数据已有一个在跑）时 15 秒后再看；自己正常退出（0）的等下次启动螺壳</td></tr>
+<tr><td>螺壳搜索</td><td>本体，主控起来以后；开启了才起</td><td><code>Contents/Helpers/luoke-search --resident --parent-pid &lt;本体&gt;</code>，常驻；起之前和扫描一样停着核（标识 <code>ai.luoke.search</code>、版本对螺壳 <code>Info.plist</code> 的 <code>LuokeSearchVersion</code>），临时签名的开发版不核。标准错误进 <code>logs/search.log</code>。它和邮件助手意外退出时 2 秒后重起，10 分钟内最多 3 次；退出码 3（这份数据已有一个在跑）时 15 秒后再看；自己正常退出（0）的等下次启动螺壳</td></tr>
 <tr><td>螺壳扫描</td><td>本体，用到时；开启了才起</td><td>不常驻。agent 核心要连它时，本体起 <code>Contents/Helpers/luoke-scan mcp --this-mac</code>，一个请求一个进程，同时最多 4 个，一个最长 300 秒，描述符 3 是它请本体弹管理员密码框的通道；空闲任务见「空闲任务」一行。起的时候先停着（<code>POSIX_SPAWN_START_SUSPENDED</code>），核正在跑的这个进程：Developer ID 签的、团队和螺壳自己的一样、标识是写死的 <code>ai.luoke.scan</code>、签名里的版本和螺壳 <code>Info.plist</code> 的 <code>LuokeScanVersion</code> 一样，核完它还停着、一条指令没跑过才放行，不过就结束它；临时签名的开发版、实验室构建不核。标准错误进 <code>logs/luoke-scan.log</code></td></tr>
 <tr><td>agent 核心</td><td>本体，主控起来以后（带了 agent 时）</td><td>螺壳自带的 Python 在 <code>Resources/agent</code> 下运行 <code>-B -E -s -m luoke_agent serve</code>，数据在 <code>~/.luoke/agent</code>；标准输入是本体给的通道，经它向本体要螺壳扫描的连接；意外退出后从 2 秒起加倍间隔（最多 60 秒）重起；标准错误进 <code>logs/agent.log</code></td></tr>
 <tr><td>记忆界面</td><td>本体</td><td>用主控自带的 Python 运行记忆的入口</td></tr>
@@ -335,7 +335,7 @@ sequenceDiagram
 <li><b>下载</b>：依据发布清单（每项有文件列表、大小、sha256、多个镜像地址）。多地址时先测速排序；每个地址重试 3 次，403、404、410 直接换地址；支持续传；sha256 对上才落位。本机已有同名模型（<code>~/.omlx/models</code>、Hugging Face 缓存、LM Studio）时逐文件核对后 APFS 克隆，不重复下载。首次运行以后发现还缺模型时自动补下（失败后从 30 秒起加倍间隔，最长半小时）；网络按流量计费或开了低数据模式时不自动补下，只在设置「下载」的「还缺」一行说明，点「重试」照下；首次运行、「应用」窗口、换档是用户点的，照下。下了模型或引擎包才重启引擎、重做冒烟检查，只装应用不动引擎；发布版的新引擎冒烟检查通过后，删除 <code>engines/</code> 里的其他版本。</li>
 <li><b>配件安装校验</b>：<code>codesign --verify --deep --strict</code>、Team ID、bundle id 与清单一致、公证票据有效。</li>
 <li><b>安装位置</b>：主控 DMG 是拖放窗口，左边「螺壳」、右边「应用程序」快捷方式，拖过去装在 <code>/Applications/螺壳.app</code>。在 DMG 里直接双击「螺壳」时提示先拖进「应用程序」，另给「帮我装进去」。发布页只放螺壳的 DMG（<code>Luoke.dmg</code>），应用在「应用」窗口里装；应用的安装器（<code>安装&lt;应用&gt;.app</code>）和「帮我装进去」把主控拷进 <code>/Applications/螺壳.app</code>（写不进去时拷进 <code>~/Applications/螺壳.app</code>），去掉下载标记并登记；目标位置已有 bundle id 不同的同名应用时不覆盖，改放另一处，两处都被占才弹框请用户改名或挪走。已装的主控以实际位置为准：<code>/Applications</code>、<code>~/Applications</code> 两处，<code>螺壳.app</code>、<code>螺壳主控.app</code> 两个名字都认，只认 bundle id 相同的，两处都有时用 <code>/Applications</code> 那份：另一份被打开时（例如登录项还指着它）直接交给装好的那份后退出，装好的那份启动时把没在跑的另几份移进 <code>previous.noindex</code>、注销登记并重新登记登录项（用户关掉过的不动）；已装着主控而安装器不比它新时，把预选交给它后退出。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 核心在 <code>螺壳.app</code> 里，不另装；单独成包的只有输入法，装在 <code>~/Library/Input Methods</code>。</li>
-<li><b>螺壳里的应用</b>：邮件助手、螺壳搜索、螺壳扫描、agent 核心各自在包里的位置见「参考 · 配件清单与配方」的打包布局；这一版没带上的，「应用」窗口里没有它。签名只有螺壳一份：发布时由内向外签，<code>Contents/Helpers</code> 里的程序保留打包时定的签名标识和 entitlements，签完再核一遍标识（螺壳搜索 <code>ai.luoke.search</code>；螺壳扫描 <code>ai.luoke.scan</code>、<code>ai.luoke.scan.admin</code>，它用的 ClamAV、YARA 程序是 <code>ai.luoke.scan.clamscan</code> 这样的标识）；邮件助手、agent 核心是 Python 代码，由螺壳的签名盖着。本体当子进程直接起它们（邮件助手、搜索、agent 核心用 Foundation 的 <code>Process</code>，扫描用 <code>posix_spawn</code>），不经 <code>open</code>、不经主控，也不 disclaim：它们用到的完全磁盘访问、照片、Apple Events 都算在螺壳头上；带了搜索时，这几项权限的说明写在螺壳的 <code>Info.plist</code>，照片和 Apple Events 的 entitlement 在螺壳外层的签名里。起之前只有扫描核签名和版本（见「组成」）。主控按包里各自的清单把它们当配件认，版本就是这一版螺壳带的版本。</li>
+<li><b>螺壳里的应用</b>：邮件助手、螺壳搜索、螺壳扫描、agent 核心各自在包里的位置见「参考 · 配件清单与配方」的打包布局；这一版没带上的，「应用」窗口里没有它。签名只有螺壳一份：发布时由内向外签，<code>Contents/Helpers</code> 里的程序保留打包时定的签名标识和 entitlements，签完再核一遍标识（螺壳搜索 <code>ai.luoke.search</code>；螺壳扫描 <code>ai.luoke.scan</code>、<code>ai.luoke.scan.admin</code>，它用的 ClamAV、YARA 程序是 <code>ai.luoke.scan.clamscan</code> 这样的标识）；邮件助手、agent 核心是 Python 代码，由螺壳的签名盖着。本体当子进程直接起它们（邮件助手、搜索、agent 核心用 Foundation 的 <code>Process</code>，扫描用 <code>posix_spawn</code>），不经 <code>open</code>、不经主控，也不 disclaim：它们用到的完全磁盘访问、照片、Apple Events 都算在螺壳头上；带了搜索时，这几项权限的说明写在螺壳的 <code>Info.plist</code>，照片和 Apple Events 的 entitlement 在螺壳外层的签名里。起之前核签名和版本的是扫描和搜索（见「组成」）。主控按包里各自的清单把它们当配件认，版本就是这一版螺壳带的版本。</li>
 <li><b>开启、停用</b>：螺壳里的应用不用下载。开没开记在 <code>state.json</code> 的 <code>enabled</code>（主控没起时本体也直接读）；用户没选过时按清单的 <code>default_on</code>，邮件助手默认开着，螺壳搜索、螺壳扫描默认关。在「应用」窗口那一行点「开启」：螺壳搜索先开「开启螺壳搜索」窗口，读一次选中的文件夹（桌面、文稿、下载默认勾上，第一次读时 macOS 问），勾了照片的要照片权限，要到至少一样才把选中的写进搜索的设置；别的直接开启。开启都经 <code>POST /accessories/enable</code> 记下（<code>hub.log</code> 里是 <code>enabled luoke-scan=True</code> 这样一行），常驻的随即起来。没开着的不起、不跑空闲任务，<code>GET /accessories</code> 也不列。「…」里的「停用」走卸载窗口，写明「它在螺壳里，这里只是停用」，可选同时删除数据（有 <code>uninstall</code> 命令的先跑它）、从记忆里忘掉；本体先停掉它，主控停它的空闲任务、记下停用（<code>enabled …=False</code>），删掉 <code>previous.noindex</code> 里同 bundle id 的旧版 .app，注销同 bundle id 的其他登记，螺壳里的程序不动。</li>
 <li><b>旧的单独 .app</b>：从各自单独装的版本升上来的用户，螺壳每次起来（主控进程起来以后），本体在 <code>~/Applications</code> 和 <code>/Applications</code> 里按 bundle id（<code>ai.luoke.mail</code>、<code>ai.luoke.search</code>、<code>ai.luoke.scan</code>，邮件助手还有更早的 AppleScript 启动器）找收进来以前的 .app：先结束里面的进程（SIGTERM，等 15 秒，再 SIGKILL），注销登记，挪进废纸篓，用户没开启的也挪；邮件助手和搜索等旧的挪完才起螺壳里的那份，免得两份抢同一个数据目录。邮件助手还先移除旧的登录项 <code>local.luoke-mail</code>，注销并删掉 <code>~/.luoke-mail/notifier</code> 里通知用的小 App。数据目录和钥匙串里的授权码不动，螺壳里的那份接着用；搜索的系统授权不跟过来，旧的挪走时搜索还没开启，就弹「开启螺壳搜索」窗口重新要。挪走的每一个在系统日志里记一行，不进 <code>hub.log</code>。开发版、实验室构建不动本机装着的。旧的「螺壳 agent.app」不挪：它在跑时 agent 核心不起，主窗口里请用户退出它、从「应用程序」里删掉；登录时不再拉起它，「应用」窗口也不列它。</li>
 <li><b>首次运行</b>：步骤条五步：这台 Mac（预检：档位、磁盘、系统版本、照实说明体验；内存不到 16 GB 或系统版本低于引擎要求时停在这一步）→ 选应用（发布清单里单独成包的，现在只有输入法）→ 确认下载 → 下载安装（逐项进度，主控排第一行；总进度的剩余时间在头 10 秒、下到 2% 以前不估；应用装好即打开，不等模型；含本机试跑）→ 完成；后来加装应用在「应用」窗口那一行里装，不走向导。离开下载页时注册登录项；下载页结束时分几种结局给出下一步：有项没下下来（先继续 / 重试）、试跑没过（重新检查 / 继续）、缺底座、主控没起来（重试会重启主控）。确认页上废纸篓里有旧输入法时提示。完成页：输入法的 <code>--status</code> 答 <code>not_registered</code> 时调一次它的 <code>--register</code>，每秒检查是否已添加；添加后输入法没在跑时在后台拉起它，可试打并一键切换（<code>--select</code>），切过去后试打框重新取得焦点，切不过去、或输入法报告还登记着别的副本时给「重新登记输入法」，重新登记后仍不行则提示注销重新登录；邮件助手开着时有一行写「已经在浏览器里打开了，第一次要连接邮箱。」，给「打开」；带了螺壳搜索时有一行「螺壳搜索」，没开启的给「开启」（走「开启螺壳搜索」窗口）；单独成包的普通应用（<code>type</code> 为 <code>app</code>）列出通知权限（经启动器的 <code>--notify-status</code>）：已允许 / 还没问过（按钮发一条测试通知，让系统询问）/ 已关闭（按钮打开该应用的通知设置），未全部允许时每 2 秒刷新；螺壳里的应用和输入法不在这里列。</li>
@@ -989,38 +989,40 @@ sequenceDiagram
 </section>
 <section class="page" id="search" data-title="螺壳搜索 luoke-search">
 <h1>螺壳搜索</h1>
-<p class="lede">给 Mac 上用户选的文件夹和照片图库建索引，按字词和按意思找回来。没有自己的窗口，入口在 agent 的对话和螺壳窗口的全局搜索，窗口还显示它的概况和权限。螺壳搜索这边的接口已备好；窗口和对话由 luoke-agent 写，还没上线，现在只能用命令行。向量由主控算，自己不带模型。</p>
-<p class="src">仓库 <code>luoke-search</code>（Swift 包 <code>LuokeSearchKit</code>）· 版本 0.1.0，按代码 a0113d3 核对 · 未发布：不在 v1 首发中，进 beta 2 · 只支持 macOS 26.2 及以上</p>
+<p class="lede">给 Mac 上用户选的文件夹和照片图库建索引，按字词和按意思找回来。随螺壳一起出：程序放在螺壳.app 里，用户开启后由螺壳本体起，系统权限都在螺壳名下。没有自己的窗口，入口在 agent 的对话和螺壳窗口的全局搜索；窗口侧栏的应用页显示它的状态、文件夹和搜照片开关。窗口和对话由 luoke-agent 写。向量由主控算，自己不带模型。</p>
+<p class="src">仓库 <code>luoke-search</code>（Swift 包 <code>LuokeSearchKit</code>，Apache-2.0）· 版本 0.1.13，按代码 f68fbe8 核对 · 未发布：随螺壳 beta 2 第一次发布（封闭测试）· 只支持 macOS 26.2 及以上</p>
 
 <h2>职责</h2>
 <ul>
 <li>第一版搜本机文件（文档、PDF 含扫描件、截图、图片、视频、录音）和照片图库。不搜代码。</li>
 <li>只读用户的文件，不改、不移动、不上传；照片图库只读。</li>
-<li>不主动找用户：只经 agent 的 outbox 报三类事。改设置、打开文件、请 macOS 问照片权限，这三件都要用户在卡片上点按。</li>
+<li>不主动找用户：只经 agent 的 outbox 报三类事。改设置、打开文件都要用户在卡片或应用页上点按；自己不向 macOS 要权限，由螺壳本体问（见下面的「权限」）。</li>
 <li>第一版不读也不写记忆，搜索词不写进记忆。</li>
 </ul>
 
 <h2>运行形态</h2>
 <div class="tbl"><table>
 <tr><th>入口</th><th>行为</th></tr>
-<tr><td><code>螺壳深度搜索.app</code></td><td>bundle id <code>ai.luoke.search</code>，<code>LSUIElement</code>（不出现在程序坞）。主控在登录时带 <code>--resident</code> 拉起，打开即 <code>serve</code>；带 <code>--resident</code> 时向主控 <code>PUT /accessory/resident</code>，收到 SIGTERM 退出前 <code>POST /accessory/exiting</code></td></tr>
-<tr><td><code>luoke-search serve</code></td><td>常驻服务：在 <code>run/agent.sock</code> 上提供 MCP，并跟着文件夹和照片图库更新索引；每 5 分钟补一次还在等的向量，每 2 分钟看一次设置、照片权限和文件夹能不能读；10 分钟没人搜就放掉内存里的向量。<code>--socket</code> 换 socket 路径，<code>--no-watch</code> 只开 socket</td></tr>
-<tr><td><code>luoke-search index --job</code></td><td>第一遍建索引（供主控的空闲任务调用）：同步设置里的文件夹和照片图库、读等着的、补向量；SIGTERM / SIGINT 时读完手上那个文件就停，退出码 0，下次接着读；标准错误只有计数</td></tr>
-<tr><td>其他子命令</td><td>同一个可执行文件 <code>Contents/MacOS/luoke-search</code> 也是命令行，见「接口」</td></tr>
+<tr><td><code>螺壳.app/Contents/Helpers/luoke-search</code></td><td>裸程序，不是嵌套的 .app（嵌套的会被 LaunchServices 按 bundle id 登记）。签名标识 <code>ai.luoke.search</code>，它靠这个认出自己是发布版；版本编进程序的 <code>__TEXT,__info_plist</code>，签名盖着（<code>scripts/build_helper.sh</code>）。清单在 <code>Contents/Resources/search/luoke-accessory.json</code>，许可在 <code>Contents/Resources/licenses/luoke-search/</code>。用户开启后（首次运行的完成页或「应用」窗口），螺壳本体在主控起来以后当子进程起它：<code>--resident --parent-pid &lt;本体&gt;</code>，不带子命令就是 <code>serve</code>。正式版停着起，核过签名（Developer ID、螺壳的团队、写死的标识）和签名里的版本（和螺壳 Info.plist 的 <code>LuokeSearchVersion</code> 比）才放行。标准错误进螺壳的 <code>logs/search.log</code>。带 <code>--resident</code> 时照旧向主控 <code>PUT /accessory/resident</code>，退出前 <code>POST /accessory/exiting</code>。退出码 0 不重起，3 过 15 秒再试，别的十分钟内最多重起 3 次。以前单独装在 <code>~/Applications</code> 或 <code>/Applications</code> 的 <code>螺壳搜索.app</code>，螺壳先结束它（最多等 15 秒）、挪进废纸篓，数据目录不动；系统授权不跟过来，要在螺壳名下重新开启</td></tr>
+<tr><td><code>luoke-search serve</code></td><td>常驻服务：在 <code>run/agent.sock</code> 上提供 MCP，并跟着文件夹和照片图库更新索引；每 5 分钟补一次还在等的向量，每 2 分钟看一次设置、照片权限和文件夹能不能读；10 分钟没人搜就放掉内存里的向量。socket 起好后，有 <code>LUOKE_HOST_FD</code> 就经它告诉螺壳本体 <code>{"up": true}</code>（本体为权限重起它以后，等这一句再转等着的活）。另一份已经在这个 socket 上答话时退出码 3。带 <code>--parent-pid</code> 时，那个进程没了（被杀、崩了也算）就按 SIGTERM 收尾；收尾最多 15 秒，到时直接退出。<code>--socket</code> 换 socket 路径，<code>--no-watch</code> 只开 socket</td></tr>
+<tr><td><code>luoke-search index --job</code></td><td>第一遍建索引（给主控的空闲任务用，还没接上，见「已知限制」）：同步设置里的文件夹和照片图库、读等着的、补向量；SIGTERM / SIGINT 时读完手上那个文件就停，退出码 0，下次接着读；标准错误只有计数</td></tr>
+<tr><td>其他子命令</td><td>同一个程序也是命令行（螺壳本体写、读它的设置也调它的 <code>settings</code>），见「接口」</td></tr>
 </table></div>
 <ul>
-<li><b>没有自己的窗口</b>：设计上用户在 agent 的对话里提问，agent 调 MCP 工具并画结果卡片（agent 的对话还没做）；搜哪些文件夹、是否加入照片图库也由 agent 的卡片询问。配件清单给螺壳的窗口提供概况（<code>summary</code>）、权限状态（<code>permissions</code>）和一行介绍（<code>listing</code>）。</li>
+<li><b>没有自己的窗口</b>：用户在 agent 的对话里提问，agent 调 MCP 工具并画结果卡片；螺壳窗口的全局搜索直接调 <code>search_query</code>，按 <code>hits</code> 画整页（每一处从哪个字段来，见仓库的 <code>docs/窗口接口.md</code>）。第一次用时，螺壳本体的「开启螺壳搜索」窗口让用户选地方（桌面、文稿、下载默认勾，照片图库不勾），要到权限，再用命令行 <code>settings</code> 写进设置；以后加文件夹跟 agent 说，卡片确认。配件清单给窗口提供概况（<code>summary</code>）、权限状态（<code>permissions</code>）、应用页（<code>service.pages</code> 的 <code>overview</code>）和一行介绍（<code>listing</code>）。</li>
+<li><b>应用页</b>（资源 <code>page/overview</code>，侧栏「应用」下，螺壳搜索开着才有）：一张列表。精确搜索、语义搜索：可用，或进度条和数字；语义搜索用不了时写等待下载、稍后可用、未连接、不支持；暂停了或有文件不在这台 Mac 上，下面多一行小字。文件夹：只写名字，不在这里改。搜照片图库：一个开关（<code>variant: switch</code> 的按钮，调 <code>search_settings_apply</code>，不带 <code>plan_id</code>、带 <code>photos</code>，只认这一页上的点按）；打开时按钮 context 带 <code>needs: photos</code>，窗口先交给螺壳本体要到权限才调；开着但没允许时左边多一个按钮，没问过是「允许」、拒绝过是「去系统设置」，context 带 <code>permission: photos</code>，也交给本体；还没选过要搜的地方时不画开关。最近读入：只有时间，没有文件名。没有「用电池时建索引」的开关。</li>
 <li><b>读取和算向量分开</b>：读取（取文字、OCR、抽帧、切声音）由本工具完成，读完即可按字词搜；向量找主控要，主控不在或忙时记为等向量，以后补。</li>
 <li><b>跟着文件夹</b>：常驻服务启动时把文件夹走一遍（只看名字和时间，不读内容），移出不再搜的；之后用 FSEvents 盯着，变化停 0.75 秒后一起处理（最长攒 5 秒），只看变了的路径（新的、改过的、移动或改名的只改路径、删掉的、整个搬进来的文件夹）。新变的文件马上读，每次最多 50 个，排在第一遍的积压前面，读完补向量。设置改了就换成盯新的文件夹。</li>
 <li><b>第一遍兜底</b>：常驻服务每 2 分钟检查一次，有等着读的就读一段（最多 100 个）；文件一有变化就让路。等着读的按截图、图片和照片、PDF、文档、录音、视频的顺序，同类里新的先。</li>
-<li><b>什么时候停</b>：连着主控时只听主控的后台状态（<code>GET /tasks</code> 的 <code>background</code>），再加本机的低电量模式和过热，设置里的 <code>on_battery</code> 不起作用；没连主控时才看 <code>on_battery</code>（默认关）、低电量和过热。补向量只在主控暂停后台时停。常驻服务从不带 <code>X-Luoke-Allow-Battery</code>，打开 app 时带了 <code>--allow-battery</code> 也不带。停着时 <code>search_status</code> 的 <code>paused</code> 写原因和由谁暂停，答复里说一句"因为螺壳的后台已暂停（在用电池）…"。</li>
+<li><b>什么时候停</b>：连着主控时只听主控的后台状态（<code>GET /tasks</code> 的 <code>background</code>），再加本机的低电量模式和过热，设置里的 <code>on_battery</code> 不起作用；没连主控时才看 <code>on_battery</code>（默认关）、低电量和过热。补向量只在主控暂停后台时停。常驻服务从不带 <code>X-Luoke-Allow-Battery</code>，起它时带了 <code>--allow-battery</code> 也不带。停着时 <code>search_status</code> 的 <code>paused</code> 写原因和由谁暂停，答复里说一句"因为螺壳的后台已暂停（在用电池）…"。</li>
 <li><b>长文件先读开头</b>：超过 50 页的 PDF 第一遍只读前 30 页，超过 40 段的文档只读前 40 段，条目记为 <code>partial</code>，读到的部分照样能搜；所有文件都过一遍以后，PDF 再每次 30 页往后补，文档剩下的一步读完，每步读完就存，能停能续；文件改了从头读。盘拔了或内容被 iCloud 挪走时留到下次，不当成读不了。</li>
 <li><b>不在这台 Mac 上</b>：等着读的文件只在 iCloud、或盘不在时放一边，计入 <code>not_on_this_mac</code>，回到本机再读；以前记成"文件不在了"的重排一次。</li>
 <li><b>单个文件的看门狗</b>（<code>index</code>、<code>index --job</code>、常驻服务都开着）：读一个文件时每秒看一次本进程内存和这个文件读了多久。内存超过上限（物理内存的一半，限在 4–8 GB）且至少一半是读这个文件时涨的，一步读了 15 分钟（只算 Mac 醒着的时间），或各步加起来超过总时限（60 分钟或每页 5 秒，取大的；剩不到 60 秒不开新一步），就把这个文件（连同修改时间和大小）和原因写进 <code>run/stopped-file.json</code>，以退出码 75 结束进程；下次起来先把它记为读不了，文件改过才重读。</li>
-<li><b>读到一半进程没了</b>：每个条目记读的次数，两次都没读完就不再读（长文件的后续部分同样计数，已读的留着）。</li>
-<li><b>照片图库</b>：常驻服务盯着图库的变更通知（变化攒 2 秒合一次），新拍的马上读。常驻服务从不询问：设置打开了图库但还没问过时，outbox 报 <code>needs-access/photos/&lt;编号&gt;</code>，用户在卡片上点「继续」才经 <code>search_request_access</code> 请 macOS 询问，最多等 240 秒；<code>limited</code> 权限算允许。被拒后卡片改成去系统设置，并带「算了」。</li>
-<li><b>线程</b>：常驻的活在自己的一条串行队列上，MCP 另有连接线程；读文件（尤其 OCR）不在 Swift 并发的线程池里做，一个进程同时只做一张 OCR。</li>
-<li><b>签名</b>：hardened runtime，权限只有 Apple Events（让 QuickTime Player 跳到某一刻）和照片图库。</li>
+<li><b>读到一半进程没了</b>：每个条目记读的次数，两次都没读完就不再读（长文件的后续部分同样计数，已读的留着）。被要求退出（SIGTERM，或本体没了）时，先把手上的文件（路径、修改时间、大小）记进 <code>run/asked-to-stop.json</code>，下次起来把这一次减回去：等不到读完就被强杀，不算在文件头上；看门狗记下的同一个文件照样算。</li>
+<li><b>照片图库</b>：常驻服务盯着图库的变更通知（变化攒 2 秒合一次），新拍的马上读。螺壳搜索从不向 macOS 询问：设置打开了图库但还不能读时，outbox 报 <code>needs-access/photos/&lt;编号&gt;</code>，卡片上的「允许」交给螺壳本体去问；<code>limited</code> 权限算允许。拒绝过的卡片改成去系统设置，并带「算了」。给了以后，常驻服务下一次看权限时开始读。</li>
+<li><b>线程</b>：常驻的活在自己的一条串行队列上，MCP 另有连接线程；读文件（尤其 OCR）不在 Swift 并发的线程池里做，一个进程同时只做一张 OCR。读 outbox 时问文件夹读不读得了，放在另一条线程上，最多等 0.5 秒：macOS 的询问还没人答时按上次的结果，不卡住别的请求。</li>
+<li><b>签名</b>：hardened runtime，entitlements 只有 Apple Events（让 QuickTime Player 跳到某一刻）和照片图库。在螺壳里时 macOS 把它用的权限算在螺壳头上：这两项 entitlement 和七条用途说明（桌面、文稿、下载、可移除卷、网络卷、照片、Apple Events）都写在螺壳.app 外层，程序自己带的不算；提到系统设置和 macOS 询问的文字写「螺壳」，单独的 .app 形态写「螺壳搜索」。</li>
+<li><b>权限</b>：螺壳搜索自己不向 macOS 要。清单的 <code>permissions</code> 有三项：<code>photos</code>（<code>kind: system</code>、<code>owner: luoke</code>），<code>folders</code> 和 <code>quicktime</code>（<code>each-time</code>，用到时由 macOS 问）。照片分两层：用户在螺壳里同意让搜索用（本体记下），macOS 给螺壳；用户没同意时本体起它带 <code>LUOKE_PERMISSIONS_OFF=photos</code>，这时不管 macOS 给没给都不读照片，按"没问过"报；本体改了这一项会重起它。文件夹在开启时由本体先读一遍选中的，macOS 逐个问；以后加的受保护文件夹在第一次读时问。跳到某一秒播放：经本体给的描述符（<code>LUOKE_HOST_FD</code>）写一行 <code>{"play": 路径, "at": 秒}</code>，由本体让 QuickTime Player 跳过去（用户刚在螺壳里点过才跳，不然只打开文件）；没设这个变量时（命令行、开发）自己跑 <code>osascript</code>，设了却用不了就只打开文件，不退回 <code>osascript</code>。</li>
 </ul>
 <h3>不读什么</h3>
 <ul>
@@ -1042,7 +1044,7 @@ sequenceDiagram
 <tr><td><code>image</code></td><td>读尺寸和 EXIF 拍摄时间；长边不到 256 px 的跳过；不做 OCR；样子等图片向量</td><td>—</td></tr>
 <tr><td><code>audio</code></td><td>AVFoundation 解成 16 kHz 单声道，30 秒一窗、每 25 秒起一窗，静音窗丢掉；不转文字，等声音向量</td><td>那一窗的起止秒</td></tr>
 <tr><td><code>video</code></td><td>每 3 秒一帧（最多 1200 帧），和上一张留下的帧几乎一样的不留；音轨照录音切。没有画面、有声音的按声音读，两样都没有才记读不了；AVFoundation 打不开的格式（mkv、webm 等）记读不了</td><td>那一帧或那一窗的秒数</td></tr>
-<tr><td><code>photo</code></td><td>照片图库（PhotoKit），用户在设置里打开并允许后才读。照片记拍摄时间和尺寸、不做 OCR，样子等图片向量；视频照视频文件取帧和声音。图库的视频 <code>kind</code> 是 <code>video</code>、<code>source</code> 是 <code>photos</code>。不含隐藏项。只在 iCloud 的原件不下载：视频记为 <code>skipped</code>、每 6 小时再试，照片只按名字和时间搜。新的读、改过的重读、删掉的移出，关掉就全部移出</td><td>—（打开「照片」并说明拍摄时间）</td></tr>
+<tr><td><code>photo</code></td><td>照片图库（PhotoKit），设置里打开、用户在螺壳里同意、macOS 也给了才读。照片记拍摄时间和尺寸、不做 OCR，样子等图片向量；视频照视频文件取帧和声音。图库的视频 <code>kind</code> 是 <code>video</code>、<code>source</code> 是 <code>photos</code>。不含隐藏项。只在 iCloud 的原件不下载：视频记为 <code>skipped</code>、每 6 小时再试，照片只按名字和时间搜。新的读、改过的重读、删掉的移出，关掉就全部移出</td><td>—（打开「照片」并说明拍摄时间）</td></tr>
 </table></div>
 <ul>
 <li><b>OCR</b> 用系统的 Vision，指定语言、中文排第一（简体、繁体、英文、日文、韩文，再加本机偏好的语言）。</li>
@@ -1075,9 +1077,10 @@ sequenceDiagram
 <ul>
 <li><b>按字词</b>：SQLite FTS5 两张表，<code>fts</code>（unicode61 + Porter 词干）和 <code>fts_tri</code>（trigram，给中文、日文等不用空格的文字）。查询中的中日文用系统分词（NLTokenizer）切词，去掉停用词和相对时间词（"上个月""去年"等，交给 agent 换成 <code>since</code> / <code>until</code>）；分词器拆成单字的相邻字连起来再试（可选词：找到每个加 0.1、最多 0.3，找不到不扣，不能单独让条目入围）；三个字以上走 trigram，两个字用 LIKE；带空格的文字 3 字以上、索引里没有原词时按前缀找，阿拉伯字母和印度系文字的词一律按前缀找。存关键词和查问题前都先做同样的规整：去掉看不见的格式字符，阿拉伯文去掉元音符号和拉长线，并统一几个字母的写法。问题只看前 200 字，必需词最多 12 个、可选词最多 8 个，每个词最多取 5000 条。</li>
 <li><b>类型词</b>：查询中的"截图""照片""录音""视频""PDF""文档"等不当关键词，给对应类型加分（不是筛选），这类条目按意思 z ≥ 1 即入围；"照片"同时指文件夹里的图片和图库的照片。只有类型词、按意思也没找到时，列出该类型最新的条目。</li>
-<li><b>按意思</b>：查询向量以 <code>user-waiting</code> 向主控要（模型在加载时最多等两次，一次请求限时 10 秒）。全部向量以 fp16 存在索引里，搜索时整块读进内存，之后只增量读改过的行，每 1024 行转 fp32 用 vDSP 求余弦。每个条目取最好的一段。</li>
+<li><b>按意思</b>：查询向量以 <code>user-waiting</code> 向主控要。agent 的搜索（<code>search_query</code>）问参数、等模型加载、算向量合起来最多 5 秒，过了只按字词搜，<code>partial_reason</code> 说"螺壳这次没及时算出来"；模型在加载时，5 秒内照主控说的时间接着等，剩的时间不够就说"螺壳还在加载模型"。命令行的 <code>search</code>、<code>eval</code> 每次请求各限时 10 秒，模型在加载时最多等两次。全部向量以 fp16 存在索引里，搜索时整块读进内存，之后只增量读改过的行，每 1024 行转 fp32 用 vDSP 求余弦。每个条目取最好的一段。</li>
 <li><b>混合打分</b>（默认做法 A）：余弦先换成 z 分：满 20 行的模态（文字、图片、声音）按自己的均值居中，不满的按全体均值；离散度全体合着算，每行跟其余各行比（留一法），并向典型值 0.03 收缩。条目入围条件：z ≥ 2（类型词对上时 ≥ 1），或含必需的查询词至少一半。分数 = z + 2 ×（命中词比例）<sup>1.5</sup> + 0.5 × 名字中的命中比例 + 0.3 × 名次项 + 类型词加 1。查询的词都含数字（编号、单号）时按精确查找：字词权重加倍、z 减半。</li>
 <li><b>其他打分做法</b>只在 <code>eval --scoring</code> 里用于对比：<code>b</code>（每个模态只和自己比）、<code>c&lt;k&gt;</code>（模态的均值和方差按 k 行的分量往全体拉）、<code>d</code>（各自均值、离散度合着算）。</li>
+<li><b>找相似的</b>（<code>search_similar</code>）：只用索引里已有的向量，不问主控。编号指到一处（<code>12#p3</code>、<code>12#t25.0</code>）就用那一处的向量，那一处没有就用整条的，几段取平均；同一时刻既有画面又有声音的只用画面。别的条目各按最像的一段算余弦，再在条目之间换成 z（不在段之间算：一个长文件几十段都像，会把别的压下去）；z ≤ 0 的不列，z ≥ 2 标 <code>strong</code>；不列自己和已经不在的文件；<code>why</code> 写"…和它相近"。</li>
 <li><b>结果</b>：分数不到第一名一半的标 <code>strong: false</code>（卡片上标"可能相关"）；原文件已不在的不列出。结果指向含查询词最多的一段（名字和内容都对得上时指向内容）；按意思入围的指向意思最好的那段。表格命中时片段是含查询词的一两行，每格前写列名。片段和标题送出前遮掉凭证，索引里保留原文。</li>
 <li><b>遮凭证</b>：规则从记忆的 <code>find_secrets</code> 起步并扩充，分七类：密码、验证码、密钥换成〔密码〕这样；助记词、恢复码同样整串遮；卡号、证件号留后 4 位（〔卡号 ****1111〕）。全角和其他文字的数字先折成半角再认，夹了零宽空格的两种读法都看。表格按列名遮；没有可用列名时，一列六成以上像密码就整列遮。<code>search_open</code> 的答复、文件夹显示名（方案、卡片、outbox）也遮；<code>path</code> 不遮，含 outbox 的 id 和卡片小字里的路径。已知漏：带空格又不是英文词的密码、OCR 认错的卡号、无表头的纯小写字母数字密码。</li>
 <li><b>拒答门槛未开</b>：没有结果时 <code>confident</code> 为 <code>false</code>，有结果时为 <code>null</code>（"有结果但说不准"）。候选门槛（字词全中，或第一条的余弦过它那个模态的门槛：文字 0.70 / 图片 0.66 / 声音 0.70）只在 <code>eval --refusal</code> 里量，是否开启待定；开启后没过门槛的结果照给、标 <code>confident: false</code>。</li>
@@ -1085,24 +1088,25 @@ sequenceDiagram
 
 <h2>接口</h2>
 <h3>给 agent 的 MCP 工具</h3>
-<p>按 agent 工具协议（版本 1，协议版本 <code>2026-07-28</code>，MCP 无状态子集：<code>server/discover</code>、<code>resources/list</code>、<code>resources/read</code>、<code>tools/list</code>、<code>tools/call</code>，另答 <code>initialize</code>、<code>ping</code>），在 <code>~/.luoke-search/run/agent.sock</code> 上 <code>POST /mcp</code>；<code>luoke-search mcp</code> 在标准输入输出上提供同一组工具（一行一条）。一次只处理一个请求；socket 上的 <code>search_request_access</code> 要等用户答复，不占这个锁。</p>
+<p>按 agent 工具协议（版本 1，协议版本 <code>2026-07-28</code>，MCP 无状态子集：<code>server/discover</code>、<code>resources/list</code>、<code>resources/read</code>、<code>tools/list</code>、<code>tools/call</code>，另答 <code>initialize</code>、<code>ping</code>），在 <code>~/.luoke-search/run/agent.sock</code> 上 <code>POST /mcp</code>；<code>luoke-search mcp</code> 在标准输入输出上提供同一组工具（一行一条）。一次只处理一个请求，缩略图在锁外做。工具自己出错时只答"工具内部出错"，标准错误记一行：方法、登记过的工具或资源名、错误的类型，不写错误的文字。</p>
 <div class="tbl"><table>
 <tr><th>工具</th><th>只读</th><th>参数 → 答复</th></tr>
-<tr><td><code>search_query</code></td><td>是</td><td><code>query</code>（可省：只给 <code>since</code> / <code>until</code> / <code>kinds</code> 时列出最新的）；可选 <code>kinds</code>（<code>doc</code> <code>pdf</code> <code>screenshot</code> <code>image</code> <code>video</code> <code>audio</code> <code>photo</code>，筛选；不认识的静默忽略）、<code>since</code> / <code>until</code>（ISO 8601 日期或时间，不带时区按本机时间）、<code>limit</code>（1–50，默认 10）→ <code>hits</code>、<code>partial</code>、<code>partial_reason</code>、<code>confident</code>、<code>took_ms</code>，加一张结果卡片（前 5 条，每条 [打开]，文件另有 [在访达中显示]，照片没有；每次 surfaceId 不同）</td></tr>
-<tr><td><code>search_open</code></td><td>否</td><td><code>id</code>、可选 <code>reveal</code> → 一句说明。没有 <code>ai.luoke/user-action</code> 答 <code>needs_user_action</code>。视频、录音用 QuickTime Player 跳到那一刻；PDF 说明在第几页；照片打开「照片」并说明拍摄时间，读不了图库或没允许时答 <code>failed</code> 并说明原因；文件不在了答 <code>stale</code>。标 <code>ai.luoke/where: mac</code></td></tr>
-<tr><td><code>search_status</code></td><td>是</td><td>— → <code>items</code>（按类型）、<code>waiting</code>（<code>read</code> / <code>rest_of_long_files</code> / <code>vectors</code> / <code>media</code> / <code>not_on_this_mac</code>）、<code>paused</code>（<code>reasons</code>、<code>by</code>、<code>reading</code>、<code>vectors</code>）、<code>dataset_folders</code>（路径和文件数）、<code>first_pass_done</code>、<code>hub</code>（<code>state</code>：available / downloading / busy / unsupported / not_running / not_connected，<code>note</code>）、<code>folders</code>、<code>photos</code>（on / needs_access / off）</td></tr>
+<tr><td><code>search_query</code></td><td>是</td><td><code>query</code>（可省：只给 <code>since</code> / <code>until</code> / <code>kinds</code> / <code>sources</code> 时列出最新的）；可选 <code>kinds</code>（<code>doc</code> <code>pdf</code> <code>screenshot</code> <code>image</code> <code>video</code> <code>audio</code> <code>photo</code>，筛选；不认识的静默忽略）、<code>sources</code>（<code>files</code> 是选的文件夹里的，<code>photos</code> 是照片图库的，筛选；不认识的不管）、<code>since</code> / <code>until</code>（ISO 8601 日期或时间，不带时区按本机时间）、<code>limit</code>（1–50，默认 10）→ <code>hits</code>、<code>totals</code>（<code>{files, photos}</code>：一共对上几条，不受 <code>limit</code> 和 <code>sources</code> 限，受 <code>kinds</code> 和时间限）、<code>skipped</code>（这次没搜或没搜全的地方，总在，见下）、<code>partial</code>、<code>partial_reason</code>、<code>confident</code>、<code>took_ms</code>，加一张结果卡片（前 5 条，每条 [打开]，文件另有 [在访达中显示]，照片没有；每次 surfaceId 不同）。给模型的文字后面另起一行说没搜的（"（照片还没允许搜）"），没开搜照片图库的不说</td></tr>
+<tr><td><code>search_similar</code></td><td>是</td><td><code>id</code>（<code>search_query</code> 给的编号）、可选 <code>sources</code>、<code>limit</code>（1–50，默认 10）→ 和 <code>search_query</code> 同样的 <code>hits</code>、<code>totals</code>、<code>skipped</code> 和卡片，做法见「怎么搜」。那条还没算出向量时 <code>hits</code> 为空、<code>partial_reason</code> 说明；编号不在索引里答 <code>stale</code>，没给编号答 <code>invalid</code></td></tr>
+<tr><td><code>search_open</code></td><td>否</td><td><code>id</code>、可选 <code>reveal</code> → 一句说明。没有 <code>ai.luoke/user-action</code> 答 <code>needs_user_action</code>。视频、录音用 QuickTime Player 从那一刻开始放（在螺壳里由本体代做，见「权限」）；PDF 说明在第几页；照片打开「照片」并说明拍摄时间，读不了图库或没允许时答 <code>failed</code> 并说明原因；文件不在了答 <code>stale</code>。标 <code>ai.luoke/where: mac</code></td></tr>
+<tr><td><code>search_status</code></td><td>是</td><td>— → <code>items</code>（按类型）、<code>waiting</code>（<code>read</code> / <code>rest_of_long_files</code> / <code>vectors</code> / <code>media</code> / <code>not_on_this_mac</code>）、<code>paused</code>（<code>reasons</code>、<code>by</code>、<code>reading</code>、<code>vectors</code>）、<code>dataset_folders</code>（路径和文件数）、<code>first_pass_done</code>、<code>vectors_ready</code>（已有向量的段数）、<code>hub</code>（<code>state</code>：available / downloading / busy / unsupported / not_running / not_connected，<code>note</code>）、<code>folders</code>、<code>photos</code>（on / needs_access / off）</td></tr>
 <tr><td><code>search_settings</code></td><td>是</td><td>不带 <code>change</code>：当前设置。带 <code>change</code>（<code>add_folders</code>、<code>remove_folders</code>、<code>skip_folders</code>、<code>photos</code>、<code>on_battery</code>；文件夹可写路径或 desktop、documents、downloads、pictures、movies、music 和对应的中文名）；这一步会往 <code>state.json</code> 写方案→ <code>plan_id</code>、<code>changes</code> 和一张确认卡片：文件夹写访达里的名字，完整路径在小字里；加文件夹时数一下大约多少文件（桌面、文稿、下载、iCloud 云盘、外接盘这类 macOS 保护的位置不数，只说明 macOS 会先询问）</td></tr>
-<tr><td><code>search_settings_apply</code></td><td>否</td><td><code>plan_id</code>、可选 <code>checks</code>（用户在卡片上的勾选）→ 执行自己出过的方案。勾选不合法或全不勾答 <code>invalid</code>。没有 <code>ai.luoke/user-action</code>、或点按的不是这个方案自己的卡片，答 <code>needs_user_action</code>；设置文件读不了答 <code>needs_setup</code>；方案已不在、设置在出方案后变过、选文件夹的方案已选过或放下，都答 <code>stale</code>；macOS 不让读的文件夹答 <code>needs_setup</code> 并换上带 [打开系统设置] 的卡片</td></tr>
+<tr><td><code>search_settings_apply</code></td><td>否</td><td><code>plan_id</code>、可选 <code>checks</code>（用户在卡片上的勾选）→ 执行自己出过的方案；不带 <code>plan_id</code>、带 <code>photos</code>（真假）是应用页上的开关，只认那一页上的点按（surfaceId 为 <code>overview</code>，别处答 <code>needs_user_action</code>），还没选过要搜的地方时答 <code>needs_setup</code>。勾选不合法或全不勾答 <code>invalid</code>。没有 <code>ai.luoke/user-action</code>、或点按的不是这个方案自己的卡片，答 <code>needs_user_action</code>；设置文件读不了答 <code>needs_setup</code>；方案已不在、设置在出方案后变过、选文件夹的方案已选过或放下，都答 <code>stale</code>；macOS 不让读的文件夹答 <code>needs_setup</code> 并换上带 [打开系统设置] 的卡片</td></tr>
 <tr><td><code>search_open_system_settings</code></td><td>是</td><td><code>pane</code>：<code>files</code>（文件和文件夹）/ <code>full_disk</code>（完全磁盘访问）/ <code>photos</code> → 打开系统设置对应隐私页。标 Mac</td></tr>
-<tr><td><code>search_request_access</code></td><td>否</td><td><code>id</code>（<code>photos</code>）→ 请 macOS 询问，等用户答复。只有常驻服务会请 macOS 问，别的进程答 <code>failed</code>。要 <code>ai.luoke/user-action</code>。标 Mac、<code>waits</code></td></tr>
 <tr><td><code>outbox_ack</code></td><td>是</td><td><code>id</code>、<code>state</code>（shown / answered / dismissed）；只收 outbox 现在可能有的 id，别的答 <code>invalid</code>；<code>shown</code> 不记，answered、dismissed 的不再出</td></tr>
 </table></div>
-<p>结果条目：<code>id</code>（条目号加位置，如 <code>12#p3</code> 第 3 页、<code>#s</code> 幻灯片、<code>#w</code> 工作表、<code>#c</code> 第几部分、<code>#t25.0</code> 秒）、<code>kind</code>、<code>title</code>、<code>path</code>（照片图库的条目为空）、<code>where</code>（<code>page</code> / <code>part</code> / <code>sheet</code> / <code>time</code> / <code>end</code>）、<code>date</code>、<code>snippet</code>（约 160 字）、<code>why</code>（"第 3 页的文字对得上"等）、<code>score</code>、<code>strong</code>，以及给窗口用的 <code>source</code>、<code>line</code>、<code>thumb</code>、<code>actions</code>。</p>
+<p>结果条目：<code>id</code>（条目号加位置，如 <code>12#p3</code> 第 3 页、<code>#s</code> 幻灯片、<code>#w</code> 工作表、<code>#c</code> 第几部分、<code>#t25.0</code> 秒）、<code>kind</code>、<code>title</code>、<code>path</code>（照片图库的条目为空）、<code>where</code>（<code>page</code> / <code>part</code> / <code>sheet</code> / <code>time</code> / <code>end</code>）、<code>date</code>、<code>snippet</code>（约 160 字）、<code>why</code>（"第 3 页的文字对得上"等）、<code>score</code>、<code>strong</code>，以及给窗口用的 <code>source</code>（<code>files</code> / <code>photos</code>）、<code>kind_label</code>（"截图""录音"这样的叫法）、<code>line</code>、<code>thumb</code>、<code>actions</code>（[打开]、文件的 [在访达中显示]，已有向量的再加 [找相似的]，调 <code>search_similar</code>）。<code>skipped</code> 每项是 <code>source</code>、<code>why</code>、<code>text</code>、<code>detail</code>，要权限的带 <code>permission</code>：现在只有照片图库，<code>why</code> 是 <code>off</code>（没开）、<code>needs_access</code>（还没允许）、<code>denied</code>（拒绝过）、<code>not_updated</code>（不让读了，以前读过的照样搜得到）；后三种只有判断权限的常驻服务才报；只要 <code>files</code> 或只要图库没有的类型时不列。</p>
 <h3>资源</h3>
 <ul>
 <li><code>luoke://luoke-search/outbox</code>（也可写 <code>outbox</code>）：见下。</li>
 <li><code>summary</code>：<code>{count, text}</code>，<code>count</code> 只算 <code>needs-setup</code> 和 <code>needs-access</code>。</li>
-<li><code>permissions</code>：<code>{photos: granted|denied|ask}</code>，不弹框；读不了图库的进程报 denied。</li>
+<li><code>permissions</code>：<code>{photos: granted|denied|ask}</code>，不弹框；读不了图库的进程报 denied；用户还没在螺壳里同意让搜索用照片时（<code>LUOKE_PERMISSIONS_OFF</code>），不管 macOS 给没给都报 ask。</li>
+<li><code>page/overview</code>：应用页，A2UI 消息，见「运行形态」。</li>
 <li><code>thumb/&lt;条目号&gt;</code>：缩略图，答 <code>blob</code>、<code>image/jpeg</code>，不在 <code>resources/list</code> 里列。长边 400 px、不超过 256 KB、最多等 2 秒、同时最多做 2 张；SVG、AVFoundation 打不开的视频、内容只在 iCloud 的、加密 PDF 不给；照片没有权限时不去图库里找。</li>
 </ul>
 <h3>outbox</h3>
@@ -1110,7 +1114,7 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th><code>kind</code></th><th>紧急度</th><th>什么时候</th></tr>
 <tr><td><code>needs-setup</code></td><td>normal</td><td>发布版、从没选过要搜的地方、也没放下时。id 就是 <code>needs-setup</code>；卡片默认勾桌面、文稿、下载（存在且可搜），照片不勾</td></tr>
-<tr><td><code>needs-access</code></td><td>low</td><td>设置里的文件夹 macOS 不让读，或打开了照片图库但没得到允许。id 是 <code>needs-access/&lt;路径&gt;/&lt;编号&gt;</code> 或 <code>needs-access/photos/&lt;编号&gt;</code>，编号按时间取，每次又要用户处理时换新。照片那件带 <code>permission: photos</code>；文件夹读不读得了只由常驻服务判定</td></tr>
+<tr><td><code>needs-access</code></td><td>low</td><td>设置里的文件夹 macOS 不让读，或打开了照片图库但没得到允许。id 是 <code>needs-access/&lt;路径&gt;/&lt;编号&gt;</code> 或 <code>needs-access/photos/&lt;编号&gt;</code>，编号按时间取，每次又要用户处理时换新。照片那件带 <code>permission: photos</code>；文件夹读不读得了只由常驻服务判定。文件夹那件的卡片带 [打开系统设置]（「文件和文件夹」）；照片那件没问过时，卡片上的「允许」交给螺壳本体去问，拒绝过的带 [打开系统设置] 和「算了」</td></tr>
 <tr><td><code>index-ready</code></td><td>low</td><td>第一遍建完，id 是 <code>index-ready/&lt;时间&gt;</code>，3 天后过期</td></tr>
 </table></div>
 <h3>命令行</h3>
@@ -1123,39 +1127,40 @@ sequenceDiagram
 <tr><td><code>status [--json]</code></td><td>索引位置和大小、各类数量、等什么、停着的原因、不在这台 Mac 上的个数、像数据集的文件夹、主控状态、是否排除出 Time Machine</td></tr>
 <tr><td><code>settings [--add-folder] [--remove-folder] [--skip-folder] [--photos on|off] [--on-battery on|off] [--json]</code></td><td>用户自己敲的改动直接执行（经同一套方案检查）</td></tr>
 <tr><td><code>eval &lt;题库.json&gt;... [--testbed] [-n] [--refusal] [--scoring a|b|d|c&lt;k&gt;] [--timing] [--json]</code></td><td>跑评测，出第一名、前五、前十、MRR，按题型分开；<code>--refusal</code> 量拒答门槛（<code>expect</code> 为空的是没有答案的题）；<code>--scoring</code> 换打分做法对比；<code>--timing</code> 在标准错误打 p50、p90、最长</td></tr>
-<tr><td><code>photos-probe [--access] [--sample] [--originals]</code></td><td>只出汇总数字：本机照片图库能给螺壳搜索多少（开发版 app 或设 <code>LUOKE_SEARCH_PHOTOS=system</code> 才能用，发布版不接这条命令；不问权限，不从 iCloud 下载）</td></tr>
+<tr><td><code>photos-probe [--access] [--sample] [--originals]</code></td><td>只出汇总数字：本机照片图库能给螺壳搜索多少（开发版程序或设 <code>LUOKE_SEARCH_PHOTOS=system</code> 才能用，发布版不接这条命令；不问权限，不从 iCloud 下载）</td></tr>
 <tr><td><code>probe-audio</code></td><td>开发用的声音探测，发布版不接</td></tr>
 <tr><td><code>mcp</code>、<code>serve</code></td><td>见上</td></tr>
 </table></div>
 <ul>
-<li><code>--json</code> 的键为 snake_case，<code>search --json</code> 与 <code>search_query</code> 的答复同格式；<code>status --json</code> 的形状和 <code>search_status</code> 不同。</li>
-<li><b>发布版</b>：bundle id 或代码签名标识等于 <code>ai.luoke.search</code>，或带 <code>serve --resident</code>，就按发布版处理，只接 <code>serve</code>、<code>index</code>、<code>status</code>、<code>search</code>、<code>open</code>、<code>settings</code>、<code>mcp</code>。<code>--index</code>、<code>--socket</code>、<code>LUOKE_SEARCH_HOME</code>、<code>CFFIXED_USER_HOME</code> 拒绝启动，其余开发变量删掉并在标准错误说一句，<code>index</code> 不接受另给文件夹。开发版 app 用 <code>LUOKE_SEARCH_DEV_APP=1</code> 构建，强制 ad-hoc 签名。</li>
-<li>开发版的每条命令可加 <code>--index &lt;数据目录&gt;</code>（<code>photos-probe</code> 除外）；环境变量 <code>LUOKE_SEARCH_HOME</code> 同样换数据目录。不在 app 里运行的命令行必须给出其中之一，不用正式的 <code>~/.luoke-search</code>；不认识的选项报错。<code>LUOKE_HUB_SOCKET</code> 指定主控。<code>LUOKE_SEARCH_OPENER=dry</code> 什么都不真的打开（照片也不），只在标准错误说要打开什么，答复句尾加"（演习）"；<code>LUOKE_SEARCH_PHOTOS=system</code> 让非 app 进程读图库（开发用），<code>off</code> 关掉。</li>
+<li><code>--json</code> 的键为 snake_case；<code>search --json</code> 是 <code>search_query</code> 答复的基本字段（含 <code>totals</code>），没有给窗口的字段、卡片和 <code>skipped</code>；<code>status --json</code> 的形状和 <code>search_status</code> 不同。命令行没有 <code>search_similar</code>、<code>sources</code> 和应用页的开关。</li>
+<li><b>发布版</b>：bundle id 或代码签名标识等于 <code>ai.luoke.search</code>，或带 <code>serve --resident</code>，就按发布版处理，只接 <code>serve</code>、<code>index</code>、<code>status</code>、<code>search</code>、<code>open</code>、<code>settings</code>、<code>mcp</code>。<code>--index</code>、<code>--socket</code>、<code>LUOKE_SEARCH_HOME</code>、<code>CFFIXED_USER_HOME</code> 拒绝启动，其余开发变量删掉并在标准错误说一句，<code>index</code> 不接受另给文件夹。开发版程序用 <code>LUOKE_SEARCH_DEV_APP=1</code> 编（<code>build_helper.sh</code> 编的签名和发布版一样带标识，看签名分不出来；<code>build_app.sh</code> 打的开发版 app 强制 ad-hoc 签名）。螺壳的开发版、实验室构建按自己的 bundle id 带开发版程序，给它 <code>LUOKE_SEARCH_HOME</code>（<code>~/Library/Application Support/luoke-search</code>）和自己主控的 <code>LUOKE_HUB_SOCKET</code>。<code>LUOKE_PERMISSIONS_OFF</code>、<code>LUOKE_HOST_FD</code> 是螺壳本体给的，发布版照认。</li>
+<li>开发版的每条命令可加 <code>--index &lt;数据目录&gt;</code>（<code>photos-probe</code> 除外）；环境变量 <code>LUOKE_SEARCH_HOME</code> 同样换数据目录。签名标识不是 <code>ai.luoke.search</code> 的程序（比如 <code>swift build</code> 编出来的）必须给出其中之一，不用正式的 <code>~/.luoke-search</code>；不认识的选项报错。<code>LUOKE_HUB_SOCKET</code> 指定主控。<code>LUOKE_SEARCH_OPENER=dry</code> 什么都不真的打开（照片也不），只在标准错误说要打开什么，答复句尾加"（演习）"；<code>LUOKE_SEARCH_PHOTOS=system</code> 让非 app 进程读图库（开发用），<code>off</code> 关掉。</li>
 </ul>
 
 <h2>依赖主控</h2>
 <ul>
-<li><b>任务</b>：客户端请求的任务名为 <code>luoke-search.embed</code>（配件清单同名；开发时 <code>LUOKE_SEARCH_EMBED_TASK</code> 可换成归 luoke-search 的其他任务）。主控的开发配方已有这个任务，16 / 32 / 128 三档都分给 <code>embeddinggemma-2</code>，只收文字，<code>verified</code> 里有 luoke-search；发布配方里它在进流水线、过参考向量集评测之前各档关着，答 <code>unsupported</code>"这一档没通过验证"，螺壳搜索说成"这台 Mac 上的螺壳不提供按意思搜"，只按字词搜。不认识螺壳搜索的旧主控答 403，传输失败也一样归成 <code>unsupported</code>。</li>
-<li><b>接口</b>：<code>GET /tasks</code> 读状态、后台在不在跑（<code>background</code>，决定暂停）和参数（<code>batch</code>、<code>max_chars</code>、<code>max_total_chars</code>、<code>vector_space</code>，以及 <code>image_batch</code>、<code>image_budgets</code>、<code>audio_batch</code>、<code>max_image_bytes</code>、<code>max_audio_bytes</code>、<code>max_audio_secs</code>），<code>X-Luoke-Tasks-Version</code> 变了就重读；<code>POST /tasks/&lt;任务&gt;/v1/embed</code> 送 <code>texts</code> 或 <code>inputs</code>（图片、声音的字节，不送路径）。请求头 <code>X-Luoke-Accessory: luoke-search/0.1.0</code>、<code>X-Luoke-Priority</code>，需要时 <code>X-Luoke-Allow-Battery</code>。要求 768 维，收到后再做 L2 归一化。</li>
+<li><b>任务</b>：客户端请求的任务名为 <code>luoke-search.embed</code>（配件清单同名；开发时 <code>LUOKE_SEARCH_EMBED_TASK</code> 可换成归 luoke-search 的其他任务）。主控配方里 16 / 32 / 128 三档都分给 <code>embeddinggemma-2</code>；32、128 两档也收图片和声音（一次最多 8 张图、2 段声音），16 档只收文字。哪一档开着由发布评测定（每档对参考向量集余弦都 ≥ 0.999）。发布流水线按钉住的提交用 <code>build_helper.sh</code> 编它、打进螺壳；这一版搜索没有评测证据时，内部版照出、主控不给它算向量，RC 和正式版的出版停下。主控不提供时螺壳搜索说"这台 Mac 上的螺壳不提供按意思搜"，只按字词搜。不认识螺壳搜索的旧主控答 403，传输失败也一样归成 <code>unsupported</code>。</li>
+<li><b>接口</b>：<code>GET /tasks</code> 读状态、后台在不在跑（<code>background</code>，决定暂停）和参数（<code>batch</code>、<code>max_chars</code>、<code>max_total_chars</code>、<code>vector_space</code>，以及 <code>image_batch</code>、<code>image_budgets</code>、<code>audio_batch</code>、<code>max_image_bytes</code>、<code>max_audio_bytes</code>、<code>max_audio_secs</code>），<code>X-Luoke-Tasks-Version</code> 变了就重读；<code>POST /tasks/&lt;任务&gt;/v1/embed</code> 送 <code>texts</code> 或 <code>inputs</code>（图片、声音的字节，不送路径）。请求头 <code>X-Luoke-Accessory: luoke-search/0.1.13</code>、<code>X-Luoke-Priority</code>，需要时 <code>X-Luoke-Allow-Battery</code>。要求 768 维，收到后再做 L2 归一化。</li>
 <li><b>提示词</b>：查询 <code>task: search result | query: …</code>；文档 <code>title: … | text: …</code>（标题用文件名，PDF 用它自己的标题）。</li>
 <li><b>图片和声音</b>：索引里不存像素和声音；主控的参数表明收某一种时，从文件重新做出同样的帧和窗口再送。预算：照片和图片 JPEG ≤ 1024 px、140；截图 PNG ≤ 1536 px、280；扫描页 PNG 1400 px、280；视频帧 JPEG ≤ 1024 px、70；声音 30 秒 WAV。一个一个做、攒够一批就发；这一档不收的预算照旧等；暂时失败的试 3 次，主控说读不了的那条不再要向量。补向量时重做图片和声音这一步也在看门狗下：内存从这个文件开始算，时间只算做图，每 30 张一步，不算送去主控的时间；停下后字照旧能搜，图和声音不再等向量。崩溃两次也放弃。有文件等着读时，一轮补向量最多 60 秒。文件不在本机时不打开、不放弃，等它回来；超了字节上限先换 JPEG 再缩一半，透明处都铺白底。</li>
 <li><b>主控不在或忙</b>：照常读取、按字词搜，答复带 <code>partial_reason</code>（主控没在运行、不认识螺壳搜索、这台 Mac 不提供、还有多少段等向量等），不退回任何自带模型。补向量时 <code>power_cooldown</code>、<code>lane_busy</code> 这类短歇原地等完；其他拒绝停下、下次再补（<code>index --wait</code> 时按 <code>retry_after_ms</code> 等，连续没进展才翻倍，最多 300 秒）。<code>vector_space</code> 变了只重算向量，不重读文件；空间不一致时这次只按字词搜。</li>
-<li><b>开发不碰正在用的主控</b>：只有默认数据目录 <code>~/.luoke-search</code> 且是 app 本身，才回退到已安装主控的 socket；带 <code>--index</code> 或 <code>LUOKE_SEARCH_HOME</code> 的运行只认 <code>LUOKE_HUB_SOCKET</code>，没设就只按字词搜。</li>
+<li><b>开发不碰正在用的主控</b>：只有默认数据目录 <code>~/.luoke-search</code> 且是螺壳搜索自己的程序（签名标识 <code>ai.luoke.search</code>），才回退到已安装主控的 socket；带 <code>--index</code> 或 <code>LUOKE_SEARCH_HOME</code> 的运行只认 <code>LUOKE_HUB_SOCKET</code>，没设就只按字词搜。</li>
 </ul>
 
 <h2>数据</h2>
 <div class="tbl"><table>
 <tr><th>位置</th><th>内容</th></tr>
-<tr><td><code>~/.luoke-search/</code></td><td>数据目录（700），整个排除出 Time Machine</td></tr>
+<tr><td><code>~/.luoke-search/</code></td><td>数据目录（700），整个排除出 Time Machine；螺壳的开发版、实验室构建起的那份用 <code>~/Library/Application Support/luoke-search</code></td></tr>
 <tr><td><code>index.noindex/index.sqlite</code></td><td>索引（600，schema 8，另有 <code>-wal</code>、<code>-shm</code>）：<code>items</code>（路径、来源 file / photos、类型、大小、时间、设备号、inode、拍摄时间、标题、状态 pending / partial / done / failed / skipped、详情和读取信息、读法版本、读完时间、进队时间、没读完的次数）、<code>segments</code>（类型、位置、向量模态、768 维 fp16 向量、等什么、暂时失败的次数、<code>vec_seq</code>）、像数据集的文件夹、<code>fts</code>（读出的文字，另存规整前的原文给片段和向量用）、<code>fts_tri</code>、<code>meta</code>（<code>vector_space</code>、<code>vector_generation</code>、<code>dataset_folders</code>，以及一次性重排的标记）。放一边的条目在详情里标 <code>not on this Mac</code>。升级索引时每个事务扫 1000 行，15 万段约 18–21 秒</td></tr>
 <tr><td><code>.lock</code></td><td><code>settings.json</code>、<code>state.json</code> 的跨进程锁（600）</td></tr>
 <tr><td><code>settings.json</code></td><td>要搜的文件夹、跳过的文件夹、照片图库（默认关）、用电池时建索引（默认关，只在没连主控时起作用）。读不了时不按设置建索引、不改设置</td></tr>
 <tr><td><code>state.json</code></td><td>未执行的方案（最多 20 个，出新方案时清掉 7 天前的，选文件夹那张不计）、outbox 已答或放下的事、第一遍完成时间、选没选过文件夹、照片和文件夹那几件 outbox 的编号</td></tr>
 <tr><td><code>run/stopped-file.json</code></td><td>看门狗停下时正在读的文件、它的修改时间和大小、原因；下次记入索引后删除</td></tr>
+<tr><td><code>run/asked-to-stop.json</code></td><td>被要求退出时正在读的文件、它的修改时间和大小；下次起来把那一次的读取次数减回去，然后删除。<code>serve</code> 和 <code>index --job</code> 同时被要求停时共用这一份，后写的盖掉先写的</td></tr>
 <tr><td><code>run/agent.sock</code></td><td>MCP socket（目录 700、socket 600；残留且没人在听的删掉重开，有人在听就拒绝）</td></tr>
 </table></div>
 <ul>
-<li>日志只写计数（"1 new, 0 changed…"），不写路径、搜索词、片段和文件内容。</li>
+<li>日志只写计数（"1 new, 0 changed…"），不写路径、搜索词、片段和文件内容；工具出错时只记方法、工具或资源名和错误的类型。在螺壳里，标准错误进螺壳的 <code>logs/search.log</code>。</li>
 <li>结果、卡片、outbox 中不放凭证，路径（原样）和缩略图（截图、证件照原样给窗口）除外；凭证文件从不读入。</li>
 </ul>
 
@@ -1184,9 +1189,9 @@ sequenceDiagram
 <li><b>录音</b>：切段和送法没问题，模型的声音向量对中文说话声差：中文 6 题里，问题对录音的余弦 0.609，对同样文字 0.814。只量过合成声音。</li>
 <li>拒答分开看：<code>en-noanswer.json</code> 拦下 38 / 39，错拒 12 / 121；中文那批拦下 78%（近似题 58%），错拒 7%。</li>
 <li>打分做法按事先写好的挑法选定：A 在 190 题上第一名最高；<code>b</code> 误拒最少但第一名低得多（164 题）；<code>c40</code> 与 A 打平但误拒更多；<code>d</code> 在文档多、图少的题上与 A 打平，在 190 题上少 4 题。</li>
-<li>参考向量集 9 条（文字 5、截图、照片、视频帧、声音各 1）经本工具客户端对主控算的向量余弦均 ≥ 0.999。</li>
+<li>参考向量集 16 条：文字 12 条（原有的 5 条，加中文查询 3 条和中文文档、超过 2048 token 的中文长文、中英混排、代码各 1 条，输入逐字在 <code>Tests/Reference/texts.json</code>），截图、照片、视频帧、声音各 1 条。经本工具客户端对主控算的向量余弦均 ≥ 0.999（新加的 7 条 0.99985–0.99991）；主控的发布评测（<code>tools/embed_parity.py</code>）读同一份。</li>
 <li>搜索端到端（要查询向量 + 混合排序）p50 15 ms、p90 17 ms。嵌入进程（开图片和声音）峰值约 4 GB。</li>
-<li>测试 442 个。</li>
+<li>测试 496 个。</li>
 </ul>
 <div class="tbl"><table>
 <tr><th>规模（合成语料）</th><th>1 万文件</th><th>5 万文件</th></tr>
@@ -1203,24 +1208,26 @@ sequenceDiagram
 <li>主控不在、忙或任务不可用：照常读文件、按字词搜，向量以后补；答复带 <code>partial</code> 和一句说明。</li>
 <li>还在建索引或长文件没读完时答复带 <code>partial</code>（"还有 N 个文件没读""还有 N 个长文件没读完"）；图片、视频、录音在等主控时说明暂时只能按名字和里面的字找到。</li>
 <li>文件读不了（加密 PDF、打不开的视频格式）记为 failed，只在 iCloud 的图库视频记为 skipped，都不影响其他文件；等着读的文件不在本机时放一边，不算读不了；文件消失后结果不再列出，<code>search_open</code> 答 <code>stale</code>。</li>
-<li>SIGTERM：手上那个文件读完就停，删掉自己的 socket；剩下的下次接着读。</li>
-<li>单个文件读得过久或内存失控：看门狗记下该文件、以退出码 75 退出，由主控重新拉起（十分钟内最多 3 次）；该文件记为读不了，改过才重读。</li>
+<li>SIGTERM：先把手上的文件记下（<code>run/asked-to-stop.json</code>），读完就停，删掉自己的 socket；剩下的下次接着读。螺壳本体没了（<code>--parent-pid</code>）一样收尾，最多 15 秒；本体停它时等 5 秒，还没退就强杀。</li>
+<li>单个文件读得过久或内存失控：看门狗记下该文件、以退出码 75 退出，由螺壳本体重新起（十分钟内最多 3 次）；该文件记为读不了，改过才重读。</li>
+<li>这个数据目录已经有一份在答 socket：退出码 3，螺壳本体过 15 秒再试，不算崩溃。</li>
 </ul>
 
 <h2>已知限制</h2>
 <ul>
-<li>发布配方里 <code>luoke-search.embed</code> 在过评测之前各档关着：在那之前正式环境只能按字词搜。</li>
-<li><b>完全磁盘访问</b>：按 ADR 0021 改为授权给螺壳本身，常驻服务由螺壳本体起；代码还没跟上：配件清单的常驻项和 <code>jobs</code> 没写 <code>"permissions": ["fda"]</code>，常驻服务仍由主控带 <code>--resident</code> 拉起，文件夹的 <code>needs-access</code> 卡片仍叫用户在「文件和文件夹」里允许"螺壳深度搜索"。</li>
-<li>还没进主控的发布流水线；<code>build_app.sh</code> 不做公证。</li>
-<li>主控配方里这个任务现在只收文字；图片、视频、录音、照片只能按文件名、拍摄时间和 OCR 的字找。</li>
+<li>按意思搜要这一版搜索在主控的发布评测里有证据：没有时内部版照出、只能按字词搜，RC 和正式版出不来。</li>
+<li><b>完全磁盘访问</b>（ADR 0021）：清单没有声明 <code>fda</code>，搜索不靠它。受保护的文件夹（桌面、文稿、下载、外接盘、网络卷）由 macOS 按文件夹问螺壳；拒绝过的，<code>needs-access</code> 卡片叫用户在「文件和文件夹」里允许螺壳。</li>
+<li>发布流水线里螺壳搜索还算可缺：没钉它的提交时出的螺壳不带搜索。<code>scripts/build_app.sh</code> 还能打单独的 <code>螺壳搜索.app</code>，不做公证，螺壳不用它。</li>
+<li>16 GB 档的主控只收文字：那一档上图片、视频、录音、照片只能按文件名、拍摄时间和 OCR 的字找。</li>
 <li>拒答门槛未开启，<code>confident</code> 有结果时恒为 <code>null</code>，答复不表示"有把握"。</li>
 <li>默认打分 A 在文档多、图少于 20 张的文件夹里，对的图 z 余量小（测得最低约 2.3）。问"X 的照片"而同文件夹文档写了 X 时，可能文档排第一。录音题成绩不稳定（3 题对 1 题），原因是模型的声音向量对中文说话声差。</li>
-<li>配件清单没有登记 <code>jobs</code>：第一遍由常驻服务兜底读，<code>index --job</code> 没有接上主控的空闲任务。</li>
+<li>配件清单没有登记 <code>jobs</code>，螺壳本体也没给它留空闲任务的参数：第一遍由常驻服务兜底读，<code>index --job</code> 没有接上主控的空闲任务。</li>
 <li>只有类型词或只给时间时的兜底列表会列出读不了、等着读和放一边的条目（<code>strong: true</code>、分数 0）；点开只在 iCloud 的会触发下载。</li>
 <li>录音和视频音轨不转文字；mkv、webm 等 AVFoundation 打不开的视频读不了。</li>
 <li>照片图库测过假图库和一次真图库只读测试；iCloud"优化 Mac 储存空间"的图库和几万张的图库没测；PDF 无法从外部定位到页，只在答复中说明页码；「照片」无法定位到某一张。</li>
-<li>邮件、记忆、打字记录的搜索（第二步）未做；判断要不要搜归 agent，手机端先纯文字。找相似没做。</li>
-<li>被要求停（SIGTERM）时等手上的条目做完，一个条目可能超过主控给的 15 秒宽限（扫描 PDF 一步约 18 秒、长视频抽帧、一次阻塞的向量请求）；被强杀时这次读也计次数，同一个文件两次都这样就记成读不了，改了才重读。</li>
+<li>邮件、记忆、打字记录的搜索（第二步）未做；判断要不要搜归 agent，手机端先纯文字。找相似的效果只在假主控的向量上试过。</li>
+<li>被要求停（SIGTERM）时等手上的条目做完，一个条目可能超过螺壳本体给的 5 秒（扫描 PDF 一步约 18 秒、长视频抽帧、一次阻塞的向量请求），会被强杀；这次读记在 <code>run/asked-to-stop.json</code>，下次减回去，不算在文件头上。</li>
+<li>应用页每次打开都要问一次主控（最多 10 秒），这期间别的请求排队。</li>
 </ul>
 </section>
 <section class="page" id="audit" data-title="螺壳扫描 luoke-scan">
@@ -2204,6 +2211,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-07</h2>
+<ul>
+<li>螺壳搜索页按代码 f68fbe8（0.1.13）和主控 6affc4f 复核：改成收进螺壳.app 以后的样子（<code>Contents/Helpers/luoke-search</code> 裸程序，本体用 <code>--resident --parent-pid</code> 起，起之前核签名和版本，退出码 3、收尾 15 秒、本体停它等 5 秒）；权限都在螺壳名下（清单的 <code>permissions</code>、<code>LUOKE_PERMISSIONS_OFF</code>、经 <code>LUOKE_HOST_FD</code> 交给本体的跳到某一秒播放，去掉 <code>search_request_access</code>）；加应用页（<code>page/overview</code>、搜照片开关）、找相似的（<code>search_similar</code>）、<code>search_query</code> 的 <code>sources</code>、<code>totals</code>、<code>skipped</code>、<code>kind_label</code>；agent 的搜索查询向量限时 5 秒；被要求退出时记 <code>run/asked-to-stop.json</code>；32、128 GB 档的嵌入也收图片和声音，搜索已进发布流水线；参考向量集 16 条、测试 496 个；已知限制跟着改。主控页写明起螺壳搜索前也核签名和版本。</li>
+</ul>
 
 <h2>2026-11-06</h2>
 <ul>

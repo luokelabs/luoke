@@ -1,6 +1,11 @@
 <!-- id: changelog | nav: 文档修订 | group: 其他 -->
 <h1>文档修订</h1>
 
+<h2>2026-11-07</h2>
+<ul>
+<li>螺壳搜索页按代码 f68fbe8（0.1.13）和主控 6affc4f 复核：改成收进螺壳.app 以后的样子（<code>Contents/Helpers/luoke-search</code> 裸程序，本体用 <code>--resident --parent-pid</code> 起，起之前核签名和版本，退出码 3、收尾 15 秒、本体停它等 5 秒）；权限都在螺壳名下（清单的 <code>permissions</code>、<code>LUOKE_PERMISSIONS_OFF</code>、经 <code>LUOKE_HOST_FD</code> 交给本体的跳到某一秒播放，去掉 <code>search_request_access</code>）；加应用页（<code>page/overview</code>、搜照片开关）、找相似的（<code>search_similar</code>）、<code>search_query</code> 的 <code>sources</code>、<code>totals</code>、<code>skipped</code>、<code>kind_label</code>；agent 的搜索查询向量限时 5 秒；被要求退出时记 <code>run/asked-to-stop.json</code>；32、128 GB 档的嵌入也收图片和声音，搜索已进发布流水线；参考向量集 16 条、测试 496 个；已知限制跟着改。主控页写明起螺壳搜索前也核签名和版本。</li>
+</ul>
+
 <h2>2026-11-06</h2>
 <ul>
 <li>已知问题：可疑邮件误判那条改到邮件助手 0.19.36（agent 里少数几封标急事、其余合成一张，默认「先不动」）。</li>
