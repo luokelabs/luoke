@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-07 12:11</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-07 17:31</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -95,7 +95,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <tr><td><a href="#mail">邮件助手</a></td><td><code>luoke-mail</code></td><td>分拣、清理、精选、起草；可撤回的处理自动执行并每日复查</td></tr>
 <tr><td><a href="#ime">输入法</a></td><td><code>luoke-ime</code></td><td>macOS 输入法；沙盒引擎出候选，本地模型重排和联想</td></tr>
 <tr><td><a href="#agent">agent</a></td><td><code>luoke-agent</code></td><td>唯一主动联系用户的组件；合并提问、建议和工具的事项</td></tr>
-<tr><td><a href="#audit">螺壳扫描</a></td><td><code>luoke-scan</code></td><td>在空闲时查这台 Mac 的空间和安全；只经 agent 说话（未发布）</td></tr>
+<tr><td><a href="#audit">螺壳扫描</a></td><td><code>luoke-scan</code></td><td>在空闲时查这台 Mac 的空间和安全；只经 agent 说话（封闭测试，随 beta 2 第一次提供）</td></tr>
 <tr><td><a href="#search">螺壳搜索</a></td><td><code>luoke-search</code></td><td>给本机文件和照片图库建索引，按字词和意思找回；没有界面，入口在螺壳（经 agent）（规划中）</td></tr>
 </table></div>
 
@@ -108,7 +108,7 @@ flowchart LR
     ime["输入法"]
     agent["agent（螺壳的后台组件）"]
     search["螺壳搜索（未发布）"]
-    audit["螺壳扫描（未发布）"]
+    audit["螺壳扫描（封闭测试）"]
     subgraph core["主控"]
       engine["推理引擎（底座）"]
       workers["打分 / 联想 / 嵌入进程"]
@@ -264,7 +264,7 @@ sequenceDiagram
 <tr><td>推理引擎</td><td>主控</td><td>oMLX（引擎包内的 <code>omlx-cli serve</code>），只监听 127.0.0.1 随机端口并带随机密钥；密钥写在引擎运行目录里只有本账户能读的 <code>settings.json</code>（<code>auth.api_key</code>），不进命令行和环境变量；以 <code>HF_HUB_OFFLINE=1</code> 运行，不去网上找模型；运行底座模型</td></tr>
 <tr><td>打分 / 联想工作进程</td><td>主控，首次请求或预热时；空闲 10 分钟停，下次用到再起</td><td>引擎包 Python 运行 <code>score_worker.py</code>（<code>HF_HUB_OFFLINE=1</code>），经管道通信，不监听端口</td></tr>
 <tr><td>嵌入工作进程</td><td>主控，首次请求或预热时；空闲 10 分钟停，下次用到再起</td><td><code>embed_worker.py</code>，同上</td></tr>
-<tr><td>空闲任务</td><td>主控</td><td>用配件的 Python 运行清单中 <code>jobs</code> 的命令（螺壳里的邮件助手、记忆用螺壳自带的 Python），环境带 <code>LUOKE_HUB_SOCKET</code>。清单写了 <code>exec</code> 的：单独成包的运行它 <code>Contents/MacOS</code> 下的那个程序；螺壳里的程序（螺壳扫描）由主控起螺壳自己的可执行文件带 <code>--run-tool &lt;配件&gt; &lt;参数&gt;</code>，本体照下面「螺壳扫描」一行核过才放行，参数只能是本体写死的几条，开启了才跑，环境只有 <code>HOME</code>、<code>TMPDIR</code>、<code>PATH</code>、<code>LANG</code>（开发版、实验室构建另加 <code>LUOKE_HUB_SOCKET</code>）</td></tr>
+<tr><td>空闲任务</td><td>主控</td><td>用配件的 Python 运行清单中 <code>jobs</code> 的命令（螺壳里的邮件助手、记忆用螺壳自带的 Python），环境带 <code>LUOKE_HUB_SOCKET</code>。清单写了 <code>exec</code> 的：单独成包的运行它 <code>Contents/MacOS</code> 下的那个程序；螺壳里的程序（螺壳扫描）由主控起螺壳自己的可执行文件带 <code>--run-tool &lt;配件&gt; &lt;参数&gt;</code>，本体照下面「螺壳扫描」一行核过才放行，参数只能是本体写死的几条，开启了才跑，环境只有 <code>HOME</code>、<code>TMPDIR</code>、<code>PATH</code>、<code>LANG</code>（开发版、实验室构建另加 <code>LUOKE_HUB_SOCKET</code>；清单里声明了、用户还没在权限窗口确认的权限写进 <code>LUOKE_PERMISSIONS_OFF</code>，例如 <code>fda</code>）</td></tr>
 <tr><td>单独成包的常驻配件</td><td>本体</td><td>经 <code>/usr/bin/open</code> 以 <code>--resident</code> 启动；10 分钟内最多自动重启 3 次</td></tr>
 <tr><td>邮件助手</td><td>本体，主控起来以后；开着才起（默认开着）</td><td>螺壳自带的 Python 运行 <code>-B -m luoke_mail --resident --parent-pid &lt;本体&gt;</code>，常驻；要发的通知、打开页面经它的标准输入输出和本体说，一行一个 JSON；起来之前的标准错误进 <code>logs/mail.log</code>，之后它自己写进数据目录的 <code>service.log</code></td></tr>
 <tr><td>螺壳搜索</td><td>本体，主控起来以后；开启了才起</td><td><code>Contents/Helpers/luoke-search --resident --parent-pid &lt;本体&gt;</code>，常驻；起之前和扫描一样停着核（标识 <code>ai.luoke.search</code>、版本对螺壳 <code>Info.plist</code> 的 <code>LuokeSearchVersion</code>），临时签名的开发版不核。标准错误进 <code>logs/search.log</code>。它和邮件助手意外退出时 2 秒后重起，10 分钟内最多 3 次；退出码 3（这份数据已有一个在跑）时 15 秒后再看；自己正常退出（0）的等下次启动螺壳</td></tr>
@@ -894,7 +894,7 @@ sequenceDiagram
 </ul>
 
 <h2>工具协议</h2>
-<p>工具在配件清单的 <code>capabilities</code> 中声明协议版本（1）、socket 路径、可报事项（<code>reports[]</code>：kind、title、默认 urgency）和动作（<code>actions[]</code>），并在自己的 Unix socket 上提供 MCP 子集。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。目前没有已发布的配件声明 <code>capabilities.protocol</code>：输入法的清单只有 <code>listing</code>，agent 跳过它；邮件助手 0.19.26 起接口默认打开、在清单里声明（打包版只接受螺壳的 agent 核心连进来），还没进 beta 版；螺壳扫描和螺壳搜索已实现协议并在清单中声明，但都未发布。agent 实际只有记忆一个来源。</p>
+<p>工具在配件清单的 <code>capabilities</code> 中声明协议版本（1）、socket 路径、可报事项（<code>reports[]</code>：kind、title、默认 urgency）和动作（<code>actions[]</code>），并在自己的 Unix socket 上提供 MCP 子集。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。目前没有已发布的配件声明 <code>capabilities.protocol</code>：输入法的清单只有 <code>listing</code>，agent 跳过它；邮件助手 0.19.26 起接口默认打开、在清单里声明（打包版只接受螺壳的 agent 核心连进来），还没进 beta 版；螺壳搜索已实现协议并在清单中声明，未发布；螺壳扫描（封闭测试，随 beta 2 第一次提供）已实现协议并在清单中声明，传输写 <code>"transport": "stdio"</code>：它不开 socket，agent 核心向螺壳本体要连接，本体每个请求起一次 <code>luoke-scan mcp --this-mac</code>，把接在它标准输入输出上的那一端交过去，一行一条 JSON-RPC。agent 实际只有记忆一个来源。</p>
 <h3>传输</h3>
 <ul>
 <li>每个请求一条连接：<code>POST /mcp</code>，请求体为一条 JSON-RPC 2.0 消息，上限 1 MB；MCP 协议版本 <code>2026-07-28</code>，在 <code>params._meta</code> 中携带。</li>
@@ -924,7 +924,7 @@ sequenceDiagram
 </ul>
 <h3>协议里有、agent 还没做的</h3>
 <ul>
-<li><b>基础页和权限（§1a，已定）</b>：工具可在 <code>capabilities</code> 里加 <code>service</code>（<code>summary</code>、<code>pages</code>、<code>ui</code>）、<code>permissions</code>、<code>listing</code>；对应资源 <code>summary</code>、<code>page/&lt;id&gt;</code>、<code>permissions</code> 用相对 id。权限分四种：<code>system</code>、<code>account</code>、<code>delegate</code>、<code>each-time</code>，状态由工具照实报。窗口归螺壳.app 画，agent 供内容；主控和 agent 现在都不读这些字段，螺壳扫描和螺壳搜索已实现工具一侧（基础页只有螺壳扫描有）。</li>
+<li><b>基础页和权限（§1a，已定）</b>：工具可在 <code>capabilities</code> 里加 <code>service</code>（<code>summary</code>、<code>pages</code>、<code>ui</code>）、<code>permissions</code>、<code>listing</code>；对应资源 <code>summary</code>、<code>page/&lt;id&gt;</code>、<code>permissions</code> 用相对 id。权限分四种：<code>system</code>、<code>account</code>、<code>delegate</code>、<code>each-time</code>，状态由工具照实报。窗口归螺壳.app 画，agent 供内容；agent 现在不读这些字段，主控也不读 <code>service</code>、<code>listing</code>；螺壳本体读 <code>permissions</code>：<code>kind</code> 为 <code>system</code>、<code>owner</code> 为 <code>luoke</code> 的项在权限窗口里问用户（显示 <code>title</code>、<code>facts</code>），用户确认了才向系统要，没确认的经 <code>LUOKE_PERMISSIONS_OFF</code> 告诉螺壳扫描。螺壳扫描和螺壳搜索已实现工具一侧（基础页只有螺壳扫描有）。</li>
 <li><b>问螺壳（§1b，草案）</b>：<code>service.ask</code> 的 <code>suggest</code>、<code>search</code> 两个只读动作，只在用户点开或打字问时才调。<code>search</code> 回 <code>hits</code>：固定形状的数据，不是 A2UI，由 <code>LuokeA2UI</code> 里只给窗口用的 <code>HitsList</code> 画。草案还给目录加 <code>Image</code>，现在不在目录里。主控、agent 都没有实现。</li>
 <li><b>不从卡片发起的调用（§5，草案）</b>：用户在对话里问时，只读工具的结果带一张新卡片，不进 outbox 和简报。agent 没有对话，未实现；螺壳搜索已按此回。</li>
 <li><b><code>ai.luoke/where: mac</code>（§5）</b>：标明只在 Mac 上有意义的工具，手机上不调。agent 没有手机端，不读它。</li>
@@ -1232,128 +1232,141 @@ sequenceDiagram
 </section>
 <section class="page" id="audit" data-title="螺壳扫描 luoke-scan">
 <h1>螺壳扫描</h1>
-<p class="lede">在空闲时查一遍这台 Mac：空间去向、会重建的缓存、卸载残留、久未动的项目、重复和久未打开的大文件，以及常驻项、进程、键盘监听、权限、浏览器扩展、MCP 配置、AI 工具的 skill 和说明文件、基础安全设置和病毒。是不是垃圾、能不能删由确定的规则决定，主控的本机模型只把发现讲成人话。结果经 agent 告诉用户；删除只执行用户在卡片上点过的方案，用户打开以后，四类按规则挑出的东西不用点就清。除缓存和失效的链接外都移到废纸篓，能放回。</p>
-<p class="src">仓库 <code>luoke-scan</code>（Swift 包，Apache-2.0；三个程序 <code>luoke-scan</code>、<code>luoke-scan-serve</code>、<code>luoke-scan-admin</code>）· 版本 0.1.4，规则包 0.1.0，按代码 1b3aea6（v0.1.4）核对 · 进 beta 2 · 只支持 macOS 26.2 及以上</p>
+<p class="lede">在空闲时查一遍这台 Mac：空间去向、会重建的缓存、卸载残留、久未动的项目、重复和久未打开的大文件，以及常驻项、进程、键盘监听、权限、浏览器扩展、MCP 配置、AI 工具的 skill 和说明文件、依赖里的已知恶意包、基础安全设置和病毒。是不是垃圾、能不能删由确定的规则决定，主控的本机模型只把发现讲成人话。打在螺壳.app 里，不常驻：空闲任务由主控经螺壳本体起，agent 的每个请求由本体起一次。结果经 agent 告诉用户；删除只执行用户在卡片上点过的方案，用户打开以后，四类按规则挑出的东西不用点就清。除会重建的缓存和失效的链接外都移到废纸篓，能放回。</p>
+<p class="src">仓库 <code>luoke-scan</code>（用 Go 写，Apache-2.0；两个程序 <code>luoke-scan</code>、<code>luoke-scan-admin</code>）· 版本 0.3.8，规则包 0.1.0，按代码 37c38cb 核对 · 封闭测试，随 beta 2 第一次提供 · 只支持 Apple 芯片、macOS 26.2 及以上</p>
 
 <h2>职责</h2>
 <ul>
-<li>查的时候不改任何东西；定时的一轮查完以后才清（见「清理」）。能用元信息（大小、时间、inode、签名、链接数）判断的不读内容；要内容的（重复文件的哈希、明文凭据、散落的密钥、AI 工具的 skill 和说明文件）只在本机读，内容不进报告、日志和卡片。</li>
+<li>查的时候不改任何东西；只有主控定时起的、带 <code>--autoclean</code> 的一轮在查完以后清（见「清理」）。能用元信息（大小、时间、inode、签名、链接数）判断的不读内容；要内容的（重复文件的哈希、锁文件和全局包的名字与版本、明文凭据和散落的密钥、AI 工具的 skill 和说明文件）只在本机读，内容不进报告、日志和卡片。</li>
 <li>每条发现带结论（放心删 <code>safe</code> / 要确认 <code>confirm</code> / 仅供参考 <code>info</code>）、类别、严重度和依据。只有会重建的缓存能得到"放心删"。</li>
 <li>检查没跑成记成"没扫描"并写原因，不算没有发现。</li>
-<li>不主动找用户：没有通知、没有菜单栏图标，要说的事放进 outbox，由 agent 挑时机。</li>
-<li>不带模型：把发现讲成人话、给认不出的文件夹认名字、看 skill 说的和做的对不对得上，用主控的三个生成任务（见「生成任务」）；模型说的只附在发现下面，不改结论；主控不在或任务没开时照样查、照样出结果。病毒扫描用随包的 ClamAV 和 YARA（特征扫描，不是模型）。</li>
+<li>不主动找用户：没有通知、没有菜单栏图标、没有自己的窗口，要说的事放进 outbox，由 agent 挑时机。</li>
+<li>不带模型：讲成人话、给认不出的文件夹认名字、看 skill 说的和做的对不对得上，用主控的三个生成任务（见「生成任务」）；模型说的只附在发现下面，不改结论；主控不在或任务没开时照样查、照样出结果。病毒扫描用随包的 ClamAV 和 YARA。</li>
+<li>只有 freshclam 每天最多一次从 <code>database.clamav.net</code> 下载病毒库会联网。恶意包名单只从本机文件导入，git 不 fetch，模型和记忆都经本机的主控，给 agent 的接口是本体交来的标准输入输出，不开 socket、不监听端口。</li>
 </ul>
 
 <h2>运行形态</h2>
 <div class="tbl"><table>
 <tr><th>程序</th><th>行为</th></tr>
-<tr><td><code>luoke-scan</code></td><td>「螺壳扫描.app」的主程序，读磁盘的是它。完全磁盘访问授给螺壳本身（ADR 0021），它由螺壳直接或经 <code>luoke-scan-serve</code> 起时用这份授权。扫描、出方案、执行方案、不用点就清、问主控的模型都在它里面；<b>从不开 socket</b>。空闲任务 <code>scan --this-mac --autoclean</code>、<code>update --this-mac</code> 起它；agent 的每个请求起一次 <code>luoke-scan mcp</code>（标准输入一条 JSON-RPC，标准输出答复，答完就退出）</td></tr>
-<tr><td><code>luoke-scan-serve</code></td><td>只管给 agent 的 socket <code>~/.luoke-scan/run/agent.sock</code>，自己不读不动用户的文件；只链接 <code>ScanSocket</code>，不含检查和清理的代码。带团队签名时（正式包、内部版）每个连接按对方的审计令牌（<code>LOCAL_PEERTOKEN</code>）核签名，只认同一个团队签的程序，别的答 403；开发版没有团队签名，只看是不是同一个用户。每个 <code>POST /mcp</code> 起同一文件夹里的 <code>luoke-scan mcp</code>（不脱离，跟着起它的螺壳用完全磁盘访问），只传 0、1、2 三个描述符，等 290 秒。每 300 秒（<code>--quick-every</code>）起一次 <code>luoke-scan scan --quick</code> 看新下载的</td></tr>
-<tr><td><code>luoke-scan-admin</code></td><td>单独签名（<code>ai.luoke.scan.admin</code>）。平时不运行，只在用户输入 Mac 的密码后以管理员身份做一次「要密码的删除」，见「清理」。不是常驻的 root 辅助程序</td></tr>
+<tr><td><code>luoke-scan</code></td><td>在 <code>螺壳.app/Contents/Helpers</code>，签名标识 <code>ai.luoke.scan</code>。读磁盘的是它：扫描、出方案、执行方案、不用点就清、问主控的模型、写记忆都在它里面；<b>从不开 socket</b>。三种起法：空闲任务 <code>update --this-mac</code>、<code>scan --this-mac --autoclean</code>（主控经螺壳本体的 <code>--run-tool</code> 起）；agent 的每个请求起一次 <code>luoke-scan mcp --this-mac</code>；<code>scan_now</code> 另起一个脱离的 <code>scan --for-agent --this-mac</code>（自己一个进程组，起它的请求先答完退出）</td></tr>
+<tr><td><code>luoke-scan-admin</code></td><td>同在 <code>Contents/Helpers</code>，单独签名（<code>ai.luoke.scan.admin</code>）。平时不运行，只在用户在螺壳弹出的密码框里输入密码以后，以 root 做一次「要密码的删除」，见「清理」。不是常驻的 root 辅助程序</td></tr>
 </table></div>
 <ul>
-<li><b>谁起</b>：空闲任务由主控按配件清单的 <code>jobs</code> 起（每天一次，接着电源；<code>scan</code> 声明要完全磁盘访问 <code>"permissions": ["fda"]</code>，<code>update</code> 不要）。<code>luoke-scan-serve</code> 要常驻：配件清单写了 <code>resident_exec</code>、<code>resident_command</code>、<code>resident_permissions</code>，<code>resident</code> 还是 false；主控还不认这几个字段，现在不会起它，要手动起。</li>
-<li><b>第一轮</b>：主控发现新配件没有运行记录，第一个满足条件的周期就跑（用户安静、后台条件允许、没有别的任务在跑），不用等一天。配件清单里 <code>update</code> 排在 <code>scan</code> 前，第一轮先下病毒库再扫描。第一轮就带 <code>--autoclean</code>（自动清默认关，用户打开以后才清），<code>persistence.new</code> 只记基线，<code>space.growth</code> 要攒几天历史。<code>luoke-scan-serve</code> 自己不起第一轮；想马上查用 <code>scan_now</code>（不清东西）。</li>
-<li><b>装好的包只认 <code>--this-mac</code></b>：在 .app 里运行时，<code>--home</code>、<code>--data</code>、<code>--tmp</code>、<code>--projects</code>、<code>--tool-dir</code>、<code>--fixture</code>、<code>--clock-start</code>、<code>--clock</code>、<code>--no-full-disk-access</code> 和 <code>fixture</code>、<code>eval-cleanup</code>、<code>eval-skills</code>、<code>eval-agentfiles</code>、<code>make-skill-evalset</code> 子命令都拒绝；<code>findings</code>、<code>status</code>、<code>update</code> 要带 <code>--this-mac</code>。扫描工具只用包里的，不找 Homebrew 的（那些文件夹用户可写，会借到完全磁盘访问）。</li>
-<li><b><code>--this-mac</code> 查哪里</b>：家目录、本用户的临时目录（<code>DARWIN_USER_TEMP_DIR</code>），<code>/Library</code> 和 <code>/var/db/receipts</code>（找系统目录里的卸载残留），项目目录取 <code>~/Developer</code>、<code>~/Projects</code>、<code>~/Documents/GitHub</code>、<code>~/code</code>、<code>~/src</code>、<code>~/repos</code>、<code>~/workspace</code> 里存在的；数据放 <code>~/.luoke-scan</code>。</li>
-<li><b>没有完全磁盘访问时</b>：不碰 macOS 会弹框问的文件夹（桌面、文稿、下载、iCloud 云盘、<code>~/Library/CloudStorage</code>、<code>Containers</code>、<code>Daemon Containers</code>、<code>Group Containers</code>）。能不能读用打开 TCC 库试探，不弹框，试不出算没有。看不到的部分跳过，写成"没有完全磁盘访问，…没看"，已看到的照报；受保护文件夹里的程序签名记成"不知道"，不当成不存在；方案不碰这些路径，快速扫描不跑；记过的大小和哈希不忘。outbox 出 <code>needs-access</code> 卡片，请用户在系统设置里给「螺壳」打开。受保护文件夹里的缓存不看，也记成"没看"（发现里不出现，不用点就清也不碰）；其余缓存和临时文件夹照常清，安装包和重复文件没有发现就不动。</li>
-<li><b>一次一轮</b>：每个数据目录用 <code>round.lock</code> 保证空闲任务和 agent 叫的那一轮不重叠；快速扫描另有 <code>quick.lock</code>；一个数据目录只能起一个 <code>luoke-scan-serve</code>（<code>serve.lock</code>）；一份方案同时只在一个进程里执行（<code>plans/&lt;编号&gt;.lock</code>）。</li>
-<li><b>跑得轻</b>：<code>scan</code>、<code>update</code> 以 utility 优先级运行（磁盘 I/O 同档，起的 clamscan、yara、git 也是）；只在 iCloud 的文件不读（读会触发下载）。外部命令都带超时，超时连进程组一起杀。</li>
-<li><b>被打断</b>：收到 SIGTERM 时停在做完的那一步、保存报告、退出码 0；没来得及查的规则沿用上一轮的发现并在 <code>skipped</code> 里注明，量过的留给下一轮。扫描被打断的一轮不做不用点就清；清的时候被打断见「不用点就清」。</li>
-<li><b>快速扫描</b>（<code>scan --quick</code>）：只在接着电源、不在低电量模式、内存压力不高（<code>kern.memorystatus_vm_pressure_level</code> ≤ 1）时跑；FSEvents 日志显示下载或桌面有改动才扫，只跑病毒扫描，用精简库，跳过 120 秒内写过的文件（修改时间在未来的不算还在写）；有跳过的文件时不记这次的事件号，下一次不管日志有没有改动都再看，没变的沿用记录不重扫；结果并进上一轮的报告；整轮在跑就不看。还没有完整的一轮或没有完全磁盘访问时不做。</li>
+<li><b>空闲任务</b>：主控按配件清单的 <code>jobs</code> 起：<code>update</code>（每天最多一次，<code>memory_mb</code> 800，20 分钟）和 <code>scan</code>（每天最多一次，用模型，1500，60 分钟，声明用到完全磁盘访问 <code>"uses": ["fda"]</code>），都不用电池，要用户安静、后台状态允许、没有别的空闲任务在跑。主控起的是螺壳本体的 <code>--run-tool luoke-scan &lt;参数&gt;</code>：本体只认 <code>update --this-mac</code>、<code>scan --this-mac --autoclean</code> 两条，一字不差，用户在「应用」里开启了才起（默认关），停着起、核过签名再放行（见主控页）。环境只有 <code>HOME</code>、<code>TMPDIR</code>、<code>PATH</code>、<code>LANG</code>，没有描述符 3（空闲任务不提权）。</li>
+<li><b>agent 的请求</b>：本体起 <code>luoke-scan mcp --this-mac</code>，标准输入输出接在交给 agent 的那条连接上，描述符 3（<code>LUOKE_HOST_FD=3</code>）是请本体弹密码框的通道；同时最多 4 个，一个最长 300 秒（见主控页）。扫描读一条请求或一行一条，读到结尾就退出；一条超过 1 MB 或什么都没读到时退出码 3。</li>
+<li><b>第一轮</b>：用户开启螺壳扫描或刚确认权限时，清单里标了 <code>first_use</code> 的 <code>scan</code> 马上跑一轮（用户在跟前也不让路，只看超时）；病毒库这时多半还没下，病毒扫描记成没扫描，<code>update</code> 等下一个安静时刻。之后每天一轮，被打断的隔 10 分钟就能接着跑。自动清默认关，<code>persistence.new</code> 第一轮只记基线，<code>space.growth</code> 要攒几天历史。</li>
+<li><b>装好的包只认 <code>--this-mac</code></b>：<code>--home</code>、<code>--data</code>、<code>--tmp</code>、<code>--projects</code>、<code>--tool-dir</code>、<code>--fixture</code>、<code>--clock</code> 这类开发参数和 <code>eval-*</code>、<code>make-skill-evalset</code> 都拒绝。扫描工具只用 <code>Helpers</code> 里同一份的，每次用之前核签名（标识 <code>ai.luoke.scan.&lt;名字&gt;</code>、发行团队），不对就当没有，不找 Homebrew 的（那些文件夹用户可写，会借到完全磁盘访问）。提示词、<code>freshclam.conf</code> 和 ClamAV 的根证书编在 <code>luoke-scan</code> 里，起它之前核的签名也盖住它们。</li>
+<li><b><code>--this-mac</code> 查哪里</b>：家目录、本用户的临时目录（<code>$TMPDIR</code>），<code>/Library</code> 和 <code>/var/db/receipts</code>，应用目录 <code>/Applications</code>、<code>~/Applications</code>、<code>/System/Applications</code>，项目目录取 <code>~/Developer</code>、<code>~/Projects</code>、<code>~/Documents/GitHub</code>、<code>~/code</code>、<code>~/src</code>、<code>~/repos</code>、<code>~/workspace</code> 里存在的；数据放 <code>~/.luoke-scan</code>。</li>
+<li><b>完全磁盘访问</b>：授给螺壳本身（ADR 0021），本体起的扫描和扫描起的程序都跟着用。有没有：打开 <code>TCC.db</code> 试探（不弹框），试不出算没有。用户没在螺壳的权限窗口确认这一项时，本体给 <code>LUOKE_PERMISSIONS_OFF=fda</code>，扫描不管 macOS 给没给都当没有，连 Mail、Messages、Safari 这类隐私目录也不碰；<code>scan_now</code> 那一轮从起它的进程继承。</li>
+<li><b>没有完全磁盘访问时</b>：不碰 macOS 会弹框问的地方（桌面、文稿、下载、音乐、<code>~/Movies/TV</code>、<code>~/Library/Photos</code>、iCloud 云盘、<code>CloudStorage</code>、<code>Containers</code>、<code>Daemon Containers</code>、<code>Group Containers</code>，和任何 <code>.photoslibrary</code>），走别的目录时碰到也不进，<code>~/Documents/GitHub</code> 连在不在都不看。看不到的写成「没有完全磁盘访问，…没看」，已看到的照报；受保护文件夹里的程序签名记成"不知道"，不当成不存在；方案不碰这些路径；记过的大小、哈希、项目结论不忘。outbox 出 <code>needs-access</code>。</li>
+<li><b>一次一轮</b>：每个数据目录用 <code>round.lock</code> 保证空闲任务和 agent 叫的那一轮不重叠（等 3 秒还拿不到就说「已经在查了」、退出码 0）；快速扫描另有 <code>quick.lock</code>；一份方案同时只在一个进程里执行（<code>plans/&lt;编号&gt;.lock</code>）；数据表和 <code>agent-state.json</code> 读改写都加锁。</li>
+<li><b>跑得轻</b>：外部命令都带超时（默认 20 秒），超时或这一轮被叫停时先 TERM、2 秒后 KILL；起的程序留在扫描自己的进程组里，主控按组强杀时一起结束。只在 iCloud 的文件不读（读会触发下载）。</li>
+<li><b>被打断</b>：收到 SIGTERM 时停在做完的那一步、保存报告、退出码 0；没来得及查的规则沿用上一轮的发现并在 <code>skipped</code> 里注明，量过的留给下一轮。被打断的一轮不做不用点就清；清的时候被打断见「不用点就清」。主控发 SIGTERM 15 秒后对整个进程组强杀。</li>
+<li><b>快速扫描</b>（<code>scan --this-mac --quick</code>）：只在接着电源、不在低电量模式、内存压力不高（<code>kern.memorystatus_vm_pressure_level</code> ≤ 1）时跑；FSEvents 显示下载或桌面有改动才扫，只跑病毒扫描（不扫正在运行的程序），用精简库，跳过 120 秒内写过的文件，结果并进上一轮的报告；整轮在跑、还没有完整的一轮或没有完全磁盘访问时不做。现在没人起它，见「已知限制」。</li>
 </ul>
 
 <h2>检查什么</h2>
-<p>一轮按顺序跑 25 条规则，每条记耗时（<code>ruleSeconds</code>）。下表按类别合并；"结论"是规则给的。只有会重建的缓存是"放心删"；仅供参考的不删东西，写清怎么处理。</p>
+<p>一轮按顺序跑 26 条规则（<code>RuleOrder</code>），每条记耗时（<code>ruleSeconds</code>）。下表按类别合并；"结论"是规则给的。只有会重建的缓存是"放心删"；仅供参考的不删东西，写清怎么处理。大小门槛按 MiB、GiB 算。</p>
 <div class="tbl"><table>
 <tr><th>类别</th><th>发现（<code>rule</code>）</th><th>结论</th><th>要点</th></tr>
-<tr><td>会重建的缓存</td><td><code>cache.rebuildable.*</code></td><td>放心删</td><td>20 项：pip、SwiftPM、Go、Xcode DerivedData、Cargo（registry 的 cache 和 src）、Bun、uv、npm（只算 <code>~/.npm/_cacache</code>）、Homebrew、Yarn、CocoaPods、Gradle（caches 和 wrapper）、Poetry（cache 和 artifacts）、node-gyp、Composer、Xcode 文档、模拟器缓存；≥ 50 MB 才报</td></tr>
-<tr><td>临时目录</td><td><code>leak.temp-prefix</code></td><td>要确认</td><td>同一前缀（<code>mkdtemp</code> 式后缀）≥ 20 个、合计 ≥ 100 MB、1 天没动；给出数量、日期范围和每天多少</td></tr>
-<tr><td>久未动的项目</td><td><code>stale.project</code>、<code>stale.artifacts</code>、<code>stale.folders</code></td><td>要确认 / 仅供参考</td><td>项目目录下 6 个月（182 天）没动的；查 git（未推送提交、未提交改动、stash、没有远程、被忽略的非构建产物、仓库旁不在 git 里的东西），全干净才"要确认"，否则"仅供参考"并写会丢什么。<code>stale.artifacts</code> 是老项目里 25 种会重建的构建产物，往下 4 层、合计 ≥ 100 MB，查是否被 git 跟踪和内嵌仓库。git 带 <code>--no-optional-locks</code>，关掉仓库配置里会运行程序的项</td></tr>
-<tr><td>空间</td><td><code>space.growth</code>、<code>space.low</code>、<code>space.partial</code></td><td>仅供参考</td><td>家目录下一层（<code>~/Library</code> 的 Caches、Application Support、Containers、Developer 和 <code>.cache</code>、<code>.local/share</code> 再细分一层）和临时目录每天记大小，比 7 天内最早的记录每天多 ≥ 1 GB 报；可用空间 &lt; max(20 GB, 10%) 报；一轮量大小最多 10 分钟；<code>~/Library/CloudStorage</code> 从不量</td></tr>
-<tr><td>系统层空间</td><td><code>space.tm-snapshots</code>、<code>space.vm-disk</code>、<code>space.ai-model(s)</code>、<code>space.xcode-*</code>、<code>space.simulators</code></td><td>仅供参考；单个模型和旧设备支持文件要确认</td><td>Time Machine 本地快照留了 2 天以上；容器和虚拟机磁盘 ≥ 5 GB；AI 工具下载的模型单个 ≥ 2 GB 单列、合计 ≥ 5 GB 报一条；Xcode 旧的设备支持文件（≥ 100 MB、30 天没写）、归档 ≥ 1 GB、模拟器 ≥ 5 GB</td></tr>
-<tr><td>重复文件</td><td><code>space.duplicates</code></td><td>要确认</td><td>下载、桌面、文稿、影片、音乐、图片里 ≥ 10 MB、内容相同的几份（大小、头尾 64 KB、整份 SHA-256）；多占按 APFS 独占大小算，克隆和硬链接不算；一组多占 ≥ 50 MB 才报，最多 20 组</td></tr>
-<tr><td>久未打开的大文件</td><td><code>stale.large-file</code></td><td>要确认</td><td>Spotlight 记的上次打开时间在一年前、≥ 500 MB，最大的 20 个</td></tr>
-<tr><td>残留</td><td><code>leftover.app-data</code>、<code>leftover.installer</code>、<code>leftover.partial-download</code>、<code>leftover.relocated-items</code>、<code>leftover.intel-homebrew(-links)</code></td><td>要确认 / 仅供参考</td><td><code>~/Library</code> 和 <code>/Library</code> 里以 bundle id 命名、没有已装应用对得上、30 天没写、≥ 1 MB 的（名字像钱包、密码库、密钥、VPN、验证码、ssh 的，或同一开发商还有应用装着的，只"仅供参考"）；下载文件夹里 14 天前来的安装包（≥ 5 MB、没挂着）；7 天没写、≥ 1 MB 的没下完的下载；升级挪出的旧配置；Apple 芯片上的旧 Intel 版 Homebrew 和它留下的失效链接</td></tr>
-<tr><td>常驻项</td><td><code>persistence.*</code></td><td>要确认 / 仅供参考</td><td>本用户 LaunchAgent 指向不存在的程序；系统级 LaunchAgents / LaunchDaemons、应用登记的后台程序和登录项（<code>launchctl print gui/&lt;uid&gt;</code>）、crontab、shell 配置和 <code>/etc/paths</code> 里的 PATH：读签名（Security，不运行程序）、本用户能否换掉。记下见过的（第一轮只记），之后新出现、没人担保的报 <code>persistence.new</code>（高）</td></tr>
-<tr><td>启动钩子</td><td><code>startup.*</code></td><td>仅供参考</td><td>动态库注入环境变量（<code>dyld-insert</code>）、授权插件、登录钩子、终端启动命令、iTerm 自动运行、<code>periodic</code> 脚本</td></tr>
-<tr><td>新装的应用</td><td><code>apps.bad-signature</code>、<code>apps.unsigned</code>、<code>apps.not-notarized</code></td><td>要确认 / 仅供参考</td><td>最近 30 天放进「应用程序」的：签名对不上、没签名或临时签名、没公证；附隔离标记里下载它的程序。浏览器装成应用的网页不算</td></tr>
+<tr><td>会重建的缓存</td><td><code>cache.rebuildable.*</code></td><td>放心删</td><td>20 处：pip、SwiftPM、Go、Xcode DerivedData、Cargo（registry 的 cache 和 src）、Bun、uv、npm（只算 <code>~/.npm/_cacache</code>）、Homebrew、Yarn 1、CocoaPods、Gradle（caches 和 wrapper）、Poetry（cache 和 artifacts）、node-gyp、Composer、Xcode 文档、模拟器缓存；≥ 50 MiB 才报。每处都写了哪些程序在用它</td></tr>
+<tr><td>临时目录</td><td><code>leak.temp-prefix</code></td><td>要确认</td><td>同一前缀（<code>mkdtemp</code> 式后缀，<code>com.apple.*</code> 不算）≥ 20 个、合计 ≥ 100 MiB、1 天没动；≥ 1 GiB 算中；给出数量、日期范围和每天多少</td></tr>
+<tr><td>久未动的项目</td><td><code>stale.project</code>、<code>stale.artifacts</code>、<code>stale.folders</code></td><td>要确认 / 仅供参考</td><td>项目目录下 182 天没动的；查 git（没有远程、未推送提交、未提交改动、stash、被忽略的非构建产物、仓库旁不在 git 里的东西），全干净才"要确认"，否则"仅供参考"并写会丢什么。<code>stale.artifacts</code> 是老项目里 25 种会重建的构建产物，往下 4 层、合计 ≥ 100 MiB，查是否被 git 跟踪和内嵌仓库；<code>stale.folders</code> 是不在 git 里、≥ 1 MiB 的文件夹。git 带 <code>--no-optional-locks</code>，关掉 fsmonitor、hooks 和全局、系统配置</td></tr>
+<tr><td>空间</td><td><code>space.low</code>、<code>space.growth</code>、<code>space.partial</code></td><td>仅供参考</td><td>可用空间（「重要用途可用容量」，含可清除的）&lt; max(20 GiB, 10%) 报，附交换文件多大；家目录下一层（<code>~/Library</code> 的 Caches、Application Support、Containers、Developer 和 <code>.cache</code>、<code>.local/share</code> 再细分一层）和临时目录每天记大小，比 7 天内最早的记录每天多 ≥ 1 GiB 报；一轮量大小最多 10 分钟；<code>~/Library/CloudStorage</code> 和废纸篓从不量</td></tr>
+<tr><td>系统层空间</td><td><code>space.tm-snapshots</code>、<code>space.vm-disk</code>、<code>space.ai-model(s)</code>、<code>space.ipsw</code>、<code>space.xcode-*</code>、<code>space.simulators</code></td><td>仅供参考；单个模型、恢复镜像、旧设备支持文件要确认</td><td>Time Machine 本地快照留了 2 天以上；Docker、OrbStack、colima、Podman、lume 的虚拟机磁盘 ≥ 5 GiB；AI 工具下载的模型单个 ≥ 2 GiB 单列（Hugging Face 共用存储里的按文件实际占的算，只"仅供参考"）、合计 ≥ 5 GiB 报一条；装完系统留下的 <code>.ipsw</code> ≥ 1 GiB；Xcode 旧的设备支持文件（每个平台最新那版以外、≥ 100 MiB、30 天没写）、归档 ≥ 1 GiB、模拟器 ≥ 5 GiB</td></tr>
+<tr><td>重复文件</td><td><code>space.duplicates</code></td><td>要确认</td><td>下载、桌面、文稿、影片、音乐、图片里 ≥ 10 MiB、内容相同的几份（大小、头尾 64 KB、整份 SHA-256）；多占按 APFS 独占大小算，克隆和硬链接不算；一组多占 ≥ 50 MiB 才报，最多 20 组；留的那份先挑下载以外的</td></tr>
+<tr><td>久未打开的大文件</td><td><code>stale.large-file</code></td><td>要确认</td><td>Spotlight 记的上次打开时间（没打开过的按内容改动时间）在一年前、≥ 500 MB，最大的 20 个</td></tr>
+<tr><td>残留</td><td><code>leftover.app-data</code>、<code>leftover.installer</code>、<code>leftover.partial-download</code>、<code>leftover.relocated-items</code>、<code>leftover.intel-homebrew(-links)</code></td><td>要确认 / 仅供参考</td><td><code>~/Library</code> 和 <code>/Library</code>（root 拥有的 Application Support、Caches、Logs）里以 bundle id 命名、没有已装应用对得上、30 天没写、≥ 1 MiB 的（名字像钱包、密码库、密钥、VPN、ssh 的，或同一开发商还有应用、后台任务、扩展装着的，只"仅供参考"；<code>/Library</code> 里的这类不报）；下载文件夹里 14 天前来的安装包（≥ 5 MiB、没挂着）；7 天没写、≥ 1 MiB 的没下完的下载；升级挪出的旧配置；Apple 芯片上的旧 Intel 版 Homebrew 和它留下的失效链接</td></tr>
+<tr><td>常驻项</td><td><code>persistence.*</code></td><td>要确认 / 仅供参考</td><td>本用户 LaunchAgent 指向不存在的程序；系统级 LaunchAgents / LaunchDaemons、会话里登记的后台程序和登录项（<code>launchctl print gui/&lt;uid&gt;</code>）、crontab、shell 配置和 <code>/etc/paths</code> 里的 PATH：用 <code>codesign</code> 读签名（不运行程序）、本用户能否换掉。记下见过的（第一轮只记），之后新出现、又有疑点的报 <code>persistence.new</code>（要确认，出现后 7 天内每轮都报；签名对不上、系统级任务的程序本用户能换、程序在下载、缓存或临时目录里的为高，其余为中）</td></tr>
+<tr><td>启动钩子</td><td><code>startup.*</code></td><td>仅供参考</td><td>动态库环境变量（<code>dyld-insert</code>）、授权插件、登录钩子、终端启动命令、iTerm2 自动运行、<code>periodic</code> 脚本</td></tr>
+<tr><td>新装的应用</td><td><code>apps.bad-signature</code>、<code>apps.unsigned</code>、<code>apps.not-notarized</code></td><td>要确认 / 仅供参考</td><td>最近 30 天放进「应用程序」的：签名对不上（高）、没签名或临时签名、没公证（仅供参考；只认钉在应用上或这台 Mac 已有的票据，不联网）；附隔离标记里下载它的程序。浏览器装成应用的网页不算</td></tr>
 <tr><td>进程</td><td><code>process.*</code></td><td>要确认 / 仅供参考</td><td>程序文件已删除的进程；同一父进程下同一程序 ≥ 20 个；跑了 ≥ 6 小时的孤儿</td></tr>
-<tr><td>键盘监听</td><td><code>keyboard.unvouched</code>、<code>keyboard.watchers</code></td><td>仅供参考</td><td>用 <code>CGGetEventTapList</code> 列出在监听键盘事件的程序；没人担保的算中或高</td></tr>
-<tr><td>对外露出</td><td><code>exposure.*</code></td><td>仅供参考</td><td>本用户程序在回环以外监听 TCP 端口（libproc）；正在运行的命令行里带密码、令牌（只记种类）；SSH：<code>~/.ssh</code> 和钥匙的权限、没有口令的钥匙、弱算法、<code>authorized_keys</code>、<code>~/.ssh/rc</code></td></tr>
-<tr><td>凭据</td><td><code>secrets.plaintext</code>、<code>secrets.stray-key</code></td><td>仅供参考</td><td>工具明文存的凭据（<code>.git-credentials</code>、<code>.netrc</code>、<code>.npmrc</code>、<code>.pypirc</code>、Docker、gh）；下载、桌面、文稿往下两层里的私钥、证书包、云服务密钥。只读小文件的开头，只记种类和个数</td></tr>
+<tr><td>键盘监听</td><td><code>keyboard.unvouched</code>、<code>keyboard.watchers</code></td><td>仅供参考</td><td>用 <code>CGGetEventTapList</code> 列出在监听键盘事件的程序；没人担保的算中或高（Apple 签名的解释器也算中）</td></tr>
+<tr><td>对外露出</td><td><code>exposure.*</code></td><td>仅供参考</td><td>本用户程序在回环以外监听 TCP 端口；正在运行的命令行里带密码、令牌（只记种类）；SSH：<code>~/.ssh</code> 和钥匙的权限、没有口令的钥匙、弱算法、<code>authorized_keys</code>、<code>~/.ssh/rc</code></td></tr>
+<tr><td>凭据</td><td><code>secrets.plaintext</code>、<code>secrets.stray-key</code></td><td>仅供参考</td><td>工具明文存的凭据（<code>.git-credentials</code>、<code>.netrc</code>、<code>.npmrc</code>、<code>.pypirc</code>、Docker、gh）；下载、桌面、文稿往下两层里的私钥、证书包、Google Cloud 服务账号密钥。只读 64 KB 以内的文件，只记种类和个数</td></tr>
 <tr><td>浏览器</td><td><code>browser.*</code></td><td>仅供参考</td><td>7 个 Chromium 系浏览器和 Firefox 的扩展、被策略强装的（高）、侧载的、原生消息程序；不看 Safari</td></tr>
-<tr><td>MCP 配置</td><td><code>mcp.servers</code>、<code>mcp.secrets</code></td><td>仅供参考</td><td>7 处 AI 工具的 MCP 配置：装了哪些服务器，配置里有没有明文密钥</td></tr>
-<tr><td>AI 工具的 skill</td><td><code>skill.*</code>、<code>skill.partial</code></td><td>仅供参考</td><td>带 <code>SKILL.md</code> 的文件夹：家目录下 Claude Code（含插件）、Cursor、Gemini CLI、Copilot、Codex、<code>~/.agents</code> 的，和项目目录里每个项目的同类位置。在上限内读（每轮 200 个，单个文字文件 512 KB），逐行做十类静态检查：读密钥再往外发（<code>exfil</code>）、下载直接运行（<code>download-exec</code>）、提权和关保护（<code>escalation</code>）、自启动（<code>persistence</code>）、改 AI 自己的设置和记忆（<code>agent-tamper</code>）、大面积删除（<code>destructive</code>）、给 AI 的话和看不见的字符（<code>injection</code>）、权限太宽（<code>permission</code>）、供应链（<code>supply-chain</code>）、读不了的内容（<code>unreadable</code>）。一个 skill 一条，规则名取最重的一类，只记哪个文件第几行、哪一类，不记内容；编号按真实位置和内容哈希，内容一改就是新的一条；同一份内容在几处只报一次；高的算进卡片上的高风险提醒</td></tr>
-<tr><td>给 AI 看的说明文件</td><td><code>agentfile.*</code>、<code>agentfile.partial</code></td><td>仅供参考</td><td>AI 写代码的工具自己会读的：项目最上一层的 <code>AGENTS.md</code>、<code>CLAUDE.md</code>、<code>CLAUDE.local.md</code>、<code>GEMINI.md</code>、<code>.cursorrules</code>、<code>.cursor/rules/</code>、<code>.windsurfrules</code>、Copilot 的说明，和家目录下 Claude Code、Codex、Gemini CLI 的。用 skill 的文字检查（讲怎么维护说明文件、项目的 skill 和 MCP 放在哪的只当背景）；每个文件最多读 256 KB，一轮最多 400 个；不交给模型</td></tr>
+<tr><td>MCP 配置</td><td><code>mcp.servers</code>、<code>mcp.secrets</code></td><td>仅供参考</td><td>7 处 AI 工具的 MCP 配置：装了哪些服务器、哪些启动时现拉不钉版本的包；配置里有没有明文密钥（别的账户能读这个文件时为高）</td></tr>
+<tr><td>AI 工具的 skill</td><td><code>skill.*</code>、<code>skill.partial</code></td><td>仅供参考</td><td>带 <code>SKILL.md</code> 的文件夹：家目录下 Claude Code（含插件）、Cursor、Gemini CLI、Copilot、Codex、<code>~/.agents</code> 的，和项目目录里每个项目的同类位置。在上限内读（每轮 200 个，单个文字文件 512 KB），逐行做十类静态检查：读密钥再往外发（<code>exfil</code>）、下载直接运行（<code>download-exec</code>）、提权和关保护（<code>escalation</code>）、自启动（<code>persistence</code>）、改 AI 自己的设置和记忆（<code>agent-tamper</code>）、大面积删除（<code>destructive</code>）、给 AI 的话和看不见的字符（<code>injection</code>）、权限太宽（<code>permission</code>）、供应链（<code>supply-chain</code>）、读不了的内容（<code>unreadable</code>）。一个 skill 一条，规则名取最重的一类，只记哪个文件第几行、哪一类，不记内容；编号按真实位置和内容哈希，内容一改就是新的一条；同一份内容在几处只报一次</td></tr>
+<tr><td>给 AI 看的说明文件</td><td><code>agentfile.*</code>、<code>agentfile.partial</code></td><td>仅供参考</td><td>AI 写代码的工具自己会读的：项目最上一层的 <code>AGENTS.md</code>、<code>CLAUDE.md</code>、<code>CLAUDE.local.md</code>、<code>.claude/CLAUDE.md</code>、<code>GEMINI.md</code>、<code>.cursorrules</code>、<code>.cursor/rules/</code>、<code>.windsurfrules</code>、Copilot 的说明，和家目录下 Claude Code、Codex、Gemini CLI 的。用 skill 的文字检查（讲改 AI 的记忆、长期指令或别的 skill 的只当背景）；每个文件最多读 256 KB，一轮最多 400 个；不交给模型</td></tr>
 <tr><td>权限授予</td><td><code>permission.stale-grant</code></td><td>要确认</td><td>TCC 里允许的授权，应用或路径已经不在；读不了 TCC 记成没扫描（"需要完全磁盘访问"）</td></tr>
-<tr><td>基础设置</td><td><code>posture.*</code></td><td>仅供参考</td><td>FileVault、SIP、Gatekeeper、自动登录（高）；防火墙、隐身模式、锁屏和锁屏延迟、自动检查更新、待装更新且 30 天没重启；远程登录、屏幕共享、文件共享、互联网共享、AirDrop 对所有人、访客账户；用户加的根证书（只算不限主机、不是拒绝的）；XProtect 60 天没更新。只报不好的状态</td></tr>
+<tr><td>基础设置</td><td><code>posture.*</code></td><td>仅供参考</td><td>FileVault、SIP、Gatekeeper、自动登录（高）；防火墙、隐身模式、锁屏和锁屏延迟、自动检查更新、待装更新且 30 天没重启；远程登录、屏幕共享、文件共享、互联网共享、AirDrop 对所有人、访客账户；用户加的根证书；XProtect 60 天没更新。只报不好的状态</td></tr>
+<tr><td>依赖里的已知恶意包</td><td><code>supplychain.*</code></td><td>要确认</td><td>见下</td></tr>
 <tr><td>病毒</td><td><code>malware.*</code></td><td>要确认 / 仅供参考</td><td>见下</td></tr>
 </table></div>
 
 <h3>病毒扫描</h3>
 <ul>
-<li><b>扫什么</b>：下载文件夹里 30 天内来的文件（按修改时间或加入时间）、Spotlight 记着在家目录别处下载的（<code>kMDItemWhereFroms</code>）、下载来的应用里的程序（<code>Contents/MacOS</code> 全部，另加至多 50 个可执行文件）、本用户 LaunchAgent 运行的程序，一轮最多 2000 个；另加 AI 工具 skill 里的文件（不论新旧，最多 1000 个）。</li>
-<li><b>只扫新的</b>：扫过的记在 <code>malware_scanned</code>（路径、inode、大小、修改时间、当时认出的）；没变的 7 天后再扫，病毒库更新后 3 天内来的文件用新库再扫；没有要扫的就不起 clamscan。</li>
-<li><b>ClamAV</b>：<code>--max-filesize=100M --max-scansize=400M --alert-exceeds-max=yes</code>，太大的报 <code>malware.too-large</code>；读不了的文件不交给扫描器，下一轮再看；文件名带控制字符的单独报 <code>malware.odd-name</code>。整轮 clamscan 限 30 分钟、YARA 15 分钟。</li>
+<li><b>扫什么</b>：下载文件夹里 30 天内来的文件（按修改时间或加入时间）和 Spotlight 记着在家目录别处下载的（<code>kMDItemWhereFroms</code>），这两处一轮最多 2000 个；下载来的应用里的程序（<code>Contents/MacOS</code> 全部，另加至多 50 个可执行文件）；本用户 LaunchAgent 运行的程序；正在运行的本用户程序（最多 300 个，系统目录里的不算，解释器跑的脚本也扫）；AI 工具 skill 里的文件（不论新旧，最多 1000 个）。</li>
+<li><b>只扫新的</b>：扫过的记在 <code>malware_scanned</code>（路径、inode、大小、修改时间、当时认出的）；没变的 7 天后再扫，病毒库换新以后 3 天内来的文件用新库再扫；没有要扫的就不起 clamscan。</li>
+<li><b>ClamAV</b>：<code>--max-filesize=100M --max-scansize=400M --alert-exceeds-max=yes</code>，不跟链接；太大的合成一条 <code>malware.too-large</code>；读不了的不交给扫描器，下一轮再看；文件名带控制字符的单独报 <code>malware.odd-name</code>。整轮 clamscan 限 30 分钟、YARA 15 分钟。</li>
 <li><b>YARA</b>：自带两条规则（反弹 shell、伪造的系统密码对话框），加上 macOS 自带 XProtect 的规则（取版本新的那份；编不过时只用自带的），发现记成 <code>malware.yara.xprotect.&lt;规则&gt;</code>。</li>
 <li><b>精简库</b>：快速扫描用的库由 <code>sigtool --unpack</code> 拆开后去掉 <code>Win.</code>、<code>PUA.Win.</code> 开头的特征和 PE 的节、导入表哈希，每个库文件一个子目录、只重做变了的；快速扫描扫过的记成 <code>+quick</code>，下一次整轮用全库再扫。</li>
-<li><b>病毒库更新</b>（<code>update</code>）：每天最多一次；freshclam 读随包签名的配置（库的位置每次用 <code>--datadir</code> 给），在克隆出的临时目录里下载，<code>sigtool --info</code> 逐个校验通过才换库，任何一步失败保留旧库；被上游限流时保留 freshclam 的冷却状态。库超过 14 天没更新报 <code>malware.stale-db</code>，照样扫。</li>
+<li><b>病毒库更新</b>（<code>update</code>）：每天最多一次；freshclam 读编在程序里的配置（每次写进新建的临时目录），库下载到从现有库克隆出的 <code>clamav.staging</code>，<code>sigtool --info</code> 逐个校验通过才换库，任何一步失败保留旧库；被上游限流时保留 freshclam 的冷却状态。ClamAV 的根证书编在 <code>luoke-scan</code> 里，用时写进临时目录，<code>--cvdcertsdir</code> 指过去。库超过 14 天没更新报 <code>malware.stale-db</code>，照样扫。</li>
+</ul>
+
+<h3>依赖里的已知恶意包</h3>
+<ul>
+<li><b>名单</b>：<code>luoke-scan malicious-import &lt;OSV 的 JSON、文件夹或 .zip&gt;</code> 从本机文件导入，不联网；只留 <code>MAL-</code> 开头、没撤回的 npm、PyPI、crates.io 条目，并进原有的名单（同一编号的换新）。没导入过时这条规则不查也不提；名单超过 30 天报 <code>supplychain.stale-list</code>。</li>
+<li><b>看哪里</b>：项目目录下每个项目往下 3 层的九种锁文件（<code>package-lock.json</code>、<code>npm-shrinkwrap.json</code>、<code>pnpm-lock.yaml</code>、<code>yarn.lock</code>、<code>bun.lock</code>、<code>uv.lock</code>、<code>poetry.lock</code>、<code>Pipfile.lock</code>、<code>Cargo.lock</code>；<code>node_modules</code>、测试数据和示例文件夹里的不看），和全局装的包（npm 的全局目录里每个包的 <code>package.json</code>，bun、yarn、pnpm 的全局锁文件，pipx、uv tool、<code>cargo install</code>）。只读名字和版本，不打开包里的代码。</li>
+<li><b>比对</b>：按「生态 + 规范化的包名 + 版本」，名单写着「所有版本」的也算；从 git、本地路径、别的网址装的不算；从私有源装的同名包照报，写明来自哪里。</li>
+<li><b>报法</b>：同一个包一条 <code>supplychain.malicious</code>（高），列出用到它的地方和怎么办（删掉 <code>node_modules</code> 或虚拟环境、换到名单外的版本、装过就把令牌和钥匙都换掉）；最多单列 10 个包，其余并成一条。进 outbox 当急事，不替用户删项目里的东西。</li>
 </ul>
 
 <h3>增量</h3>
 <ul>
-<li><b>量大小</b>：每个文件夹和它下面两层 ≥ 1 MB 的子目录记下 FSEvents 事件号、inode、大小；下一轮回放日志，没改动、inode 没变、真正量过不到 7 天的沿用，被碰过的只重量改过的子目录。日志换了或丢了细节就全量。</li>
+<li><b>量大小</b>：每个文件夹和它下面两层 ≥ 1 MiB 的子目录记下 FSEvents 事件号、inode、大小；下一轮回放日志，没改动、inode 没变、真正量过不到 7 天的沿用，被碰过的只重量改过的子目录。日志换了（UUID 不同）或丢了事件就当一切都变了。回放前先等 fseventsd 交出刚写的事件（最多 5 秒），回放最多 60 秒，一轮里几条规则共用一次。</li>
 <li><b>临时目录、老项目、卸载残留</b>：同样按 FSEvents 沿用上次的结论（<code>temp_entries</code>、<code>project_state</code>、<code>leftover_state</code>），最长 7 天。</li>
-<li>遍历用 <code>getattrlistbulk</code>，不跟符号链接，不进挂在里面的别的卷；APFS、HFS+ 上空文件夹不打开，不够 20 个的临时目录前缀组不细看。新装应用和常驻项的签名结果按文件记下，最多沿用 7 天。</li>
+<li>遍历在 APFS、HFS+ 上用 <code>getattrlistbulk</code>，不跟符号链接，不进挂在里面的别的卷；不够 20 个的临时目录前缀组不细看。新装应用和常驻项的签名结果按文件记下，最多沿用 7 天。</li>
 </ul>
 
 <h2>清理</h2>
 <ul>
-<li><b>方案</b>：<code>scan_plan</code> 或 outbox 卡片从上一轮的发现出方案（最多 30 项），每项可选移到废纸篓、先不动、以后别提，重复文件另有换成克隆，失效的链接是删除。放心删的默认移到废纸篓，要确认的默认先不动。"仅供参考"的不进方案。要密码的项单独一份方案、单独一个按钮。方案存在 <code>plans/</code>，30 天后删掉。</li>
-<li><b>能进方案的</b>：缓存、残留（含没下完的下载、旧的 Intel 版 Homebrew）、临时目录的成批前缀、干净的久未动项目和其中的构建产物、久未打开的大文件、重复文件、单个 AI 模型、Xcode 旧设备支持文件、本用户指向不存在程序的 LaunchAgent 和新出现的本用户 LaunchAgent、病毒库或 YARA 认出的文件。目标只能在家目录或临时目录里面（不能是家目录、临时目录、项目目录本身）；要密码的那份例外。</li>
-<li><b>执行</b>（<code>scan_apply</code>）：没有 <code>ai.luoke/user-action</code> 就拒绝；只执行本工具出过的方案、只接受方案里列的选项，没送的项当"先不动"。每个目标再核对：还在、不是链接、设备号和 inode 没变、在家目录或临时目录里、父目录本用户可写、里面没挂别的盘、查过以后没改过（会重建的缓存 <code>cache.rebuildable.*</code> 除外，归在缓存类别里的 AI 模型和 Xcode 设备支持文件要重下，同样要查；未来时间不算；核对总共最多 2 分钟）；久未动的项目再问一次 git；移的那一步再比一次核对时的设备号和 inode。核对不上的跳过并写原因。</li>
-<li><b>怎么删</b>：移到废纸篓（<code>trashItem</code>）。LaunchAgent 先 <code>launchctl bootout</code> 再移配置。重复文件移走前确认要留的那份还在且内容相同；换成克隆前逐字节再比一遍，几份都留着；比的时候读失败算不一样。系统级常驻项、登录项、crontab 不进方案：登录项打开系统设置，crontab 说用 <code>crontab -e</code> 删哪一行，系统级常驻项说在访达里移走（会要密码）。</li>
+<li><b>方案</b>：<code>scan_plan</code> 或 outbox 卡片从上一轮的发现出方案（最多 30 项），每项可选移到废纸篓、先不动、以后别提；重复文件另有换成克隆，会重建的缓存是「删掉（会自动重建）」，失效的链接是「删掉（只是失效的链接）」。放心删的默认清，要确认的默认先不动。"仅供参考"的不进方案。要密码的项单独一份方案、单独一个按钮。方案存在 <code>plans/</code>，30 天后删掉。</li>
+<li><b>能进方案的</b>：缓存类里不是仅供参考的（会重建的缓存、单个 AI 模型、Xcode 旧设备支持文件、恢复镜像）、残留（含没下完的下载、旧的 Intel 版 Homebrew）、临时目录的成批前缀、干净的久未动项目和其中的构建产物、久未打开的大文件、重复文件、本用户指向不存在程序的 LaunchAgent 和新出现的本用户 LaunchAgent、病毒库或 YARA 认出的文件。目标只能在家目录或临时目录里面（不能是家目录、临时目录、项目目录本身）；要密码的那份和 <code>/usr/local</code> 下的失效链接例外。</li>
+<li><b>执行</b>（<code>scan_apply</code>）：没有 <code>ai.luoke/user-action</code> 就拒绝；只执行本工具出过的方案、只接受方案里列的选项，没送的项当"先不动"。每个目标再核对：还在、不是链接、设备号和 inode 没变、在家目录或临时目录里、父目录本用户可写、里面没挂别的盘、查过以后没改过（会重建的缓存 <code>cache.rebuildable.*</code> 除外，归在缓存类别里的 AI 模型、设备支持文件和恢复镜像要重下，同样要查；未来时间不算；核对总共最多 2 分钟）；久未动的项目再问一次 git；移的那一步再比一次核对时的设备号和 inode。核对不上的跳过并写原因。</li>
+<li><b>怎么删</b>：移到废纸篓是改名挪进 <code>~/.Trash</code>（重名时加「 2」「 3」，和访达一样）。会重建的缓存由扫描自己删：从 <code>/</code> 起一级一级不跟链接地打开，里面的链接只删链接，挂进来的别的盘不进去，不进废纸篓、放不回。LaunchAgent 要 <code>launchctl bootout</code> 和移走配置。重复文件移走前确认要留的那份还在且内容相同；换成克隆前逐字节再比一遍，几份都留着；比的时候读失败算不一样。系统级常驻项、登录项、crontab 不进方案：登录项打开系统设置，crontab 说用 <code>crontab -e</code> 删哪一行，系统级常驻项说在访达里移走（会要密码）。</li>
 </ul>
 
 <h3>不用点就清</h3>
 <p>四类默认关，用户在卡片或设置里点了「以后自动清」（<code>scan_autoclean</code>）才开；开了以后只在主控定时起的、带 <code>--autoclean</code> 的一轮里、查完且没被打断时做；agent 叫的一轮、快速扫描都不清。用户说过「以后别提」的不挑。</p>
 <div class="tbl"><table>
 <tr><th>类</th><th>判定</th><th>怎么清</th></tr>
-<tr><td>会重建的缓存</td><td>位置正好是缓存清单里的那一处、是真文件夹不是链接、到它的路上也没有链接（真实路径正好是家目录的真实路径加上缓存的位置）、里面没挂盘、用它的程序都没在运行。清单里没写谁在用的不自动清（测试要求每项都写）</td><td>扫描自己删文件夹，不跑工具自己的清理命令：从 <code>/</code> 起一级一级不跟链接地打开，里面的链接只删链接，挂进来的别的盘不进去。不进废纸篓，放不回；还留 ≥ 1 MiB 算没清完</td></tr>
+<tr><td>会重建的缓存</td><td>位置正好是缓存清单里的那一处、是真文件夹不是链接、到它的路上也没有链接（真实路径正好是家目录的真实路径加上缓存的位置）、里面没挂盘、用它的程序都没在运行。清单里没写谁在用的不自动清（测试要求每项都写）</td><td>扫描自己删文件夹，不跑工具自己的清理命令。不进废纸篓，放不回；还留 ≥ 1 MiB 算没清完</td></tr>
 <tr><td>安装包</td><td>下载文件夹里的普通文件，名字去掉版本、芯片、系统词后正好是已装的应用（≥ 4 个字母）；有隔离标记、有签名、来了 ≥ 14 天；名字带版本时不高于已装版本；没被打开、没挂着</td><td>移到废纸篓</td></tr>
-<tr><td>重复文件</td><td>副本在下载文件夹里，来和改都 ≥ 7 天、不在项目里、独占 ≥ 1 MiB；留的那份在下载之外、在本地、不在构建类文件夹里，内容相同；副本没被打开</td><td>移到废纸篓</td></tr>
+<tr><td>重复文件</td><td>副本在下载文件夹里，来和改都 ≥ 7 天、不在项目里、独占 ≥ 1 MiB；留的那份在下载之外、在本地、不在构建类文件夹里，是另一个文件、内容相同；副本没被打开</td><td>移到废纸篓</td></tr>
 <tr><td>测试工具的临时文件夹</td><td>只认 6 个前缀（Puppeteer、Playwright 的配置文件夹和产物、Lighthouse）；先要有 <code>leak.temp-prefix</code> 发现；每个文件夹 3 天没写、属于本用户、没挂盘、浏览器没开着、没被任何命令行点名；读不到进程列表就都不清</td><td>移到废纸篓</td></tr>
 </table></div>
 <ul>
 <li>移进废纸篓的三类，动手前和点过的方案做同样的核对，每项前重读开关，ctime 不晚于这一轮开始。</li>
-<li><b>开关</b>：<code>scan_autoclean</code> 开关全部四类，默认关。从某类放回过东西，那一类以后不再自动清（<code>autoOff</code>），关了再开时清空。状态文件读不出就不清，之后从"关"开始；以前默认开时写的状态文件读进来算关，更早明确同意过的照旧开。</li>
-<li><b>被打断</b>：缓存和移进废纸篓的每项之间都看一次，用户回来就停在两项之间，剩下的等下一轮。主控发 SIGTERM 15 秒后强杀，所以每清一项就写一次记录；这一轮的报告没存下时，由下一轮那一件告诉用户。</li>
+<li><b>开关</b>：<code>scan_autoclean</code> 开关全部四类，默认关。从某类放回过东西，那一类以后不再自动清（<code>autoOff</code>），关了再开时清空。状态文件读不出就不清，之后从"关"开始。</li>
+<li><b>被打断</b>：每项之前都看一次，用户回来就停在两项之间，剩下的等下一轮。主控发 SIGTERM 15 秒后强杀，所以每清一项就写一次记录；这一轮的报告没存下时，由下一轮那一件告诉用户。</li>
 <li>清了的记成 <code>auto-done</code>：卡片给 [放回]（整批，缓存除外）和 [以后别自动清]。</li>
 </ul>
 
 <h3>要密码的删除</h3>
 <ul>
-<li><b>范围</b>：<code>/Library</code> 的 Application Support、Caches、Logs 里 root 拥有的卸载残留，和旧的 Intel 版 Homebrew（Cellar、Caskroom、Homebrew 三个文件夹全动或全不动）。按钮是「移到废纸篓（要输入密码）」，选项绑在 <code>/admin_choices</code>。</li>
-<li><b>流程</b>：用户进程先再判一遍；点了以后弹 macOS 的授权框（<code>NSAppleScript</code>），在终端里是 <code>sudo -k</code>，每次都问。root 那一侧把 <code>luoke-scan-admin</code> 拷进只有 root 能写的临时文件夹，核对是小于 100 MB 的普通文件，按发布签名验这份拷贝，用空环境运行。它按和扫描同一个判定重判每一项，再看整棵树，30 天内写过或有别的账户东西的不动，逐层不跟链接地打开，<code>renameatx_np</code> 移进废纸篓。结果只经标准输出交回，由用户进程写记录。取消密码框时方案保留。</li>
-<li><b>在终端里</b>：<code>luoke-scan system --this-mac</code> 列出，<code>--trash a0,a1</code> 移走；root 直接跑会被拒绝。</li>
+<li><b>范围</b>：<code>/Library</code> 的 Application Support、Caches、Logs 里 root 拥有的卸载残留，和旧的 Intel 版 Homebrew（<code>Cellar</code>、<code>Caskroom</code>、<code>Homebrew</code> 三个文件夹全动或全不动）。按钮是「移到废纸篓（要输入密码）」，选项绑在 <code>/admin_choices</code>。</li>
+<li><b>流程</b>：用户进程先再判一遍，在 <code>plans/</code> 记下每个目标的设备号和 inode，再经描述符 3 请本体弹框，只交方案编号、自己的用户号、项的编号和 bundle id（最多等 280 秒）。本体逐项核对这些参数，用一个只有 <code>PATH</code> 环境的子进程弹 macOS 的授权框，框上是螺壳，每次都问。root 那一侧把本体包里的 <code>luoke-scan-admin</code> 拷进只有 root 能写的临时文件夹，核对是小于 100 MB 的普通文件，按螺壳的团队验这份拷贝的签名，用空环境运行；扫描说的话不进那条命令。临时签名的开发版不提权。</li>
+<li><b><code>luoke-scan-admin</code></b>：读用户的那份方案（不跟链接），按和扫描同一个判定重判每一项，再看整棵树，30 天内写过或有别的账户东西的不动，逐层不跟链接地打开，<code>renameatx_np</code> 移进用户的废纸篓。结果只经标准输出交回，由用户进程写记录。取消密码框时方案保留；本体等到时限也没答复时，已经挪走的照记，下一轮或放回时按设备号和 inode 再核。</li>
+<li><b>在终端里</b>：<code>luoke-scan system --this-mac</code> 列出，<code>--trash a0,a1</code> 把同一步交给 <code>sudo</code>，每次在终端里问密码；root 直接跑会被拒绝。</li>
 </ul>
 
 <h3>放回</h3>
 <ul>
-<li>清理记录写在只追加的 <code>cleaned.jsonl</code>，<code>scan_restore</code> 按一条（<code>c-…</code>）或一批（<code>p-…</code> / <code>auto-…</code>）放回，能放回的都带 <code>ai.luoke.scan.cleaned</code> 标记。</li>
+<li>清理记录写在只追加的 <code>cleaned.jsonl</code>，<code>scan_restore</code> 按一条（<code>c-…</code>）或一批（<code>p-…</code> / <code>auto-…</code>）放回，移进废纸篓的都带 <code>ai.luoke.scan.cleaned</code> 标记。</li>
 <li>用 <code>RENAME_EXCL</code> 放，原位置有同名的放成「名字（放回）」。整批不带报毒的文件和常驻项；受保护的位置不放回；要密码删的要在访达里拖。缓存放不回。</li>
 </ul>
+
 <h2>接口</h2>
 <h3>给 agent 的 MCP 工具</h3>
-<p>按 agent 工具协议（版本 1，MCP <code>2026-07-28</code> 的无状态子集：<code>server/discover</code>、<code>resources/list</code>、<code>resources/read</code>、<code>tools/list</code>、<code>tools/call</code>），在 <code>~/.luoke-scan/run/agent.sock</code> 上 <code>POST /mcp</code>（正式包只认同一个团队签名的程序连进来），请求体至多 1 MB。卡片是 A2UI v0.9（目录 <code>ai.luoke/a2ui/agent/1</code>）。不支持订阅。</p>
+<p>按 agent 工具协议（版本 1，MCP <code>2026-07-28</code> 的无状态子集：<code>server/discover</code>、<code>resources/list</code>、<code>resources/read</code>、<code>tools/list</code>、<code>tools/call</code>），走本体交来的标准输入输出（配件清单 <code>capabilities.transport</code> 是 <code>"stdio"</code>），一条消息至多 1 MB，通知不答。卡片是 A2UI v0.9（目录 <code>ai.luoke/a2ui/agent/1</code>，至多 200 个组件）。不支持订阅。</p>
 <div class="tbl"><table>
 <tr><th>工具</th><th>只读</th><th>参数 → 答复</th></tr>
 <tr><td><code>scan_status</code></td><td>是</td><td>— → 上一轮的时间和耗时、三种结论各多少、放心删能腾出多少、病毒库版本和日期、没查成的规则、自动清开着哪几类、是否正在查；带卡片</td></tr>
 <tr><td><code>scan_findings</code></td><td>是</td><td>可选 <code>verdict</code>（safe / confirm / info）、<code>category</code>、<code>limit</code>（1–50，默认 20）→ 发现列表和卡片；标成"以后别提"的不列</td></tr>
-<tr><td><code>scan_now</code></td><td>是</td><td>— → 另起 <code>luoke-scan scan --for-agent</code>，马上答复；这一轮不清东西，也不问模型新的问题（只用记下的答复）；已经在查就说一声</td></tr>
+<tr><td><code>scan_now</code></td><td>是</td><td>— → 另起 <code>luoke-scan scan --for-agent --this-mac</code>，马上答复；这一轮不清东西，也不问模型新的问题（只用记下的答复）；已经在查就说一声</td></tr>
 <tr><td><code>scan_plan</code></td><td>是</td><td>可选 <code>scope</code>（all / cache）→ 方案和确认卡片</td></tr>
-<tr><td><code>scan_apply</code></td><td>否（destructive）</td><td><code>plan_id</code>、<code>choices</code> → 移了、克隆了、部分处理、已不在、没动的各几项；什么都没剩时 <code>done: true</code></td></tr>
+<tr><td><code>scan_apply</code></td><td>否（destructive）</td><td><code>plan_id</code>、<code>choices</code> → 移了、克隆了、部分处理、以后不再提、已不在、没动的各几项；什么都没剩时 <code>done: true</code></td></tr>
 <tr><td><code>scan_ignore</code></td><td>否</td><td><code>finding_id</code> → 以后不再报这一条</td></tr>
 <tr><td><code>scan_restore</code></td><td>否</td><td><code>id</code>（<code>c-…</code>、<code>p-…</code>、<code>auto-…</code>）→ 放回一条或一批</td></tr>
 <tr><td><code>scan_autoclean</code></td><td>否</td><td><code>on</code>（旧的 <code>enable</code> 照旧认）→ 开或关不用点就清的四类（默认关）</td></tr>
@@ -1376,49 +1389,49 @@ sequenceDiagram
 <h3>outbox</h3>
 <div class="tbl"><table>
 <tr><th>kind</th><th>urgency</th><th>什么时候出</th></tr>
-<tr><td><code>security</code></td><td>urgent</td><td>病毒库或 YARA 认出的文件、新出现的没人担保的常驻项，每件一条、跨轮同一 <code>id</code>；放下（dismissed）后不再出。卡片给移到废纸篓 / 停掉并移到废纸篓（本用户的 LaunchAgent）/ 打开「登录项」设置、在访达里显示、以后别提</td></tr>
+<tr><td><code>security</code></td><td>urgent</td><td>病毒库或 YARA 认出的文件、用了名单上的恶意包、为高的 <code>persistence.new</code>，每件一条、跨轮同一 <code>id</code>；放下（dismissed）后不再出。卡片给移到废纸篓 / 停掉它（本用户的 LaunchAgent）/ 打开「登录项」设置、在访达里显示、以后别提；恶意包的卡片不删东西</td></tr>
 <tr><td><code>space</code></td><td>normal</td><td>只在可用空间低（<code>space.low</code>）时，每天一条；有会重建的缓存时同一张卡片带清理方案</td></tr>
-<tr><td><code>needs-access</code></td><td>low</td><td>这一轮有检查因为没有完全磁盘访问没查成，请用户给「螺壳」打开；带 <code>"permission": "fda"</code> 和打开系统设置的按钮</td></tr>
+<tr><td><code>needs-access</code></td><td>low</td><td>这一轮有检查因为没有完全磁盘访问没查成（也包括用户没在螺壳里确认这一项），请用户给「螺壳」打开；带 <code>"permission": "fda"</code> 和打开设置的按钮</td></tr>
 <tr><td><code>auto-done</code></td><td>normal</td><td>一轮的那一件，有自动清了的时候。上半部是清了的，[放回]、[以后别自动清]；下半部是要用户决定的和风险高的提醒。过期时间取清理后 7 天和这一轮开始后 3 天里晚的</td></tr>
 <tr><td><code>findings</code></td><td>low</td><td>一轮的那一件，没有自动清了的、但有放心删、要确认或风险高的仅供参考的时候：摘要和清理方案，3 天后过期。自动清关着、又有会重建的缓存时附「以后自动清」；权限残留附打开系统设置的按钮</td></tr>
 </table></div>
 <p><b>一轮一件</b>：编号 <code>round/&lt;这一轮开始的时间&gt;</code>，下一轮的那件顶替它；只剩风险不高的仅供参考时不放。agent 还没说过（没回 <code>outbox_ack shown</code>）的自动清带进下一轮那件，最多一周，卡片画最近 2 次；什么都没清掉只是失败的只写一句。<code>space.growth</code> 不进 outbox，只在发现列表里。</p>
-<p><b>卡片上列什么</b>：标题数到的都在卡片上，在方案里、在要收回的授权里，或单独列出。单独列的是进不了方案的要确认项（例如 <code>apps.unsigned</code>、<code>process.deleted-binary</code>）和风险高的仅供参考（例如 <code>posture.filevault</code>、<code>browser.forced-extensions</code>，<code>keyboard.unvouched</code>、<code>mcp.secrets</code> 判为高的），每种至多 10 条，高的在前，每条写怎么办，有的话带打开系统设置和在访达里显示的按钮，这些按钮都不删东西。放不下的写"还有 N 条"。</p>
+<p><b>卡片上列什么</b>：标题数到的都在卡片上，在方案里、在要收回的授权里，或单独列出。单独列的是进不了方案的要确认项（例如 <code>apps.unsigned</code>、<code>process.deleted-binary</code>、登录项和 crontab 的 <code>persistence.new</code>）和风险高的仅供参考（例如 <code>posture.filevault</code>、<code>browser.forced-extensions</code>，判为高的 <code>keyboard.unvouched</code>、<code>mcp.secrets</code>、<code>skill.*</code>），每种至多 10 条，高的在前，每条写怎么办，有的话带打开系统设置和在访达里显示的按钮，这些按钮都不删东西。放不下的写"还有 N 条"。</p>
+
 <h3>命令行</h3>
 <div class="tbl"><table>
 <tr><th>子命令</th><th>做什么</th></tr>
 <tr><td><code>scan --this-mac [--json]</code></td><td>查一轮；<code>--autoclean</code> 查完做不用点就清（空闲任务这样起，不和 <code>--for-agent</code>、<code>--quick</code>、<code>--home</code>、<code>--data</code> 一起用）；<code>--for-agent</code> agent 叫的一轮；<code>--quick</code> 快速扫描；<code>--if-none</code> 已有报告就不查</td></tr>
 <tr><td><code>update --this-mac [--force]</code></td><td>更新病毒库，每天最多一次</td></tr>
+<tr><td><code>malicious-import --this-mac &lt;路径&gt;</code></td><td>从本机的 OSV 文件导入恶意包名单</td></tr>
 <tr><td><code>report</code></td><td>终端里看上一轮，按放心删、要确认、仅供参考分组；模型说的写在那一条下面</td></tr>
-<tr><td><code>findings</code>、<code>status [--json]</code></td><td>上一轮的全部发现 / 概况</td></tr>
+<tr><td><code>findings</code>、<code>status --this-mac [--json]</code></td><td>上一轮的全部发现 / 概况</td></tr>
 <tr><td><code>cleaned --this-mac [--json]</code></td><td>清理记录：移进废纸篓的、直接删的，哪些还能放回</td></tr>
 <tr><td><code>restore --this-mac &lt;编号&gt;…</code></td><td>放回一条（<code>c-…</code>）或一批（<code>p-…</code> / <code>auto-…</code>）</td></tr>
 <tr><td><code>system --this-mac [--trash a0,a1]</code></td><td>列出要密码才能删的；<code>--trash</code> 把这几项移到废纸篓，<code>sudo</code> 每次在终端里问密码</td></tr>
-<tr><td><code>eval-cleanup [--cases &lt;文件&gt;]</code></td><td>清理规则评测，挑错一个就退出码 1（只在开发版）</td></tr>
-<tr><td><code>eval-skills</code>、<code>eval-agentfiles [--cases &lt;文件&gt;]</code></td><td>skill 检查、说明文件检查的评测：漏报恶意的、把正常的报成高的，退出码 1（只在开发版）</td></tr>
+<tr><td><code>mcp --this-mac</code></td><td>答 agent 的 MCP 请求（本体起）</td></tr>
+<tr><td><code>eval-cleanup</code>、<code>eval-skills</code>、<code>eval-agentfiles [--cases &lt;文件&gt;]</code></td><td>清理规则、skill 检查、说明文件检查的评测：挑错一个、漏报恶意的、把正常的报成高的，退出码 1（只在开发版）</td></tr>
 <tr><td><code>make-skill-evalset</code></td><td>用扫描拼输入的同一段代码生成 skill 语义检查的评测集和提示词示范（只在开发版）</td></tr>
-<tr><td><code>mcp</code></td><td>答一个 MCP 请求（<code>luoke-scan-serve</code> 用）</td></tr>
-<tr><td><code>fixture &lt;目录&gt;</code></td><td>生成假用户目录（只在开发版）；<code>luoke-scan-serve --fixture &lt;目录&gt;</code> 起只查它的服务，时钟从固定日期往前走（<code>--clock &lt;时间&gt;</code> 停在给的时间，<code>--no-full-disk-access</code> 当作螺壳没有完全磁盘访问：录 <code>fixtures/agent/</code> 用），移到废纸篓只挪进 <code>&lt;目录&gt;/Trash</code>，不调 <code>launchctl</code></td></tr>
 <tr><td><code>version</code></td><td>程序和规则包版本</td></tr>
 </table></div>
-<p>开发版用 <code>--home</code>、<code>--data</code>、<code>--tmp</code>、<code>--projects</code>、<code>--tool-dir</code> 指向假目录和自己的数据目录。</p>
+<p>开发版用 <code>--home</code>、<code>--data</code>、<code>--tmp</code>、<code>--projects</code>、<code>--tool-dir</code> 指向假目录和自己的数据目录；<code>--fixture &lt;假目录&gt;</code> 连进程、系统设置这些也换成假目录里 <code>fakes.json</code> 的答案（<code>--clock</code> 停住时钟，<code>--no-full-disk-access</code> 当作没有完全磁盘访问），移到废纸篓只挪进假目录的 <code>Trash/</code>，系统命令只记进 <code>commands.log</code>。假目录由外部测试 <code>blackbox/fx.py</code> 造。</p>
 
 <h2>生成任务</h2>
-<p>三个任务的提示词在 <code>prompts/</code>（照顶层 ADR 0019 的格式），扫描和评测程序读同一份，打包时原样拷进 <code>Contents/Resources/prompts</code>；建议参数 temperature 0、top_p 1、不思考。每一轮规则查完（自动清理之后）、存报告之前问：先 <code>GET /tasks</code>，只问 available 的任务，<code>POST /tasks/&lt;任务&gt;/v1/chat/completions</code>，后台优先级、流式，请求体和 <code>bench/run_eval.py</code> 发的逐字节一样。每轮新问的最多 explain 10 条、identify 5 条、skills 10 条，三个任务一共最多 3 分钟，一条最多等 90 秒；一个任务被挡回、出错或超时，这一轮就不再问它（主控说等不超过 5 秒时等一次再问）。答复按任务、提示词指纹和输入记在 <code>scan.db</code>，同一输入下一轮直接用，30 天没用到就删；agent 叫的那一轮只用记下的。只在这台 Mac 自己的数据目录、装好的 app 或指向自己主控（<code>LUOKE_HUB_SOCKET</code>）的开发版里问；主控不在、任务没开时只多一次 <code>GET /tasks</code>，报告照旧。模型说的只作为证据（<code>model_explain</code>、<code>model_identify</code>、<code>model_note</code>）附在发现下面，不改结论、轻重、标题和编号；卡片上列出的发现、清理方案的每一项、病毒提醒、<code>scan_findings</code> 和 <code>report</code> 上都显示。</p>
+<p>三个任务的提示词在 <code>prompts/</code>（照顶层 ADR 0019 的格式），装好的包用编在 <code>luoke-scan</code> 里的那份，开发版从程序往上找仓库里的；建议参数 temperature 0、top_p 1、不思考。每一轮规则查完（自动清理之后）、存报告之前问：先 <code>GET /tasks</code>，只问 available 的任务，<code>POST /tasks/&lt;任务&gt;/v1/chat/completions</code>，后台优先级、流式，请求体和 <code>bench/run_eval.py</code> 发的逐字节一样。每轮新问的最多 skills 10 条、identify 5 条、explain 10 条，三个任务一共最多 3 分钟，一条最多等 90 秒；一个任务被挡回、出错或超时，这一轮就不再问它（主控说等不超过 5 秒时等一次再问）。答复按任务、提示词指纹和输入记在 <code>model_answers</code> 表，同一输入下一轮直接用，30 天没用到就删；agent 叫的那一轮只用记下的。只在装好的螺壳里，或指向自己主控（<code>LUOKE_HUB_SOCKET</code>）的开发版、用这台 Mac 自己的数据目录时问；主控不在、任务没开时只多一次 <code>GET /tasks</code>，报告照旧。模型说的只作为证据（<code>model_explain</code>、<code>model_identify</code>、<code>model_note</code>）附在发现下面，不改结论、轻重、标题和编号；卡片、清理方案、病毒提醒、<code>scan_findings</code> 和 <code>report</code> 上都显示。</p>
 <div class="tbl"><table>
 <tr><th>任务</th><th>提示词</th><th>输入 → 输出</th></tr>
 <tr><td><code>luoke-scan.explain</code></td><td>第 4 版，至多 120 字、300 token</td><td>卡片上要用户看的发现（不是仅供参考的，或仅供参考但风险高的；skill 和说明文件的不问），重的、大的在前：结论、标题、位置、大小、规则的依据（整个不超过 3000 字）→ 一两句大白话：是什么、为什么报、处理会怎样。不改结论，不编数字，不说已经处理，<code>would_lose</code> 每项都说，不写命令。显示前照评测的检查再核：超长、Markdown、命令、网址、说已经做了、把不是放心删的说成能删、输入里没有的带单位的数字，都不显示</td></tr>
 <tr><td><code>luoke-scan.identify</code></td><td>第 5 版，200 token</td><td>规则说不出是谁的文件夹：一直在涨的（<code>space.growth</code>，桌面、文稿、下载这类不问）和已卸载应用的数据（<code>leftover.app-data</code>）的元信息（路径、大小、最后改动、文件数、常见扩展名、前几项的名字，不打开文件）→ JSON <code>{name, what, kind, sure}</code>，<code>kind</code> 为 cache / app-data / user-data / logs / tool / build / unknown；能不能删不由模型说。只显示 <code>sure</code> 为真、不是 unknown、不说能不能删、不带网址和命令的，写成「本机模型认的：…」</td></tr>
-<tr><td><code>luoke-scan.skills</code></td><td>第 3 版，400 token</td><td>规则报了的 skill（<code>skill.*</code>，不含说明文件）：名字、说明、允许的工具、文件列表、<code>SKILL.md</code> 正文、其他几个文件、规则查到的，整个 JSON 不超过 6000 字符 → JSON <code>{fits, does, beyond, risk}</code>。只在说对不上时附说明，说对得上时什么都不附（免得替 skill 打包票）；带网址、域名、IP、命令、密钥、代码的句子不显示，指到 skill 里没有的文件的那条去掉</td></tr>
+<tr><td><code>luoke-scan.skills</code></td><td>第 3 版，400 token</td><td>规则报了的 skill（<code>skill.*</code>，不含说明文件），问时重读一遍：名字、说明、允许的工具、文件列表、<code>SKILL.md</code> 正文、其他几个文件、规则查到的，整个 JSON 不超过 6000 字符 → JSON <code>{fits, does, beyond, risk}</code>。只在说对不上时附说明，说对得上时什么都不附（免得替 skill 打包票）；带网址、域名、IP、命令、密钥、代码的句子不显示，指到 skill 里没有的文件的那条去掉</td></tr>
 </table></div>
 
 <h2>依赖</h2>
 <div class="tbl"><table>
 <tr><th>依赖</th><th>用来做什么</th><th>现状</th></tr>
-<tr><td>主控 luoke-core</td><td>空闲任务 <code>scan</code>（每天一次，<code>memory_mb</code> 1500，60 分钟，用模型，要完全磁盘访问）、<code>update</code>（每天一次，800，20 分钟），都不用电池；生成任务 <code>luoke-scan.explain</code>、<code>luoke-scan.identify</code>、<code>luoke-scan.skills</code>（都不是 main）；常驻起 <code>luoke-scan-serve</code>；安装、升级、卸载；<code>GET /tasks</code> 给出写记忆用的 Python</td><td>配件清单 <code>packaging/luoke-accessory.json</code> 写了这些；主控的配方已登记三个生成任务，还不认 <code>resident_exec</code></td></tr>
-<tr><td>agent luoke-agent</td><td>唯一的提醒出口：调 MCP 工具、画卡片、转达 outbox</td><td>扫描这边已做好，<code>fixtures/agent/</code> 有五个场景录下的真实答复当接口样例；agent 正式接入在 beta 2</td></tr>
-<tr><td>记忆 luoke-mem</td><td>写"发生了什么"，五种记录：<code>scan-cleaned</code>、<code>scan-ignored</code>、<code>scan-malware</code>、<code>scan-auto-cleaned</code>、<code>scan-autoclean</code>。不写路径，报毒的只写文件名。经 <code>&lt;螺壳的 python&gt; -m luoke_mem record --tool luoke-scan</code>，只认螺壳 Team 签名的 Python，让它自己负责，不沾完全磁盘访问</td><td>代码已有；主控的配方没收录本工具时答 403，写不进去。问不到主控就静默跳过。不读记忆</td></tr>
-<tr><td>macOS</td><td>FSEvents、<code>getattrlistbulk</code>、Security（验签名，也核对连进 socket 的程序）、Spotlight（<code>mdfind</code>）、libproc、<code>CGGetEventTapList</code>、<code>launchctl</code>、<code>tmutil</code>、<code>fdesetup</code>、<code>csrutil</code>、<code>spctl</code>、<code>sysadminctl</code>、<code>hdiutil</code>、<code>pkgutil</code>、<code>codesign</code>、<code>security</code>、<code>defaults</code>、<code>crontab</code>、TCC 数据库、XProtect 规则</td><td>系统自带；不用会弹管理员密码框的 <code>sfltool</code>，不用会卡住的 <code>lsof</code></td></tr>
+<tr><td>主控 luoke-core</td><td>主控：空闲任务 <code>update</code>、<code>scan</code> 什么时候跑；生成任务 <code>luoke-scan.explain</code>、<code>luoke-scan.identify</code>、<code>luoke-scan.skills</code>（都不是 main）；<code>GET /tasks</code> 给出写记忆用的 Python。螺壳本体：<code>--run-tool</code> 起空闲任务、给 agent 起 <code>luoke-scan mcp</code>，核过签名和版本再放行；权限窗口和 <code>LUOKE_PERMISSIONS_OFF</code>；替扫描弹密码框；打包时把扫描放进螺壳.app、一起签名</td><td>配件清单 <code>packaging/luoke-accessory.json</code> 写了这些；主控的配方登记了三个生成任务；本体写死了 <code>ai.luoke.scan</code>、两条空闲任务的参数和 <code>mcp --this-mac</code></td></tr>
+<tr><td>agent luoke-agent</td><td>唯一的提醒出口：调 MCP 工具、画卡片、转达 outbox；连接由本体交给它</td><td>扫描这边已做好，<code>fixtures/agent/</code> 有六个场景录下的真实答复当接口样例</td></tr>
+<tr><td>记忆 luoke-mem</td><td>写"发生了什么"，五种记录：<code>scan-cleaned</code>、<code>scan-ignored</code>、<code>scan-malware</code>、<code>scan-auto-cleaned</code>、<code>scan-autoclean</code>。不写路径，报毒的只写文件名。经 <code>&lt;螺壳的 python&gt; -m luoke_mem record --tool luoke-scan</code>，只认螺壳包里、螺壳团队签名的那份 Python，空环境运行</td><td>代码已有；问不到主控、写不进去就静默跳过。不读记忆</td></tr>
+<tr><td>macOS</td><td>FSEvents、<code>CGGetEventTapList</code>、可用容量（这三处用 cgo）；sysctl、<code>proc_info</code>、<code>getattrlistbulk</code>、<code>clonefile</code>、<code>renameatx_np</code>；<code>codesign</code>（验签名）、<code>mdfind</code>、<code>mdls</code>、<code>launchctl</code>、<code>crontab</code>、<code>sqlite3</code>（读 TCC 库）、<code>tmutil</code>、<code>fdesetup</code>、<code>csrutil</code>、<code>spctl</code>、<code>sysadminctl</code>、<code>security</code>、<code>defaults</code>、<code>hdiutil</code>、<code>pkgutil</code>、<code>pmset</code>、<code>git</code>、XProtect 规则</td><td>系统自带；不用会弹管理员密码框的 <code>sfltool</code>，不用会卡住的 <code>lsof</code></td></tr>
 <tr><td>ClamAV、YARA</td><td>特征扫描；病毒库由 freshclam 从 <code>database.clamav.net</code> 下载</td><td>随包；往外只有这一项下载，不上传</td></tr>
 </table></div>
 
@@ -1426,26 +1439,26 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>位置</th><th>内容</th></tr>
 <tr><td><code>~/.luoke-scan/</code></td><td>数据目录（700），排除出 Time Machine</td></tr>
-<tr><td><code>scan.db</code></td><td>SQLite（WAL）：<code>sizes</code>（每天各文件夹的大小，留 90 天）、<code>measured</code> / <code>temp_entries</code> / <code>project_state</code> / <code>leftover_state</code>（增量用的事件号、inode、大小或结论）、<code>malware_scanned</code>、<code>file_hashes</code>（重复文件的 SHA-256，文件不在了就删）、<code>seen</code>（见过的常驻项）、<code>meta</code>（病毒库版本、更新时间、日志游标、签名缓存、常驻项基线、快速扫描的事件号）、<code>model_answers</code>（主控模型的答复，按任务、提示词指纹和输入记，30 天没用到就删）。都是关于这台 Mac 的事实，删了下一轮重建</td></tr>
-<tr><td><code>last-report.json</code></td><td>上一轮的报告（600，<code>luoke-scan.report/v1</code>）：发现、没扫描的项、规则包和病毒库版本、各规则耗时；每轮覆盖</td></tr>
+<tr><td><code>&lt;表&gt;.json</code>、<code>&lt;表&gt;.log</code></td><td>扫描记下的事实，不用数据库：每张表一份快照加一份追加日志（一行一批改动，带 CRC），各有一个锁文件；版本不对或读不了的当缓存丢掉。表：<code>sizes</code>（每天各文件夹的大小，留 90 天）、<code>measured</code> / <code>temp_entries</code> / <code>project_state</code> / <code>leftover_state</code>（增量用的事件号、inode、大小或结论）、<code>malware_scanned</code>、<code>file_hashes</code>（重复文件的 SHA-256）、<code>seen-persistence</code>（见过的常驻项）、<code>model_answers</code>（主控模型的答复，30 天没用到就删）、<code>meta</code>（病毒库版本、更新时间、日志游标、签名缓存、常驻项基线）。都是关于这台 Mac 的事实，删了下一轮重建</td></tr>
+<tr><td><code>last-report.json</code></td><td>上一轮的报告（600，<code>luoke-scan.report/v1</code>）：发现、没扫描的项、规则包、病毒库和恶意包名单的版本或日期、各规则耗时；每轮覆盖</td></tr>
 <tr><td><code>agent-state.json</code></td><td>用户经 agent 说的（600，加锁读改写）：以后别提的发现、outbox 的回执（60 天；报毒和权限请求的放下回执一直留，至多 500 条）、自动清的开关（默认关）和放回过的类别（<code>autoOff</code>）、最近 20 次自动清、办完的方案。读不出时挪到一边，不覆盖</td></tr>
 <tr><td><code>cleaned.jsonl</code></td><td>清理记录，只追加，放回靠它</td></tr>
-<tr><td><code>plans/</code></td><td>出过的方案（每项的路径、设备号、inode）、执行时的锁和要密码那一步的待办标记，30 天后删</td></tr>
-<tr><td><code>clamav/</code>、<code>clamav-quick/</code></td><td>病毒库和精简库；更新时用 <code>clamav.staging</code>、<code>clamav.previous</code>。freshclam 的配置不放在这里：装好的包读随包签名的 <code>Contents/Resources/freshclam.conf</code>，开发版写进这一次新建的临时目录（700）、用完删；旧版本写在数据目录里的那份更新时删掉</td></tr>
-<tr><td><code>run/agent.sock</code></td><td>MCP socket（目录 700、socket 600），旁边的锁文件在服务退出时删掉</td></tr>
-<tr><td><code>round.lock</code>、<code>quick.lock</code>、<code>serve.lock</code></td><td>见「运行形态」</td></tr>
+<tr><td><code>plans/</code></td><td>出过的方案（每项的路径、设备号、inode）、执行时的锁和要密码那一步的待核对记号，30 天后删</td></tr>
+<tr><td><code>clamav/</code>、<code>clamav-quick/</code></td><td>病毒库和精简库；更新时用 <code>clamav.staging</code>、<code>clamav.previous</code>。freshclam 的配置不放在这里</td></tr>
+<tr><td><code>malicious-packages.txt</code></td><td>导入的恶意包名单：开头写着名单的日期，一行一条：生态、包名、MAL 编号、受影响的版本</td></tr>
+<tr><td><code>round.lock</code>、<code>quick.lock</code></td><td>见「运行形态」</td></tr>
 </table></div>
 <ul>
 <li>报告和卡片里不放文件内容和凭证的值；凭据类发现只有位置、种类和个数。</li>
-<li>标准错误只写退出码和出错的类型，不写发现的内容。</li>
+<li>标准错误只在出事时写一两行，不写发现的内容。</li>
 </ul>
 
 <h2>打包</h2>
 <ul>
-<li><code>scripts/package_app.py</code> 拼「螺壳扫描.app」：bundle id <code>ai.luoke.scan</code>，<code>LSUIElement</code>，只出 arm64，最低 26.2，应用图标 <code>AppIcon.icns</code>（由品牌素材生成）。<code>Contents/MacOS</code> 里有 <code>luoke-scan</code>、<code>luoke-scan-serve</code>（<code>ai.luoke.scan.serve</code>）、<code>luoke-scan-admin</code>（<code>ai.luoke.scan.admin</code>）和 <code>clamscan</code>、<code>freshclam</code>、<code>sigtool</code>、<code>yara</code>（<code>ai.luoke.scan.&lt;名字&gt;</code>）；自己的三个程序拷进包后、签名前去掉调试信息和本地符号（<code>strip -S -x</code>）；扫描工具要的库在 <code>Frameworks</code>，路径改成 <code>@rpath</code>；ClamAV 的 RAR 支持运行时由 <code>LD_LIBRARY_PATH</code> 指到 <code>Frameworks</code>。</li>
-<li>由内向外签名，hardened runtime，没有 entitlements（临时签名时扫描工具带"可以载入别人签的库"，正式签名不许有）；可选公证。Developer ID 证书和公证条目由出版机器给，脚本不带凭据。</li>
-<li><code>Resources</code> 里有去掉草案标记的配件清单、应用图标、三个生成任务的提示词（<code>prompts/</code>，和仓库里的逐字节一样）、freshclam 的配置 <code>freshclam.conf</code>（随包签名）、<code>bundled-tools.json</code>（每个随包程序和库的版本、来源、SHA-256）、许可证（ClamAV 为 GPLv2）和第三方说明（ClamAV 完整的对应源码挂在螺壳的发布上，说明里指向索引）。</li>
-<li>打完必核对：签名完整、都是 hardened runtime、没有 <code>get-task-allow</code>、没有包外的库路径、<code>luoke-scan-serve</code> 里没有 <code>ScanCore</code> / <code>ScanService</code> 的代码、第三方库只有允许清单里的、第三方说明覆盖每个文件、RAR 支持真能载入、<code>Info.plist</code> 和配件清单一致、清单没有草案标记、带着应用图标、提示词和 <code>freshclam.conf</code> 和仓库里的一样、<code>exec</code> 和 <code>resident_exec</code> 是包里的程序、包里的 <code>luoke-scan</code> 不收开发参数，再用包里的 clamscan 和 YARA 真扫一个 EICAR 测试文件。Swift 包不加第三方依赖（测试里也查）。</li>
+<li><code>scripts/package_app.py --out &lt;目录&gt;</code> 编出 <code>luoke-scan/</code>，照螺壳.app 的 <code>Contents</code> 摆：<code>Helpers/</code> 里是 <code>luoke-scan</code>、<code>luoke-scan-admin</code>（Go 编，只出 arm64；<code>luoke-scan</code> 带打包标记，发行团队标识由 <code>LUOKE_RELEASE_TEAM</code> 编进去，源码里不写）和 <code>clamscan</code>、<code>freshclam</code>、<code>sigtool</code>、<code>yara</code>（照 Homebrew 里装好的拷来，标识 <code>ai.luoke.scan.&lt;名字&gt;</code>）；<code>Frameworks/</code> 是它们要的库，路径改成 <code>@rpath</code>，ClamAV 的 RAR 支持运行时由 <code>LD_LIBRARY_PATH</code> 指到这里；<code>Resources/scan/</code> 是去掉草案标记的配件清单、<code>bundled-tools.json</code>（每个随包程序和库的版本、来源、SHA-256）和图标；<code>Resources/licenses/luoke-scan/</code> 是许可证（ClamAV 为 GPLv2）和第三方说明（ClamAV 完整的对应源码挂在螺壳的发布上，说明里指向索引）。</li>
+<li>两个程序各链进一份 Info.plist（标识和版本号），签名盖住它，本体从签名信息读版本；拷进去以后、签名以前去掉调试信息和本地符号（<code>strip -S -x</code>）。这里只做临时签名、定好标识。</li>
+<li><b>进螺壳</b>：luoke-core 的 <code>app/build_app.sh</code> 给了 <code>LUOKE_SCAN_SRC</code> 才带：跑那个提交的 <code>package_app.py</code>，<code>Resources</code>、<code>Frameworks</code> 在外层 <code>--deep</code> 签名之前拷进去，<code>Helpers</code> 之后拷进去，再不带 <code>--deep</code> 签一次；版本写进螺壳 <code>Info.plist</code> 的 <code>LuokeScanVersion</code>。正式签名时统一加 hardened runtime、保留标识，签好后跑 <code>package_app.py --verify-app &lt;螺壳.app&gt;</code>。</li>
+<li><b>核对</b>：签名完整、标识对、没有 <code>get-task-allow</code>，正式签名的要 hardened runtime、和螺壳同一个团队；编进去的提示词、<code>freshclam.conf</code>、根证书和仓库里的一样；没有包外的库路径；第三方库只有允许清单里的，第三方说明覆盖每个文件；在读不到 Homebrew 的沙箱里用包里的 clamscan 和 YARA 真扫一个 EICAR 测试文件；包里的 <code>luoke-scan</code> 不收开发参数。Go 只用标准库和 <code>golang.org/x/sys</code>。</li>
 </ul>
 
 <h2>评测</h2>
@@ -1461,18 +1474,21 @@ sequenceDiagram
 <li><b>skills 第 3 版</b>：按 16 档的参数（Qwen3.5-9B 4-bit）三遍硬性 32/32、全部 65/66，规则报了的 11 个正常 skill 里 3 个说成对不上；32、128 档还没评第 3 版。</li>
 <li><b>清理规则</b>：<code>evals/cleanup/cases.json</code> 72 例（安装包 27、缓存 18、重复文件 17、临时文件夹 10），<code>luoke-scan eval-cleanup</code> 跑，挑错算硬门槛。</li>
 <li><b>skill 和说明文件的检查</b>：<code>evals/skills/cases.json</code> 66 个合成 skill（恶意、正常各 33），<code>evals/agentfiles/cases.json</code> 26 个说明文件（各 13）；<code>luoke-scan eval-skills</code>、<code>eval-agentfiles</code> 跑：恶意的全报且不低于写的轻重和类别，正常的一个都不报成高。</li>
-<li><b>性能</b>：<code>bench/perf.py</code> 在 12 万文件的假家目录上跑 release 版，CPU 时间或内存比基线差 25% 以上、且超过下限（CPU 1 秒、内存 20 MB）算不过；墙钟只报不比。一台真实机器上一整轮 348 秒降到 140 秒（空文件夹不打开以后）。基线量于 21 条规则时（64 GB 测试机）：不带病毒库，第一轮 CPU 3.6 秒、没变的一轮 0.65 秒、改了 1% 的一轮 1.25 秒，进程树峰值约 30 MB；带病毒库第一轮峰值约 1 GB（clamscan 载入全库），没变的一轮约 37 MB。</li>
-<li><b>测试</b>：<code>ScanCoreTests</code> 274 个 <code>@Test</code>、<code>ScanServiceTests</code> 187 个，全部用生成的假用户目录（主控是临时目录里的假 socket）；<code>scripts/agent_selftest.py</code> 用 luoke-agent 的参考实现对 <code>luoke-scan-serve --fixture</code> 走一遍；<code>fixtures/agent/</code> 的五个场景由 <code>scripts/record_agent_fixtures.py</code> 起真的 <code>luoke-scan-serve --fixture</code> 录下，<code>swift test</code> 里重录比对。PR 说明勾上「跑 CI」时，GitHub 上跑编译、测试、三套规则评测和 <code>bench/test_checks.py</code>。</li>
+<li><b>性能</b>：<code>bench/perf.py</code> 在 12 万文件的假家目录上跑，CPU 时间或内存比基线差 25% 以上、且超过下限（CPU 1 秒、内存 20 MB）算不过；墙钟只报不比。基线 <code>bench/perf-baseline.json</code> 是 21 条规则时录的。</li>
+<li><b>测试</b>：<code>go test ./...</code>；从外面测（<code>blackbox/</code>）约 290 个场景，只经命令行在生成的假目录上跑 <code>luoke-scan</code>，和录好的结果逐字比；<code>fixtures/agent/</code> 的六个场景由 <code>scripts/record_agent_fixtures.py</code> 起真的 <code>luoke-scan mcp --fixture</code> 录下，<code>--check</code> 重录比对。PR 说明勾上「跑 CI」时，GitHub 上跑这些、三套规则评测和 <code>bench/test_checks.py</code>。</li>
 </ul>
 
 <h2>已知限制</h2>
 <ul>
-<li><b>主控不起常驻服务</b>：主控还不认 <code>resident_exec</code>，装好的螺壳不起 <code>luoke-scan-serve</code>：agent 连不上扫描，两轮之间也不看新下载的。</li>
+<li><b>两轮之间不看新下载的</b>：快速扫描（<code>scan --quick</code>）的代码在，但清单的空闲任务只有 <code>update</code>、<code>scan</code>，本体也只放行这两条，没人起它。</li>
+<li><b>第一轮常没有病毒库</b>：开启后马上跑的那一轮排在 <code>update</code> 前面，病毒扫描要等之后的一轮。</li>
+<li><b>不降优先级</b>：扫描和它起的 clamscan、git 等都按默认优先级跑，自己不调低。</li>
+<li><b>「现在查一下」那一轮不归主控</b>：<code>scan_now</code> 起的一轮不是空闲任务，用户回来时不让路。</li>
 <li><b>模型的说明要主控开着任务</b>：三个生成任务没开（不在 <code>GET /tasks</code> 的 available 里）时一条都不问，报告和卡片只有规则的文字；skills 第 3 版只在 16 档的参数上评过。</li>
-<li><b>没有窗口</b>：主程序是命令行，双击 .app 只报用法后退出。两页基础页要等螺壳的窗口来画，agent 现在不读；卡片在 agent 接入后显示在它的窗口里。现在能看的是终端的 <code>report</code>、<code>findings</code>、<code>status</code>、<code>cleaned</code>、<code>system</code>。</li>
-<li><b>规则写在代码里</b>：规则、门槛、缓存清单、skill 和说明文件的位置表都在 Swift 里，没有规则文件；规则包版本只是一个常量。加一条规则要改代码、发新版。</li>
+<li><b>没有窗口</b>：扫描只有命令行，两页基础页和卡片由 agent 交给螺壳的窗口画；在终端里能看的是 <code>report</code>、<code>findings</code>、<code>status</code>、<code>cleaned</code>、<code>system</code>。</li>
+<li><b>规则写在代码里</b>：规则、门槛、缓存清单、skill 和说明文件的位置表都在 Go 代码里，没有规则文件；规则包版本只是一个常量。加一条规则要改代码、发新版。</li>
 <li><b>skill 和说明文件只看写法</b>：编译过的程序、压缩包、太大的文件只报「读不了」；拼出来的命令、写法正常而用意不正的看不出来；只查位置表里的地方。</li>
-<li>要密码的删除还没在真机上弹过密码框。</li>
+<li><b>恶意包名单要自己导入</b>：扫描不下载名单，没导入过这一项不查；导入以后不会自己更新，过 30 天只提醒。</li>
 <li>没有按类别手动关自动清的开关：只能全关，或放回一次让那一类停下。</li>
 </ul>
 </section>
@@ -1572,7 +1588,7 @@ sequenceDiagram
 <tr><td><code>min_macos</code></td><td>可选；这台 Mac 的系统版本低于它时不能装、说明原因（发布清单照抄）；螺壳里的应用低于它时当没带</td></tr>
 <tr><td><code>memory</code></td><td>是否读写记忆；决定卸载时能否"一起忘掉"、首次运行是否需要记忆</td></tr>
 <tr><td><code>tasks</code></td><td>需要主控提供的任务（<code>name</code>、<code>kind</code>、<code>main</code>）</td></tr>
-<tr><td><code>jobs</code></td><td>空闲任务：<code>name</code>、<code>command</code>（可用占位符 <code>{memory}</code>、<code>{tool}</code>）、<code>min_interval_minutes</code>（默认 120）、<code>allow_battery</code>（默认否）、<code>timeout_minutes</code>（默认 30）、<code>exec</code>（可选：不带 Python 的配件用 <code>Contents/MacOS</code> 下的可执行文件名，不能含路径；螺壳里的程序写了 <code>exec</code> 的，主控经螺壳的 <code>--run-tool</code> 起，参数要和本体写死的某一条一字不差）</td></tr>
+<tr><td><code>jobs</code></td><td>空闲任务：<code>name</code>、<code>command</code>（可用占位符 <code>{memory}</code>、<code>{tool}</code>）、<code>min_interval_minutes</code>（默认 120）、<code>allow_battery</code>（默认否）、<code>timeout_minutes</code>（默认 30）、<code>exec</code>（可选：不带 Python 的配件用 <code>Contents/MacOS</code> 下的可执行文件名，不能含路径；螺壳里的程序写了 <code>exec</code> 的，主控经螺壳的 <code>--run-tool</code> 起，参数要和本体写死的某一条一字不差）、<code>first_use</code>（可选：螺壳里的应用写 true 的任务，在用户开启它或刚确认权限后马上跑一次，这一次用户在跟前也不让路，只看超时）、<code>uses</code>（可选：这个任务用到 <code>capabilities.permissions</code> 里的哪几项，写编号；只是声明，主控不读）</td></tr>
 <tr><td><code>capabilities</code></td><td>给 agent 的能力声明，主控原样转交、不解释（规格见 agent 的工具协议），可含 <code>service</code>、<code>permissions</code>、<code>listing</code>；出版时把 <code>listing</code> 的 <code>tagline</code>、<code>category</code> 和各权限的说明（<code>id</code>、<code>kind</code>、<code>title</code>、<code>facts</code>、<code>without</code>）抄进发布清单的 <code>listing</code>，不抄 <code>size_mb</code>、<code>min_tier</code>、权限的默认值和动作名</td></tr>
 <tr><td><code>data</code></td><td>卸载时可删除的数据路径，只接受与配件自身标识绑定的形式</td></tr>
 <tr><td><code>data_env</code></td><td>螺壳里的应用认数据目录的环境变量（邮件助手是 <code>LUOKE_MAIL_HOME</code>）：螺壳不是装好的那份（例如开发版）时，主控把 <code>data</code> 里的路径换成 <code>~/Library/Application Support/&lt;标识&gt;</code>，跑它的命令和空闲任务时用这个变量把新位置交给它</td></tr>
@@ -1756,7 +1772,7 @@ sequenceDiagram
 <tr><td><code>luoke-ime.rerank</code></td><td>score</td><td>开</td><td>开</td><td>开</td><td>无提示词（打分）</td></tr>
 <tr><td><code>luoke-ime.predict</code></td><td>predict</td><td>开</td><td>开</td><td>开</td><td>无提示词（续写）</td></tr>
 <tr><td><code>digup.embed</code></td><td>embed</td><td>关</td><td>关</td><td>关</td><td>无提示词（嵌入）；预留给螺壳搜索，归配件 digup。螺壳搜索请求的是 <code>luoke-search.embed</code>，配方尚未改名，<code>verified</code> 也没有收录</td></tr>
-<tr><td><code>luoke-scan.explain</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/explain.*</code>（第 4 版）；螺壳扫描未发布，配方里不是 main，各档开关这里还没收录</td></tr>
+<tr><td><code>luoke-scan.explain</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/explain.*</code>（第 4 版）；螺壳扫描封闭测试，随 beta 2 第一次提供；配方里不是 main，各档开关这里还没收录</td></tr>
 <tr><td><code>luoke-scan.identify</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/identify.*</code>（第 5 版）；同上</td></tr>
 <tr><td><code>luoke-scan.skills</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/skills.*</code>（第 3 版）；同上</td></tr>
 </table></div>
@@ -1922,12 +1938,12 @@ sequenceDiagram
 </table></div>
 
 <h2>螺壳扫描</h2>
-<p>三个任务的提示词是 luoke-scan 仓库的 <code>prompts/</code>（顶层决策 0019 的格式）：每个任务一组 <code>.task.json</code>（任务名、版本、<code>max_tokens</code>、建议参数）、<code>.system.txt</code>、<code>.user.txt</code>（只有 <code>{{input}}</code>：输入的 JSON）、<code>.examples.json</code>（示范的一问一答，不取自评测集），输出是 JSON 的另有 <code>.schema.json</code>（发给主控时去掉 <code>x-</code> 开头的键）。读法和评测程序的 <code>bench/prompts.py</code> 一样，扫描发的请求和 <code>bench/run_eval.py</code> 逐字节一样（测试对三个评测集逐条比）；打包时原样拷进 <code>Contents/Resources/prompts</code>。每一轮规则查完、存报告前问，只问 <code>GET /tasks</code> 说可用的任务，流式、后台优先级；都不重问，答复按提示词指纹和输入记在 <code>scan.db</code>，同一输入下一轮直接用。模型说的只作为证据附在发现下面，不改结论、轻重、标题和编号。</p>
+<p>三个任务的提示词是 luoke-scan 仓库的 <code>prompts/</code>（顶层决策 0019 的格式）：每个任务一组 <code>.task.json</code>（任务名、版本、<code>max_tokens</code>、建议参数）、<code>.system.txt</code>、<code>.user.txt</code>（只有 <code>{{input}}</code>：输入的 JSON）、<code>.examples.json</code>（示范的一问一答，不取自评测集），输出是 JSON 的另有 <code>.schema.json</code>（发给主控时去掉 <code>x-</code> 开头的键）。读法和评测程序的 <code>bench/prompts.py</code> 一样，扫描发的请求和 <code>bench/run_eval.py</code> 逐字节一样（测试对三个评测集逐条比）；装好的螺壳用编在 <code>luoke-scan</code> 程序里的那份（打包时照搬，起它之前核的签名也盖住它们），开发版从程序往上找仓库的 <code>prompts/</code>。每一轮规则查完、存报告前问，只问 <code>GET /tasks</code> 说可用的任务，流式、后台优先级；都不重问，答复按提示词指纹和输入记在数据目录的 <code>model_answers</code> 表，同一输入下一轮直接用，30 天没用到就删。模型说的只作为证据附在发现下面，不改结论、轻重、标题和编号。</p>
 
 <h3><code>luoke-scan.explain</code> 讲成人话</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>提示词 <code>prompts/explain.*</code>（第 4 版，<code>{{max_chars}}</code> 填 120）；代码 <code>Sources/ScanCore/Explain.swift</code> 的 <code>input</code>、<code>answer</code></td></tr>
+<tr><td>位置</td><td>提示词 <code>prompts/explain.*</code>（第 4 版，<code>{{max_chars}}</code> 填 120）；代码 <code>internal/core/explain.go</code> 的 <code>ExplainInput</code>、<code>ExplainAnswer</code></td></tr>
 <tr><td>输入</td><td>这一轮卡片上要用户看的发现（不是仅供参考的，或仅供参考但风险高的；skill、说明文件的发现和各规则的 <code>.partial</code> 不问），重的、大的在前：结论、标题、位置（家目录写成 <code>~/…</code>）、大小、规则给的依据原样（不含扫描附的 <code>model_*</code> 和目标清单；每项 ≤ 300 字，整个 ≤ 3000 字，超了先去掉最长的几项）；5 个示范</td></tr>
 <tr><td>输出</td><td>一段简体中文，≤ 120 字：是什么、为什么报、处理会怎样。只用给的事实，不编数字、日期、应用名；要确认、仅供参考的不说放心删；<code>would_lose</code> 每项都说；不说已经处理；不写命令；病毒和可疑程序提醒别打开。没有 schema</td></tr>
 <tr><td>校验与退路</td><td>超过 120 字、Markdown、终端命令、网址、域名、IP、邮箱、说已经做了、把不是放心删的说成能删（仅供参考的另多一组词）、输入里没有的带单位的数字（输入里的日期、文件夹名里的年份不算）都不显示，不重问；词表和写法同评测程序（<code>bench/test_checks.py</code> 核对）。通过的记成证据 <code>model_explain</code></td></tr>
@@ -1938,7 +1954,7 @@ sequenceDiagram
 <h3><code>luoke-scan.identify</code> 认文件夹</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>提示词 <code>prompts/identify.*</code>（第 5 版，<code>{{kinds}}</code> 由 schema 里 <code>kind</code> 的 <code>x-describe</code> 填）；代码 <code>Sources/ScanCore/Identify.swift</code></td></tr>
+<tr><td>位置</td><td>提示词 <code>prompts/identify.*</code>（第 5 版，<code>{{kinds}}</code> 由 schema 里 <code>kind</code> 的 <code>x-describe</code> 填）；代码 <code>internal/core/identify.go</code></td></tr>
 <tr><td>输入</td><td>规则说不出是谁的文件夹：一直在涨的（<code>space.growth</code>；家目录本身和桌面、文稿、下载这类不问）和已卸载应用留下的数据（<code>leftover.app-data</code>），大的在前；没有完全磁盘访问时受保护的不问。只给元信息：路径、大小、最后改动、文件数（最多数 2 万个、2 秒）、最常见的 4 种扩展名、前 6 项的名字，不打开文件；5 个示范</td></tr>
 <tr><td>输出</td><td><code>{name, what, kind, sure}</code>：<code>kind</code> 7 选 1（cache / app-data / user-data / logs / tool / build / unknown）；看不出是谁的 name 写「不确定」、sure 为 false，不编应用名；只说是什么，不说能不能删；what ≤ 30 字</td></tr>
 <tr><td>校验与退路</td><td>键不齐、<code>kind</code> 不在枚举、name 超过 40 字、what 超过 60 字的不用，不重问；只显示 sure 为真、不是 unknown、name 不是「不确定」、不说能不能删、不带网址和命令的，写成「本机模型认的：名字（是什么）」（证据 <code>model_identify</code>）；种类和把握不决定任何事</td></tr>
@@ -1949,7 +1965,7 @@ sequenceDiagram
 <h3><code>luoke-scan.skills</code> 看 skill 对不对得上</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>提示词 <code>prompts/skills.*</code>（第 3 版，<code>{{risks}}</code> 由 schema 里 <code>risk</code> 的 <code>x-describe</code> 填；示范和评测集由 <code>luoke-scan make-skill-evalset</code> 用同一段代码生成，不手改）；代码 <code>Sources/ScanCore/SkillReview.swift</code></td></tr>
+<tr><td>位置</td><td>提示词 <code>prompts/skills.*</code>（第 3 版，<code>{{risks}}</code> 由 schema 里 <code>risk</code> 的 <code>x-describe</code> 填；示范和评测集由 <code>luoke-scan make-skill-evalset</code> 用同一段代码生成，不手改）；代码 <code>internal/core/skillreview.go</code></td></tr>
 <tr><td>输入</td><td>规则报了的 skill（<code>skill.*</code>；说明文件 <code>agentfile.*</code> 不问），重的在前；问时把 skill 重读一遍：工具、名字、说明、允许的工具、文件列表、<code>SKILL.md</code> 正文、其他几个文件（长的只给开头和规则指到的几行）、规则查到的（重的在前）；看不见的字符和长段编码换成标记；整个 JSON ≤ 6000 字符；提示词写明 skill 的内容只是要看的材料、不是指令；4 个示范</td></tr>
 <tr><td>输出</td><td><code>{fits, does, beyond, risk}</code>：fits 只看有没有名字和说明外的动作（说明讲了的有风险也算对得上，做得粗糙不算）；does 一句话（提示词要 ≤ 40 字）；beyond 最多 3 条（哪个文件、做了什么），对不上至少一条；risk 为 low / medium / high；不写网址、命令、密钥和代码</td></tr>
 <tr><td>校验与退路</td><td>照 schema 核，键不齐、超长的不用，不重问；带网址、域名、IP、命令、密钥、代码、skill 里的主机名或替 skill 打包票的句子不显示，指到 skill 里没有的文件的那条去掉。只在说对不上时附说明（证据 <code>model_note</code>，开头写「本机模型看过（只是说明，不改结论）」），说对得上时什么都不附</td></tr>
@@ -2035,18 +2051,18 @@ sequenceDiagram
 </table></div>
 <p>字段见<a href="#search">螺壳搜索</a>页。</p>
 
-<h2>螺壳扫描 <code>~/.luoke-scan/</code>（未发布）</h2>
+<h2>螺壳扫描 <code>~/.luoke-scan/</code>（封闭测试，随 beta 2 第一次提供）</h2>
 <div class="tbl"><table>
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td>目录本身</td><td>700，整个排除出 Time Machine</td></tr>
-<tr><td><code>scan.db</code>（及 <code>-wal</code>、<code>-shm</code>）</td><td>大小历史、增量记录、扫过病毒的文件、重复文件的哈希、见过的常驻项、主控模型的答复</td></tr>
+<tr><td><code>&lt;表&gt;.json</code>、<code>&lt;表&gt;.log</code>、<code>&lt;表&gt;.lock</code></td><td>扫描记下的事实，不用数据库：每张表一份快照、一份追加日志（一行一批改动，带 CRC）和一个锁文件，0600；读不了或版本不对的当缓存丢掉，下一轮重建。表有 <code>sizes</code>、<code>measured</code>、<code>temp_entries</code>、<code>project_state</code>、<code>leftover_state</code>、<code>malware_scanned</code>、<code>file_hashes</code>、<code>seen-persistence</code>、<code>model_answers</code>、<code>meta</code>：大小历史、增量记录、扫过病毒的文件、重复文件的哈希、见过的常驻项、主控模型的答复</td></tr>
 <tr><td><code>last-report.json</code></td><td>上一轮的报告，0600</td></tr>
 <tr><td><code>agent-state.json</code></td><td>以后别提的、outbox 的回执、自动清的开关和记录、办完的方案，0600</td></tr>
 <tr><td><code>cleaned.jsonl</code></td><td>清理记录，只追加，放回靠它</td></tr>
-<tr><td><code>plans/</code></td><td>出过的方案，30 天后删</td></tr>
+<tr><td><code>plans/</code></td><td>出过的方案、执行时的锁、要密码那一步的待核对记号，30 天后删</td></tr>
 <tr><td><code>clamav/</code>、<code>clamav-quick/</code></td><td>病毒库、快速扫描用的精简库</td></tr>
-<tr><td><code>run/agent.sock</code></td><td>MCP socket，0600，目录 700</td></tr>
-<tr><td><code>round.lock</code>、<code>quick.lock</code>、<code>serve.lock</code></td><td>一轮、快速扫描、服务各只一个</td></tr>
+<tr><td><code>malicious-packages.txt</code></td><td>用 <code>luoke-scan malicious-import</code> 从本机文件导入的恶意包名单</td></tr>
+<tr><td><code>round.lock</code>、<code>quick.lock</code></td><td>一轮、快速扫描各只一个</td></tr>
 </table></div>
 <p>字段见<a href="#audit">螺壳扫描</a>页。</p>
 
@@ -2147,7 +2163,8 @@ sequenceDiagram
 <li>输入法的个人化组件不读记忆中的理解，打分没有个人化。</li>
 <li>agent 没有对话能力，不使用模型；不在 v1 首发中。</li>
 <li>配方不支持撤回已发布版本。</li>
-<li>主控还不认配件清单里的常驻程序（<code>resident_exec</code>、<code>resident_command</code>、<code>resident_permissions</code>）：螺壳扫描（未发布）给 agent 的服务 <code>luoke-scan-serve</code> 没人起，agent 连不上扫描，两轮之间也不看新下载的。</li>
+<li>螺壳扫描两轮之间不看新下载的文件：快速扫描（<code>luoke-scan scan --this-mac --quick</code>）的代码在，但扫描的配件清单里空闲任务只有 <code>update</code>、<code>scan</code>，螺壳本体的 <code>--run-tool</code> 也只放行这两条，没人起它。</li>
+<li>开启螺壳扫描后马上跑的第一轮（清单里 <code>scan</code> 标了 <code>first_use</code>）排在病毒库更新 <code>update</code> 前面，这一轮的病毒扫描记成"没扫描"（病毒库还没下载），要等之后的一轮。</li>
 <li>Gmail 转发过滤器的一键生成未完成；规则导出的过滤器未在真实 Gmail 上验证导入。</li>
 </ul>
 
@@ -2214,6 +2231,7 @@ sequenceDiagram
 
 <h2>2026-11-07</h2>
 <ul>
+<li>螺壳扫描页按代码 37c38cb（0.3.8 之后，用 Go 写）重写：两个程序 <code>luoke-scan</code>、<code>luoke-scan-admin</code>，打在螺壳.app 里、不常驻；agent 的每个请求由本体起一次 <code>mcp --this-mac</code>（<code>transport: stdio</code>），空闲任务经本体的 <code>--run-tool</code>，核过签名和版本；要密码的删除经描述符 3 请本体弹框；数据改成每张表一份快照加追加日志，提示词和 ClamAV 证书编在程序里；规则 26 条（加依赖里的已知恶意包、<code>space.ipsw</code>）；清单的 <code>uses</code>、<code>first_use</code>、<code>LUOKE_PERMISSIONS_OFF</code>；评测、测试和已知限制重写。已知问题换成两条现在的缺口（两轮之间不看新下载的、第一轮常常还没有病毒库）；文件位置、提示词、agent、配件清单、主控、总览、生成任务几页里关于扫描的说法跟着改。</li>
 <li>螺壳搜索页按代码 f68fbe8（0.1.13）和主控 6affc4f 复核：改成收进螺壳.app 以后的样子（<code>Contents/Helpers/luoke-search</code> 裸程序，本体用 <code>--resident --parent-pid</code> 起，起之前核签名和版本，退出码 3、收尾 15 秒、本体停它等 5 秒）；权限都在螺壳名下（清单的 <code>permissions</code>、<code>LUOKE_PERMISSIONS_OFF</code>、经 <code>LUOKE_HOST_FD</code> 交给本体的跳到某一秒播放，去掉 <code>search_request_access</code>）；加应用页（<code>page/overview</code>、搜照片开关）、找相似的（<code>search_similar</code>）、<code>search_query</code> 的 <code>sources</code>、<code>totals</code>、<code>skipped</code>、<code>kind_label</code>；agent 的搜索查询向量限时 5 秒；被要求退出时记 <code>run/asked-to-stop.json</code>；32、128 GB 档的嵌入也收图片和声音，搜索已进发布流水线；参考向量集 16 条、测试 496 个；已知限制跟着改。主控页写明起螺壳搜索前也核签名和版本。</li>
 </ul>
 

@@ -142,12 +142,12 @@
 </table></div>
 
 <h2>螺壳扫描</h2>
-<p>三个任务的提示词是 luoke-scan 仓库的 <code>prompts/</code>（顶层决策 0019 的格式）：每个任务一组 <code>.task.json</code>（任务名、版本、<code>max_tokens</code>、建议参数）、<code>.system.txt</code>、<code>.user.txt</code>（只有 <code>{{input}}</code>：输入的 JSON）、<code>.examples.json</code>（示范的一问一答，不取自评测集），输出是 JSON 的另有 <code>.schema.json</code>（发给主控时去掉 <code>x-</code> 开头的键）。读法和评测程序的 <code>bench/prompts.py</code> 一样，扫描发的请求和 <code>bench/run_eval.py</code> 逐字节一样（测试对三个评测集逐条比）；打包时原样拷进 <code>Contents/Resources/prompts</code>。每一轮规则查完、存报告前问，只问 <code>GET /tasks</code> 说可用的任务，流式、后台优先级；都不重问，答复按提示词指纹和输入记在 <code>scan.db</code>，同一输入下一轮直接用。模型说的只作为证据附在发现下面，不改结论、轻重、标题和编号。</p>
+<p>三个任务的提示词是 luoke-scan 仓库的 <code>prompts/</code>（顶层决策 0019 的格式）：每个任务一组 <code>.task.json</code>（任务名、版本、<code>max_tokens</code>、建议参数）、<code>.system.txt</code>、<code>.user.txt</code>（只有 <code>{{input}}</code>：输入的 JSON）、<code>.examples.json</code>（示范的一问一答，不取自评测集），输出是 JSON 的另有 <code>.schema.json</code>（发给主控时去掉 <code>x-</code> 开头的键）。读法和评测程序的 <code>bench/prompts.py</code> 一样，扫描发的请求和 <code>bench/run_eval.py</code> 逐字节一样（测试对三个评测集逐条比）；装好的螺壳用编在 <code>luoke-scan</code> 程序里的那份（打包时照搬，起它之前核的签名也盖住它们），开发版从程序往上找仓库的 <code>prompts/</code>。每一轮规则查完、存报告前问，只问 <code>GET /tasks</code> 说可用的任务，流式、后台优先级；都不重问，答复按提示词指纹和输入记在数据目录的 <code>model_answers</code> 表，同一输入下一轮直接用，30 天没用到就删。模型说的只作为证据附在发现下面，不改结论、轻重、标题和编号。</p>
 
 <h3><code>luoke-scan.explain</code> 讲成人话</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>提示词 <code>prompts/explain.*</code>（第 4 版，<code>{{max_chars}}</code> 填 120）；代码 <code>Sources/ScanCore/Explain.swift</code> 的 <code>input</code>、<code>answer</code></td></tr>
+<tr><td>位置</td><td>提示词 <code>prompts/explain.*</code>（第 4 版，<code>{{max_chars}}</code> 填 120）；代码 <code>internal/core/explain.go</code> 的 <code>ExplainInput</code>、<code>ExplainAnswer</code></td></tr>
 <tr><td>输入</td><td>这一轮卡片上要用户看的发现（不是仅供参考的，或仅供参考但风险高的；skill、说明文件的发现和各规则的 <code>.partial</code> 不问），重的、大的在前：结论、标题、位置（家目录写成 <code>~/…</code>）、大小、规则给的依据原样（不含扫描附的 <code>model_*</code> 和目标清单；每项 ≤ 300 字，整个 ≤ 3000 字，超了先去掉最长的几项）；5 个示范</td></tr>
 <tr><td>输出</td><td>一段简体中文，≤ 120 字：是什么、为什么报、处理会怎样。只用给的事实，不编数字、日期、应用名；要确认、仅供参考的不说放心删；<code>would_lose</code> 每项都说；不说已经处理；不写命令；病毒和可疑程序提醒别打开。没有 schema</td></tr>
 <tr><td>校验与退路</td><td>超过 120 字、Markdown、终端命令、网址、域名、IP、邮箱、说已经做了、把不是放心删的说成能删（仅供参考的另多一组词）、输入里没有的带单位的数字（输入里的日期、文件夹名里的年份不算）都不显示，不重问；词表和写法同评测程序（<code>bench/test_checks.py</code> 核对）。通过的记成证据 <code>model_explain</code></td></tr>
@@ -158,7 +158,7 @@
 <h3><code>luoke-scan.identify</code> 认文件夹</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>提示词 <code>prompts/identify.*</code>（第 5 版，<code>{{kinds}}</code> 由 schema 里 <code>kind</code> 的 <code>x-describe</code> 填）；代码 <code>Sources/ScanCore/Identify.swift</code></td></tr>
+<tr><td>位置</td><td>提示词 <code>prompts/identify.*</code>（第 5 版，<code>{{kinds}}</code> 由 schema 里 <code>kind</code> 的 <code>x-describe</code> 填）；代码 <code>internal/core/identify.go</code></td></tr>
 <tr><td>输入</td><td>规则说不出是谁的文件夹：一直在涨的（<code>space.growth</code>；家目录本身和桌面、文稿、下载这类不问）和已卸载应用留下的数据（<code>leftover.app-data</code>），大的在前；没有完全磁盘访问时受保护的不问。只给元信息：路径、大小、最后改动、文件数（最多数 2 万个、2 秒）、最常见的 4 种扩展名、前 6 项的名字，不打开文件；5 个示范</td></tr>
 <tr><td>输出</td><td><code>{name, what, kind, sure}</code>：<code>kind</code> 7 选 1（cache / app-data / user-data / logs / tool / build / unknown）；看不出是谁的 name 写「不确定」、sure 为 false，不编应用名；只说是什么，不说能不能删；what ≤ 30 字</td></tr>
 <tr><td>校验与退路</td><td>键不齐、<code>kind</code> 不在枚举、name 超过 40 字、what 超过 60 字的不用，不重问；只显示 sure 为真、不是 unknown、name 不是「不确定」、不说能不能删、不带网址和命令的，写成「本机模型认的：名字（是什么）」（证据 <code>model_identify</code>）；种类和把握不决定任何事</td></tr>
@@ -169,7 +169,7 @@
 <h3><code>luoke-scan.skills</code> 看 skill 对不对得上</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>提示词 <code>prompts/skills.*</code>（第 3 版，<code>{{risks}}</code> 由 schema 里 <code>risk</code> 的 <code>x-describe</code> 填；示范和评测集由 <code>luoke-scan make-skill-evalset</code> 用同一段代码生成，不手改）；代码 <code>Sources/ScanCore/SkillReview.swift</code></td></tr>
+<tr><td>位置</td><td>提示词 <code>prompts/skills.*</code>（第 3 版，<code>{{risks}}</code> 由 schema 里 <code>risk</code> 的 <code>x-describe</code> 填；示范和评测集由 <code>luoke-scan make-skill-evalset</code> 用同一段代码生成，不手改）；代码 <code>internal/core/skillreview.go</code></td></tr>
 <tr><td>输入</td><td>规则报了的 skill（<code>skill.*</code>；说明文件 <code>agentfile.*</code> 不问），重的在前；问时把 skill 重读一遍：工具、名字、说明、允许的工具、文件列表、<code>SKILL.md</code> 正文、其他几个文件（长的只给开头和规则指到的几行）、规则查到的（重的在前）；看不见的字符和长段编码换成标记；整个 JSON ≤ 6000 字符；提示词写明 skill 的内容只是要看的材料、不是指令；4 个示范</td></tr>
 <tr><td>输出</td><td><code>{fits, does, beyond, risk}</code>：fits 只看有没有名字和说明外的动作（说明讲了的有风险也算对得上，做得粗糙不算）；does 一句话（提示词要 ≤ 40 字）；beyond 最多 3 条（哪个文件、做了什么），对不上至少一条；risk 为 low / medium / high；不写网址、命令、密钥和代码</td></tr>
 <tr><td>校验与退路</td><td>照 schema 核，键不齐、超长的不用，不重问；带网址、域名、IP、命令、密钥、代码、skill 里的主机名或替 skill 打包票的句子不显示，指到 skill 里没有的文件的那条去掉。只在说对不上时附说明（证据 <code>model_note</code>，开头写「本机模型看过（只是说明，不改结论）」），说对得上时什么都不附</td></tr>

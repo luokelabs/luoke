@@ -68,18 +68,18 @@
 </table></div>
 <p>字段见<a href="#search">螺壳搜索</a>页。</p>
 
-<h2>螺壳扫描 <code>~/.luoke-scan/</code>（未发布）</h2>
+<h2>螺壳扫描 <code>~/.luoke-scan/</code>（封闭测试，随 beta 2 第一次提供）</h2>
 <div class="tbl"><table>
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td>目录本身</td><td>700，整个排除出 Time Machine</td></tr>
-<tr><td><code>scan.db</code>（及 <code>-wal</code>、<code>-shm</code>）</td><td>大小历史、增量记录、扫过病毒的文件、重复文件的哈希、见过的常驻项、主控模型的答复</td></tr>
+<tr><td><code>&lt;表&gt;.json</code>、<code>&lt;表&gt;.log</code>、<code>&lt;表&gt;.lock</code></td><td>扫描记下的事实，不用数据库：每张表一份快照、一份追加日志（一行一批改动，带 CRC）和一个锁文件，0600；读不了或版本不对的当缓存丢掉，下一轮重建。表有 <code>sizes</code>、<code>measured</code>、<code>temp_entries</code>、<code>project_state</code>、<code>leftover_state</code>、<code>malware_scanned</code>、<code>file_hashes</code>、<code>seen-persistence</code>、<code>model_answers</code>、<code>meta</code>：大小历史、增量记录、扫过病毒的文件、重复文件的哈希、见过的常驻项、主控模型的答复</td></tr>
 <tr><td><code>last-report.json</code></td><td>上一轮的报告，0600</td></tr>
 <tr><td><code>agent-state.json</code></td><td>以后别提的、outbox 的回执、自动清的开关和记录、办完的方案，0600</td></tr>
 <tr><td><code>cleaned.jsonl</code></td><td>清理记录，只追加，放回靠它</td></tr>
-<tr><td><code>plans/</code></td><td>出过的方案，30 天后删</td></tr>
+<tr><td><code>plans/</code></td><td>出过的方案、执行时的锁、要密码那一步的待核对记号，30 天后删</td></tr>
 <tr><td><code>clamav/</code>、<code>clamav-quick/</code></td><td>病毒库、快速扫描用的精简库</td></tr>
-<tr><td><code>run/agent.sock</code></td><td>MCP socket，0600，目录 700</td></tr>
-<tr><td><code>round.lock</code>、<code>quick.lock</code>、<code>serve.lock</code></td><td>一轮、快速扫描、服务各只一个</td></tr>
+<tr><td><code>malicious-packages.txt</code></td><td>用 <code>luoke-scan malicious-import</code> 从本机文件导入的恶意包名单</td></tr>
+<tr><td><code>round.lock</code>、<code>quick.lock</code></td><td>一轮、快速扫描各只一个</td></tr>
 </table></div>
 <p>字段见<a href="#audit">螺壳扫描</a>页。</p>
 
