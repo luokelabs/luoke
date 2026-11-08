@@ -52,7 +52,7 @@
 </ul>
 
 <h2>工具协议</h2>
-<p>工具在配件清单的 <code>capabilities</code> 中声明协议版本（1）、socket 路径、可报事项（<code>reports[]</code>：kind、title、默认 urgency）和动作（<code>actions[]</code>），并在自己的 Unix socket 上提供 MCP 子集。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。目前没有已发布的配件声明 <code>capabilities.protocol</code>：输入法的清单只有 <code>listing</code>，agent 跳过它；邮件助手 0.19.26 起接口默认打开、在清单里声明（打包版只接受螺壳的 agent 核心连进来），还没进 beta 版；螺壳搜索已实现协议并在清单中声明，未发布；螺壳扫描（封闭测试，随 beta 2 第一次提供）已实现协议并在清单中声明，传输写 <code>"transport": "stdio"</code>：它不开 socket，agent 核心向螺壳本体要连接，本体每个请求起一次 <code>luoke-scan mcp --this-mac</code>，把接在它标准输入输出上的那一端交过去，一行一条 JSON-RPC。agent 实际只有记忆一个来源。</p>
+<p>工具在配件清单的 <code>capabilities</code> 中声明协议版本（1）、socket 路径、可报事项（<code>reports[]</code>：kind、title、默认 urgency）和动作（<code>actions[]</code>），并在自己的 Unix socket 上提供 MCP 子集。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。目前没有已发布的配件声明 <code>capabilities.protocol</code>：输入法的清单只有 <code>listing</code>，agent 跳过它；邮件助手 0.19.26 起接口默认打开、在清单里声明（打包版只接受螺壳的 agent 核心连进来），还没进 beta 版；螺壳搜索已实现协议并在清单中声明，未发布；螺壳扫描（封闭测试，随 beta 2 第一次提供）已实现协议并在清单中声明，传输写 <code>"transport": "stdio"</code>：它不开 socket，agent 核心向螺壳本体要连接，本体每个请求起一次 <code>luoke-scan mcp --this-mac</code>，把接在它标准输入输出上的那一端交过去，一行一条 JSON-RPC。螺壳记忆 0.29.0 已实现工具一侧，也是 stdio（清单 <code>commands.mcp</code>：<code>-m luoke_mem --path {memory} mcp</code>），还没在清单中声明 <code>capabilities</code>，螺壳本体也还不起它。agent 实际只有记忆一个来源（经 <code>luoke_mem</code> 库，见「与记忆的交互」）。</p>
 <h3>传输</h3>
 <ul>
 <li>每个请求一条连接：<code>POST /mcp</code>，请求体为一条 JSON-RPC 2.0 消息，上限 1 MB；MCP 协议版本 <code>2026-07-28</code>，在 <code>params._meta</code> 中携带。</li>
@@ -102,7 +102,7 @@
 <tr><td>关于某条理解的问题</td><td>对 → <code>yes</code> · 不对 → <code>no</code> · 以前是，现在不是 → <code>past</code> · 按我改的 → <code>revise</code> · 以后再说 → <code>later</code>（记忆收起这条理解下开着的问题，至少 7 天内不再问；之后由反刍视情况作为新的一条再问）</td></tr>
 <tr><td>自由问题（单选、是非、文字）</td><td>交回或 是 / 不是 → <code>answer</code> · 以后再说 → <code>later</code>（只收起这一条）</td></tr>
 </table></div>
-<p>带 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」，打开 <code>luoke://memory?note=N</code>，不写入。记忆现在只产生关于理解的问题和建议，自由问题这一行暂时用不到。</p>
+<p>带 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」，打开 <code>luoke://memory?note=N</code>，不写入。记忆现在只产生关于理解的问题和建议，自由问题这一行暂时用不到。记忆 0.29.0 起自己也能出这些卡片（放进它的 outbox，回答经 <code>mem_reply</code> 交回，按钮与上表相同），但清单里还没声明 <code>capabilities</code>，见「记忆」的「工具协议」。</p>
 
 <h2>何时说</h2>
 <ul>

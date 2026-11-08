@@ -18,7 +18,7 @@
 <tr><td><code>data</code></td><td>卸载时可删除的数据路径，只接受与配件自身标识绑定的形式</td></tr>
 <tr><td><code>data_env</code></td><td>螺壳里的应用认数据目录的环境变量（邮件助手是 <code>LUOKE_MAIL_HOME</code>）：螺壳不是装好的那份（例如开发版）时，主控把 <code>data</code> 里的路径换成 <code>~/Library/Application Support/&lt;标识&gt;</code>，跑它的命令和空闲任务时用这个变量把新位置交给它</td></tr>
 <tr><td><code>default_on</code></td><td>螺壳里的应用在用户没开启、停用过时算不算开着（默认否；邮件助手写了 true）</td></tr>
-<tr><td><code>commands</code></td><td><code>uninstall</code>（删除数据前运行）、<code>forget-tool</code>（从记忆中忘掉本工具写入的内容）</td></tr>
+<tr><td><code>commands</code></td><td><code>uninstall</code>（删除数据前运行）、<code>forget-tool</code>（从记忆中忘掉本工具写入的内容）；记忆的清单另有 <code>mcp</code>（工具协议的一个请求，螺壳本体还不读它）</td></tr>
 <tr><td><code>icon</code>、<code>ui_element</code></td><td>打包用</td></tr>
 </table></div>
 

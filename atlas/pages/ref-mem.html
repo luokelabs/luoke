@@ -4,8 +4,8 @@
 
 <h2>打开</h2>
 <ul>
-<li><code>Memory(path=None, tool="luoke")</code>：工具使用。默认路径 <code>$LUOKE_HOME/mem.db</code>，未设置时为 <code>~/.luoke/mem.db</code>。文件 0600，目录 0700；记忆文件或其 <code>-wal</code>、<code>-shm</code>、<code>-journal</code> 是符号链接时拒绝打开。文件不存在时创建（0600）；命令行 <code>sources</code>、<code>forget-tool</code>、<code>learn</code> 在文件不存在时不创建（<code>record</code> 会创建）。</li>
-<li><code>WholeMemory(path=None)</code>：整份记忆，供记忆自己的界面、命令行和归纳任务使用；打开时执行重新定档（只降不升）、以前的事、相近话题合并。第一次定档前把整份记忆复制为 <code>mem.db.before-0.18</code>，14 天后或有内容被忘掉时删除。</li>
+<li><code>Memory(path=None, tool="luoke")</code>：工具使用。默认路径 <code>$LUOKE_HOME/mem.db</code>，未设置时为 <code>~/.luoke/mem.db</code>。文件 0600，目录 0700；记忆文件或其 <code>-wal</code>、<code>-shm</code>、<code>-journal</code> 是符号链接时拒绝打开。文件不存在时创建（0600）；命令行 <code>sources</code>、<code>forget-tool</code>、<code>learn</code>、<code>mcp</code> 在文件不存在时不创建（<code>record</code> 会创建）。</li>
+<li><code>WholeMemory(path=None, *, regrade=True)</code>：整份记忆，供记忆自己的界面、命令行、归纳任务和工具协议使用；打开时执行重新定档（只降不升）、以前的事、相近话题合并，<code>regrade=False</code> 时不做（工具协议的每个请求这样打开）。第一次定档前把整份记忆复制为 <code>mem.db.before-0.18</code>，14 天后或有内容被忘掉时删除。</li>
 <li>文件 schema 比库新得多（千位不同）时抛 <code>TooNew</code>。</li>
 </ul>
 
@@ -84,7 +84,65 @@
 <tr><td><code>app [--note N] [--view recent]</code></td><td>在浏览器中打开界面（<code>luoke://memory</code> 的入口）</td></tr>
 <tr><td><code>learn [--force] [--again] [--hub SOCK]</code></td><td>运行一次归纳；<code>--force</code> 有新记录就跑；<code>--again</code> 从头重新归纳（打字记下的不重复；话题线从头读，用户没表态的话题只在有 topics 任务的 Mac 上换成新归纳的，没有这个任务的 Mac 保留原有的）；已有一个在跑时直接返回</td></tr>
 <tr><td><code>record --tool &lt;工具&gt;</code></td><td>替没有 Python 的工具写记录（螺壳扫描用）：标准输入一行一条 JSON，字段同 <code>record()</code>，没给 <code>sensitive</code> 时按文字标；标准输出一行对一行回 <code>{"id"}</code> 或 <code>{"error"}</code>，一行出错不影响其他行；有失败的行退出 1，工具名不对或记忆打不开退出 2；不能以 <code>luoke-mem</code> 的名义写</td></tr>
+<tr><td><code>mcp [--clock T]</code></td><td>工具协议的一个请求（清单 <code>commands.mcp</code>，见下「工具协议」）：标准输入读到结尾、取第一条非空行，标准输出答一行，退出码 0；<code>--clock</code> 写成 <code>YYYY-MM-DDTHH:MM:SS</code>，把时钟定在这个本机时间（录场景样例用）</td></tr>
 </table></div>
+
+<h2>工具协议（<code>luoke_mem.agent</code>）</h2>
+<p>luoke-agent 工具协议版本 1 的工具一侧，<code>mcp</code> 命令每次答一个请求。消息最多 1 MB（超过答 -32600）；MCP 协议版本 <code>2026-07-28</code>，<code>params._meta</code> 里带了别的版本答 -32602 并附 <code>supportedVersions</code>。方法：<code>server/discover</code>（服务名 <code>luoke-mem</code>，版本同包）、<code>resources/list</code>、<code>resources/read</code>、<code>tools/list</code>、<code>tools/call</code>；没有 <code>id</code> 的通知不答。读不懂答 -32700，未知方法 -32601，没有的资源 -32002；工具自己出错答 -32603「工具内部出错」，标准错误只记方法、登记过的工具名或资源、异常类型和出错位置。整份记忆以 <code>regrade=False</code> 打开。</p>
+<h3>清单 <code>capabilities</code></h3>
+<p>由 <code>agent.capabilities()</code> 给出，还没写进 <code>packaging/accessory.json</code>（只在场景样例的 <code>manifest.json</code> 里）：<code>protocol</code> 1、<code>transport</code> <code>"stdio"</code>；<code>reports</code>：<code>question</code>「记忆想问的事」、<code>suggestion</code>「记忆的建议」，默认都是 <code>normal</code>；<code>actions</code>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_forget_all</code>（都 <code>writes: true</code>）；<code>service</code>：<code>summary: true</code>、<code>pages</code>（<code>overview</code> 概览、<code>guesses</code> 猜测、<code>kept</code> 记下的、<code>sources</code> 各应用写的）、<code>ui.open: "mem_open"</code>。</p>
+<h3>资源</h3>
+<div class="tbl"><table>
+<tr><th>URI</th><th>内容</th></tr>
+<tr><td><code>luoke://luoke-mem/outbox</code>（<code>outbox</code> 也认）</td><td><code>{items}</code>：开着、没过期的想问的和建议，按 <code>asks()</code> 的顺序，一件一项</td></tr>
+<tr><td><code>summary</code></td><td><code>{count, text}</code>：<code>count</code> 是等用户确认的猜测条数；没有记忆或什么都没记下时为 0、「还没有记下什么。」</td></tr>
+<tr><td><code>page/overview</code>、<code>page/guesses</code>、<code>page/kept</code>、<code>page/sources</code></td><td>一张 A2UI 卡片（<code>surfaceId</code> 是页 id），见下「四页」</td></tr>
+</table></div>
+<p>都是 <code>application/json</code>，<code>contents[0].text</code> 是一段 JSON 文字。卡片用目录 <code>ai.luoke/a2ui/agent/1</code>。</p>
+<h3>outbox 事项</h3>
+<div class="tbl"><table>
+<tr><th>字段</th><th>取值</th></tr>
+<tr><td><code>id</code></td><td><code>ask/&lt;编号&gt;</code></td></tr>
+<tr><td><code>kind</code>、<code>urgency</code></td><td>同 <code>asks</code> 的 kind、urgency（urgency 不合法时为 low）</td></tr>
+<tr><td><code>deadline</code></td><td>null</td></tr>
+<tr><td><code>created</code>、<code>expires</code></td><td><code>created_at</code>、<code>expires_at</code>，不带时区的本机时间（<code>YYYY-MM-DDTHH:MM:SS</code>）</td></tr>
+<tr><td><code>why_now</code></td><td><code>why</code>，没有时「不急，有空看看」</td></tr>
+<tr><td><code>title</code></td><td>「记忆想问：」或「记忆建议：」加正文前 100 字</td></tr>
+<tr><td><code>summary</code></td><td><code>why</code>，没有时正文前 200 字</td></tr>
+<tr><td><code>card</code></td><td><code>surfaceId</code> 为 <code>ask-&lt;编号&gt;</code></td></tr>
+</table></div>
+<h3>卡片上的按钮</h3>
+<p>都调 <code>mem_reply</code>，上下文 <code>{ask, choice}</code>，要文字的再带 <code>text</code>：</p>
+<div class="tbl"><table>
+<tr><th>哪种</th><th>按钮 → <code>choice</code></th></tr>
+<tr><td>关于某条理解的问题（有 <code>about_note</code>）</td><td>输入框「不太对的话，改成」；对 → <code>yes</code>、不对 → <code>no</code>、以前是，现在不是 → <code>past</code>、按我改的 → <code>revise</code>（<code>text</code> 取输入框）、以后再说 → <code>later</code></td></tr>
+<tr><td>带选项的问题</td><td>单选「选一个」；交回 → <code>answer</code>（<code>text</code> 取选中的）、以后再说 → <code>later</code></td></tr>
+<tr><td>是非问题</td><td>是、不是 → <code>answer</code>（<code>text</code> 为「是」「不是」）、以后再说 → <code>later</code></td></tr>
+<tr><td>其他问题</td><td>输入框「你的回答」；交回 → <code>answer</code>、以后再说 → <code>later</code></td></tr>
+<tr><td>处理习惯（<code>action.capability</code> 为 <code>habit</code>）或是非类的建议</td><td>好 → <code>useful</code>、不用 → <code>useless</code>、别再提 → <code>never</code></td></tr>
+<tr><td>其余建议</td><td>知道了 → <code>useful</code>、别再提 → <code>never</code></td></tr>
+</table></div>
+<p>有 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」→ <code>mem_open</code>（<code>{note}</code>）。</p>
+<h3>工具</h3>
+<p>四个写入工具没带 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code> 都是非空字符串）答 <code>needs_user_action</code>；缺必填参数答 <code>invalid</code>；记忆文件不存在或比这份 <code>luoke_mem</code> 新时答 <code>not_ready</code>。失败都是 <code>isError: true</code>，原因码在 <code>structuredContent.code</code>。</p>
+<div class="tbl"><table>
+<tr><th>工具</th><th>参数</th><th>说明</th></tr>
+<tr><td><code>mem_reply</code>（写）</td><td><code>ask</code>、<code>choice</code>，可带 <code>text</code></td><td>照 <code>reply()</code> 交回。<code>choice</code> 要合这件的种类（建议 <code>useful</code> / <code>useless</code> / <code>never</code>；关于理解的问题 <code>yes</code> / <code>no</code> / <code>past</code> / <code>revise</code> / <code>later</code>；其他问题 <code>answer</code> / <code>later</code>），<code>revise</code>、<code>answer</code> 要有 <code>text</code>，<code>text</code> 里有凭证不收，都答 <code>invalid</code>（卡片留着）。这件已不开着时答「这条已经变了……」。成功答一句话，<code>structuredContent</code> 带 <code>card</code>（换掉原卡片，不带 <code>createSurface</code>）和 <code>done: true</code>；「这条已经变了」也一样</td></tr>
+<tr><td><code>mem_note</code>（写）</td><td><code>note</code>、<code>op</code>（<code>confirm</code> / <code>reject</code> / <code>forget</code>）、<code>sure</code></td><td>理解须是 <code>proposed</code>、<code>observed</code>、<code>active</code> 或 <code>past</code>，否则 <code>stale</code>；<code>forget</code> 要 <code>sure: true</code>。只答一句话</td></tr>
+<tr><td><code>mem_forget_tool</code>（写）</td><td><code>tool</code>、<code>sure</code></td><td>即 <code>WholeMemory.forget_tool</code>；<code>tool</code> 须写过东西、不是 <code>luoke-mem</code>，否则 <code>stale</code>；要 <code>sure: true</code>。答删掉的记录和理解条数</td></tr>
+<tr><td><code>mem_forget_all</code>（写）</td><td><code>confirm</code></td><td><code>confirm</code> 是「清空」才清空整份记忆，否则 <code>invalid</code></td></tr>
+<tr><td><code>mem_open</code>（只读，<code>_meta</code> 带 <code>ai.luoke/where: mac</code>）</td><td><code>note</code>，或 <code>page: "recent"</code></td><td>起或找到整份记忆的页面，在浏览器里打开到这一条或「最近记下的」；没有记忆答 <code>not_ready</code>，打不开答 <code>failed</code></td></tr>
+<tr><td><code>outbox_ack</code>（只读）</td><td><code>id</code>、<code>state</code></td><td>只答「好。」，不记：答了的由 <code>mem_reply</code> 关掉，用户放下的在记忆里照旧开着</td></tr>
+</table></div>
+<h3>四页</h3>
+<div class="tbl"><table>
+<tr><th>页</th><th>内容</th></tr>
+<tr><td><code>overview</code> 概览</td><td>概览那句话；各类生效理解的条数（不含精选口味）；最近 30 天没问就记下的，最多 5 条（文字、类别、来源、日期）；最近 14 天各应用写入的记录条数；还在攒证据的别人来信事实有几条；「打开整份记忆」</td></tr>
+<tr><td><code>guesses</code> 猜测</td><td>状态 <code>proposed</code>、<code>observed</code> 的理解，不含引用了别人来信的事实；每条带类别、依据条数、日期，对 → <code>mem_note</code> <code>confirm</code>、不对 → <code>reject</code>；「在整份记忆里看依据」</td></tr>
+<tr><td><code>kept</code> 记下的</td><td>生效的理解（不含精选口味）和勾选框「我知道删了找不回来」；不对 → <code>reject</code>、忘掉 → <code>forget</code>（<code>sure</code> 取勾选框）；「打开整份记忆」</td></tr>
+<tr><td><code>sources</code> 各应用写的</td><td>勾选框；每个应用（不含 <code>luoke-mem</code>）的记录、理解条数和「忘掉…写的」→ <code>mem_forget_tool</code>；记忆自己名下的理解条数；输入框和「清空整份记忆」→ <code>mem_forget_all</code>（<code>confirm</code> 取输入框）</td></tr>
+</table></div>
+<p>每页最多列 15 条理解，多的写「还有 N 条，在整份记忆里看」。没有记忆时每页只有标题和一句说明。</p>
 
 <h2>界面</h2>
 <p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise、split（把并进来的一条拆出来）；修改文字截到 200 字，拒绝凭证）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
