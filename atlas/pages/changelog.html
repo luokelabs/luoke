@@ -5,6 +5,7 @@
 <ul>
 <li>主控任务接口页按代码 67dcf2a 复核：加转写 <code>/v1/transcribe</code>（会话、分块、草稿和终稿、<code>session_lost</code>、<code>superseded</code>）；本体专用表加开启、停用、权限、第一次任务、删数据、重新登记、重新启动输入法七条，写明 <code>/jobs/run</code> 不要求身份；错误表加 409、拆开两种 404，未知路由答 400；连接一节加启动和退出期间怎么答；<code>/tasks</code> 加 <code>main</code> 和 <code>status</code> 的取值；生成、续写、嵌入、预热、<code>/downloads</code>、<code>/settings</code>、<code>/smoke</code>、<code>/uninstall</code> 补字段、默认值和上限，嵌入被挡回改正为 <code>busy</code>（<code>reason</code> 为 <code>lane_busy</code>）；高级用户端点补错误体、请求体上限、功耗档间歇、用户模型和底座一起加载。主控页的本体专用接口列表跟着补全。</li>
 <li>记忆页按代码 c5b7d6e（0.29.0）复核：加「工具协议」一节，记忆照 agent 的工具协议出 outbox 卡片、概览和四页（猜测、记下的、各应用写的），用户的点按经 <code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_forget_all</code> 交回，只认用户的点按；清单 <code>commands.mcp</code>，一个请求一个进程，不重新定档；场景样例 <code>fixtures/agent/</code>。写明还没接上：发出去的清单没有 <code>capabilities</code>，螺壳本体也还不起记忆。记忆参考页加工具协议的资源、事项字段、按钮、工具和四页，命令行加 <code>mcp</code>，<code>WholeMemory</code> 加 <code>regrade</code>；agent 页、配件清单页里记忆一侧的说法跟着改。</li>
+<li>记忆页跟到 f9d0a7c（0.29.1）：卡片问的那条理解在别处已经定了、被取代或忘掉时，<code>mem_reply</code> 答「这条已经变了」；记忆正在问的别人来信事实也上猜测页、算进概览；记忆文件有符号链接、被锁着或坏了时，<code>not_ready</code> 和概览带一句说明。</li>
 </ul>
 
 <h2>2026-11-07</h2>

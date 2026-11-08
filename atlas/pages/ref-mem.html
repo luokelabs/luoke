@@ -95,7 +95,7 @@
 <div class="tbl"><table>
 <tr><th>URI</th><th>内容</th></tr>
 <tr><td><code>luoke://luoke-mem/outbox</code>（<code>outbox</code> 也认）</td><td><code>{items}</code>：开着、没过期的想问的和建议，按 <code>asks()</code> 的顺序，一件一项</td></tr>
-<tr><td><code>summary</code></td><td><code>{count, text}</code>：<code>count</code> 是等用户确认的猜测条数；没有记忆或什么都没记下时为 0、「还没有记下什么。」</td></tr>
+<tr><td><code>summary</code></td><td><code>{count, text}</code>：<code>count</code> 是等用户确认的猜测条数（同猜测页）；什么都没记下时为 0、「还没有记下什么。」，没有记忆或打不开时为 0 和那句说明</td></tr>
 <tr><td><code>page/overview</code>、<code>page/guesses</code>、<code>page/kept</code>、<code>page/sources</code></td><td>一张 A2UI 卡片（<code>surfaceId</code> 是页 id），见下「四页」</td></tr>
 </table></div>
 <p>都是 <code>application/json</code>，<code>contents[0].text</code> 是一段 JSON 文字。卡片用目录 <code>ai.luoke/a2ui/agent/1</code>。</p>
@@ -124,10 +124,10 @@
 </table></div>
 <p>有 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」→ <code>mem_open</code>（<code>{note}</code>）。</p>
 <h3>工具</h3>
-<p>四个写入工具没带 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code> 都是非空字符串）答 <code>needs_user_action</code>；缺必填参数答 <code>invalid</code>；记忆文件不存在或比这份 <code>luoke_mem</code> 新时答 <code>not_ready</code>。失败都是 <code>isError: true</code>，原因码在 <code>structuredContent.code</code>。</p>
+<p>四个写入工具没带 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code> 都是非空字符串）答 <code>needs_user_action</code>；缺必填参数答 <code>invalid</code>；记忆文件不存在、比这份 <code>luoke_mem</code> 新、旁边有符号链接、正被锁着或读不了时答 <code>not_ready</code>，带一句说明。失败都是 <code>isError: true</code>，原因码在 <code>structuredContent.code</code>。</p>
 <div class="tbl"><table>
 <tr><th>工具</th><th>参数</th><th>说明</th></tr>
-<tr><td><code>mem_reply</code>（写）</td><td><code>ask</code>、<code>choice</code>，可带 <code>text</code></td><td>照 <code>reply()</code> 交回。<code>choice</code> 要合这件的种类（建议 <code>useful</code> / <code>useless</code> / <code>never</code>；关于理解的问题 <code>yes</code> / <code>no</code> / <code>past</code> / <code>revise</code> / <code>later</code>；其他问题 <code>answer</code> / <code>later</code>），<code>revise</code>、<code>answer</code> 要有 <code>text</code>，<code>text</code> 里有凭证不收，都答 <code>invalid</code>（卡片留着）。这件已不开着时答「这条已经变了……」。成功答一句话，<code>structuredContent</code> 带 <code>card</code>（换掉原卡片，不带 <code>createSurface</code>）和 <code>done: true</code>；「这条已经变了」也一样</td></tr>
+<tr><td><code>mem_reply</code>（写）</td><td><code>ask</code>、<code>choice</code>，可带 <code>text</code></td><td>照 <code>reply()</code> 交回。<code>choice</code> 要合这件的种类（建议 <code>useful</code> / <code>useless</code> / <code>never</code>；关于理解的问题 <code>yes</code> / <code>no</code> / <code>past</code> / <code>revise</code> / <code>later</code>；其他问题 <code>answer</code> / <code>later</code>），<code>revise</code>、<code>answer</code> 要有 <code>text</code>，<code>text</code> 里有凭证不收，都答 <code>invalid</code>（卡片留着）。这件已不开着，或它问的那条理解已经定了、被取代或忘掉时，答「这条已经变了……」。成功答一句话，<code>structuredContent</code> 带 <code>card</code>（换掉原卡片，不带 <code>createSurface</code>）和 <code>done: true</code>；「这条已经变了」也一样</td></tr>
 <tr><td><code>mem_note</code>（写）</td><td><code>note</code>、<code>op</code>（<code>confirm</code> / <code>reject</code> / <code>forget</code>）、<code>sure</code></td><td>理解须是 <code>proposed</code>、<code>observed</code>、<code>active</code> 或 <code>past</code>，否则 <code>stale</code>；<code>forget</code> 要 <code>sure: true</code>。只答一句话</td></tr>
 <tr><td><code>mem_forget_tool</code>（写）</td><td><code>tool</code>、<code>sure</code></td><td>即 <code>WholeMemory.forget_tool</code>；<code>tool</code> 须写过东西、不是 <code>luoke-mem</code>，否则 <code>stale</code>；要 <code>sure: true</code>。答删掉的记录和理解条数</td></tr>
 <tr><td><code>mem_forget_all</code>（写）</td><td><code>confirm</code></td><td><code>confirm</code> 是「清空」才清空整份记忆，否则 <code>invalid</code></td></tr>
@@ -137,8 +137,8 @@
 <h3>四页</h3>
 <div class="tbl"><table>
 <tr><th>页</th><th>内容</th></tr>
-<tr><td><code>overview</code> 概览</td><td>概览那句话；各类生效理解的条数（不含精选口味）；最近 30 天没问就记下的，最多 5 条（文字、类别、来源、日期）；最近 14 天各应用写入的记录条数；还在攒证据的别人来信事实有几条；「打开整份记忆」</td></tr>
-<tr><td><code>guesses</code> 猜测</td><td>状态 <code>proposed</code>、<code>observed</code> 的理解，不含引用了别人来信的事实；每条带类别、依据条数、日期，对 → <code>mem_note</code> <code>confirm</code>、不对 → <code>reject</code>；「在整份记忆里看依据」</td></tr>
+<tr><td><code>overview</code> 概览</td><td>概览那句话；各类生效理解的条数（不含精选口味）；最近 30 天没问就记下的，最多 5 条（文字、类别、来源、日期）；最近 14 天各应用写入的记录条数；还在攒证据的别人来信事实有几条（记忆正在问的不算）；「打开整份记忆」</td></tr>
+<tr><td><code>guesses</code> 猜测</td><td>状态 <code>proposed</code>、<code>observed</code> 的理解，不含引用了别人来信、记忆也没在问的事实；每条带类别、依据条数、日期，对 → <code>mem_note</code> <code>confirm</code>、不对 → <code>reject</code>；「在整份记忆里看依据」</td></tr>
 <tr><td><code>kept</code> 记下的</td><td>生效的理解（不含精选口味）和勾选框「我知道删了找不回来」；不对 → <code>reject</code>、忘掉 → <code>forget</code>（<code>sure</code> 取勾选框）；「打开整份记忆」</td></tr>
 <tr><td><code>sources</code> 各应用写的</td><td>勾选框；每个应用（不含 <code>luoke-mem</code>）的记录、理解条数和「忘掉…写的」→ <code>mem_forget_tool</code>；记忆自己名下的理解条数；输入框和「清空整份记忆」→ <code>mem_forget_all</code>（<code>confirm</code> 取输入框）</td></tr>
 </table></div>
