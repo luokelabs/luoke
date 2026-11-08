@@ -1,6 +1,11 @@
 <!-- id: changelog | nav: 文档修订 | group: 其他 -->
 <h1>文档修订</h1>
 
+<h2>2026-11-08</h2>
+<ul>
+<li>主控任务接口页按代码 67dcf2a 复核：加转写 <code>/v1/transcribe</code>（会话、分块、草稿和终稿、<code>session_lost</code>、<code>superseded</code>）；本体专用表加开启、停用、权限、第一次任务、删数据、重新登记、重新启动输入法七条，写明 <code>/jobs/run</code> 不要求身份；错误表加 409、拆开两种 404，未知路由答 400；连接一节加启动和退出期间怎么答；<code>/tasks</code> 加 <code>main</code> 和 <code>status</code> 的取值；生成、续写、嵌入、预热、<code>/downloads</code>、<code>/settings</code>、<code>/smoke</code>、<code>/uninstall</code> 补字段、默认值和上限，嵌入被挡回改正为 <code>busy</code>（<code>reason</code> 为 <code>lane_busy</code>）；高级用户端点补错误体、请求体上限、功耗档间歇、用户模型和底座一起加载。主控页的本体专用接口列表跟着补全。</li>
+</ul>
+
 <h2>2026-11-07</h2>
 <ul>
 <li>螺壳扫描页按代码 37c38cb（0.3.8 之后，用 Go 写）重写：两个程序 <code>luoke-scan</code>、<code>luoke-scan-admin</code>，打在螺壳.app 里、不常驻；agent 的每个请求由本体起一次 <code>mcp --this-mac</code>（<code>transport: stdio</code>），空闲任务经本体的 <code>--run-tool</code>，核过签名和版本；要密码的删除经描述符 3 请本体弹框；数据改成每张表一份快照加追加日志，提示词和 ClamAV 证书编在程序里；规则 26 条（加依赖里的已知恶意包、<code>space.ipsw</code>）；清单的 <code>uses</code>、<code>first_use</code>、<code>LUOKE_PERMISSIONS_OFF</code>；评测、测试和已知限制重写。已知问题换成两条现在的缺口（两轮之间不看新下载的、第一轮常常还没有病毒库）；文件位置、提示词、agent、配件清单、主控、总览、生成任务几页里关于扫描的说法跟着改。</li>

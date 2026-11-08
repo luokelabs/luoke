@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-07 17:31</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-08 12:02</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -369,7 +369,7 @@ sequenceDiagram
 <li><b>窗口期间</b>：主控的任何窗口（首次运行、升级卡片、应用、卸载、检查更新、设置、主控小窗口）开着时，主控出现在程序坞和 ⌘Tab 里，全关后回到只在菜单栏。同一流程只开一个窗口：卸载接替「应用」或设置窗口，安装器的升级卡片出现后「检查更新」窗口关掉。</li>
 <li><b>再次打开主控</b>：有安装器交来的预选时，首次运行没走完就回到首次运行并预选那个应用，否则在「应用」窗口那一行里装；没有预选时，带了主窗口、首次运行已走完、首次运行和升级窗口都没开着就打开主窗口；不然有开着的窗口就叫到前面；都没有且首次运行已走完时弹出主控小窗口，显示运行状态（在运行 / 启动中 / 没连上），说明主控在菜单栏的海螺图标里、找不到时可能的原因，给「打开菜单栏设置」，并列出 记忆（随主控带的时候才有）、应用、检查更新、设置 四个入口。⌘, 打开设置窗口。</li>
 <li><b>设置</b>：通用（能耗模式 全速 / 均衡 / 静音、使用电池时仍运行后台、登录时启动螺壳）、下载（有下载或缺模型时出现：逐项进度或排队中，缺的可重试）、模型（占多少空间——可选档多于一个时出现，磁盘不够换档时在下面写明；底座模型；换档等待时的说明；已下载的模型及大小；本机放行）、高级（本机端点）、关于（螺壳版本即发布号、导出诊断信息、卸载螺壳）。Finder「显示简介」里的版本也是发布号（如 beta1、internal-1027；<code>CFBundleShortVersionString</code>），主控版本号在 <code>CFBundleVersion</code>。档位、引擎、本机试跑在诊断信息里。</li>
-<li><b>只给本体用的接口</b>（下载、设置、端点、冒烟、卸载、开启、回到上一版本、重新登记、重新启动输入法）按 socket 对端进程核对是不是本体，<code>/settings</code>、<code>/endpoint</code> 也认主控自带的 <code>luoke</code> 命令行；不是的答 <code>forbidden</code>（403）。</li>
+<li><b>只给本体用的接口</b>（下载、设置、端点、冒烟、卸载、开启、停用、权限、第一次任务、删数据、回到上一版本、重新登记、重新启动输入法）按 socket 对端进程核对是不是本体，<code>/settings</code>、<code>/endpoint</code> 也认主控自带的 <code>luoke</code> 命令行；不是的答 <code>forbidden</code>（403）。</li>
 </ul>
 
 <h2>文件</h2>
@@ -1494,83 +1494,95 @@ sequenceDiagram
 </section>
 <section class="page" id="ref-api" data-title="主控任务接口">
 <h1>主控任务接口</h1>
-<p class="lede">主控在 Unix socket 上提供的 HTTP/1.1 接口，供配件调用。每次请求一条连接。</p>
+<p class="lede">主控在 Unix socket 上提供的 HTTP/1.1 接口，供配件、主控本体和命令行 <code>luoke</code> 调用。每次请求一条连接。</p>
 
 <h2>连接</h2>
 <ul>
-<li><b>socket</b>：<code>~/Library/Application Support/luoke-core/run/hub.sock</code>（目录 0700，文件 0600）。配件依次查找：显式路径 → 环境变量 <code>LUOKE_HUB_SOCKET</code> → 默认位置。</li>
-<li><b>身份</b>：请求头 <code>X-Luoke-Accessory: &lt;配件&gt;/&lt;版本&gt;</code>。版本须在配方 <code>verified</code> 中，或本机放行，或是本机 <code>verified-history.json</code> 中有记录的已安装版本（换回的上一版，只能用记录中的任务）；带任务名的请求还要求任务存在且属于该配件。</li>
-<li><b>响应头</b>：<code>X-Luoke-Contract: 1</code>、<code>X-Luoke-Tasks-Version</code>（配方、档、模型分配、引擎版本、任务参数的摘要，变化即应重读 <code>/tasks</code>）。</li>
-<li><b>请求体</b>上限 32 MB。</li>
+<li><b>socket</b>：<code>~/Library/Application Support/luoke-core/run/hub.sock</code>（目录 0700，文件 0600）。配件依次查找：显式路径 → 环境变量 <code>LUOKE_HUB_SOCKET</code> → 默认位置；给了显式路径而它不存在时报错，不退回。</li>
+<li><b>身份</b>：请求头 <code>X-Luoke-Accessory: &lt;配件&gt;/&lt;版本&gt;</code>。版本须在配方 <code>verified</code> 中，或本机放行（只在内部版、本机版），或是本机 <code>verified-history.json</code> 中有记录的已安装版本（换回的上一版，只能用记录中的任务）；带任务名的请求还要求任务存在且属于该配件。</li>
+<li><b>响应头</b>：<code>X-Luoke-Contract: 1</code>、<code>X-Luoke-Tasks-Version</code>（配方、档、模型分配、引擎版本、任务参数的摘要，有嵌入任务时还含向量空间；变化即应重读 <code>/tasks</code>）。</li>
+<li><b>请求体</b>为 JSON，上限 32 MB，超过答 <code>invalid_request</code>。</li>
+<li><b>启动和退出</b>：主控启动期间只答 <code>/tasks</code>、<code>/status</code>、<code>/downloads</code>，别的答 <code>busy</code>（retry_after 5）；退出期间答 <code>engine_failed</code>。</li>
 </ul>
 
 <h2>错误</h2>
 <p>错误体为 <code>{"code", "message", "retry_after", …}</code>；有 <code>retry_after</code> 时同时给 <code>Retry-After</code> 头。</p>
 <div class="tbl"><table>
 <tr><th>HTTP</th><th>code</th><th>含义</th></tr>
-<tr><td>400</td><td><code>invalid_request</code></td><td>请求格式或参数不合法</td></tr>
-<tr><td>403</td><td><code>unknown_accessory</code></td><td>配件或版本未通过验证，或任务不属于该配件</td></tr>
+<tr><td>400</td><td><code>invalid_request</code></td><td>请求格式或参数不合法；没有这个路由</td></tr>
+<tr><td>403</td><td><code>unknown_accessory</code></td><td>缺身份头，配件或版本未通过验证，或任务不属于该配件</td></tr>
 <tr><td>403</td><td><code>forbidden</code></td><td>主控本体专用的路由，对端不是本体（或允许的命令行）</td></tr>
-<tr><td>404</td><td><code>task_unavailable</code>、<code>unsupported</code></td><td>任务不存在；本档不支持该任务；换回的上一版调用其记录外的任务</td></tr>
-<tr><td>413</td><td><code>input_too_long</code></td><td>超过任务的 <code>max_chars</code></td></tr>
-<tr><td rowspan="5">503</td><td><code>busy</code></td><td>暂时不能接纳，附 <code>reason</code>（见主控 · 后台接纳）</td></tr>
+<tr><td rowspan="2">404</td><td><code>task_unavailable</code></td><td>任务不存在，或现在用不了（模型要下载、正在下载、暂停，原因同 <code>/tasks</code> 的 <code>reason</code>）；换回的上一版调用其记录外的任务</td></tr>
+<tr><td><code>unsupported</code></td><td>本档不支持该任务，或配件还没在这一版螺壳里验证过；这一构建或这个配件不支持该操作</td></tr>
+<tr><td>409</td><td><code>session_lost</code>、<code>superseded</code></td><td>转写：主控没有这次听写到这一块为止的音频；草稿还在排队时同一会话来了更新的请求</td></tr>
+<tr><td>413</td><td><code>input_too_long</code></td><td>超过任务参数的上限（<code>max_chars</code> 等）</td></tr>
+<tr><td rowspan="5">503</td><td><code>busy</code></td><td>暂时不能接纳，附 <code>reason</code>（见主控 · 后台接纳）；主控正在启动</td></tr>
 <tr><td><code>paused</code></td><td>全机后台暂停或本档放不下</td></tr>
 <tr><td><code>not_ready</code></td><td>模型正在加载或工作进程按需重起（retry_after 2）；内存不够或内存压力 critical 后暂不启动工作进程（retry_after 30）</td></tr>
 <tr><td><code>needs_user</code></td><td>用户在等但内存放不下，附 <code>occupants</code>（占用内存的进程）</td></tr>
-<tr><td><code>engine_failed</code></td><td>引擎或工作进程出错</td></tr>
+<tr><td><code>engine_failed</code></td><td>引擎或工作进程出错；主控内部错误；主控正在退出</td></tr>
 </table></div>
 <p>流式生成过程中的错误以 <code>event: luoke.error</code> 事件给出，另有 <code>interrupted</code>（后台请求被用户请求打断）。</p>
 
 <h2>任务</h2>
 <h3><code>GET /tasks</code></h3>
-<p>返回 <code>{contract, hub_version, tier, tasks_version, background: {state, reasons}, tasks: {&lt;名&gt;: {kind, status, reason, progress, slow, combo, model_name, params, vector_space?}}, luoke_mem?: {path, version}}</code>。只列出请求方自己的任务；<code>model_name</code> 是只用来显示的模型名（配方的 label，没有则取目录名，本档没有模型时为 null）；<code>luoke_mem</code> 给出主控内置的记忆库路径。</p>
+<p>返回 <code>{contract, hub_version, tier, tasks_version, background: {state, reasons}, tasks: {&lt;名&gt;: {kind, main, status, reason, progress, slow, combo, model_name, params, vector_space?}}, luoke_mem?: {path, version, python?}}</code>。只列出请求方自己的任务；<code>status</code> 为 <code>available</code>、<code>unsupported</code>、<code>needs_download</code>、<code>downloading</code>、<code>paused</code>；<code>model_name</code> 是只用来显示的模型名（配方的 label，没有则取目录名，本档没有模型时为 null）；<code>vector_space</code> 只有嵌入任务有；<code>luoke_mem</code> 给出主控内置的记忆库路径、版本和自带的 Python。</p>
 <h3>生成 <code>POST /tasks/&lt;task&gt;/v1/chat/completions</code></h3>
 <ul>
-<li>任务 kind 为 <code>generate</code>。请求为 OpenAI 格式的 <code>messages</code>，必须 <code>stream: true</code>，带 <code>luoke_items</code>（本批条目数，≤ <code>batch</code>）；<code>response_format</code> 可用 <code>json_schema</code> 或 <code>json_object</code>。</li>
+<li>任务 kind 为 <code>generate</code>。请求为 OpenAI 格式的 <code>messages</code>（<code>role</code> 为 system、user、assistant；<code>content</code> 为字符串或分段，只取文字段；总字数 ≤ <code>max_chars</code>），必须 <code>stream: true</code>，可带 <code>luoke_items</code>（本批条目数，默认 1，≤ <code>batch</code>）；<code>response_format</code> 可用 <code>json_schema</code>（须带 <code>schema</code>）或 <code>json_object</code>。</li>
 <li>请求头 <code>X-Luoke-Priority</code> 必填（<code>user-waiting</code> 或 <code>background</code>）；<code>X-Luoke-Allow-Battery: 1</code> 可选。</li>
-<li>主控覆盖：<code>max_tokens = item_tokens × luoke_items + fixed_tokens</code>；采样参数取配方；中和消息中的模型特殊 token；答复中的 <code>model</code> 改写为组合名。</li>
+<li>主控覆盖：<code>max_tokens = item_tokens × luoke_items + fixed_tokens</code>；采样参数取配方，是否思考取任务参数 <code>think</code>；中和消息中的模型特殊 token；答复中的 <code>model</code> 改写为组合名。</li>
 <li>SSE 流中另有 <code>event: luoke.progress</code>（<code>queued</code>、<code>loading</code>、<code>running</code>）。</li>
 </ul>
 <h3>打分 <code>POST /tasks/&lt;task&gt;/v1/score</code></h3>
 <p>kind <code>score</code>。请求 <code>{context, candidates}</code>（候选 ≤ <code>batch</code>，默认 16；前文 ≤ <code>max_chars</code>，默认 2000）；答复 <code>{logprobs, model, cache_hit, ms}</code>。超时 10 秒。</p>
 <h3>续写 <code>POST /tasks/&lt;task&gt;/v1/continue</code></h3>
-<p>kind <code>predict</code>。请求 <code>{context, k?, max_tokens?, stop?}</code>；答复 <code>{branches: [{tokens: [{text, logprob}], finish}], model, cache_hit, ms}</code>。旧接口 <code>/v1/predict</code> 仍保留。</p>
+<p>kind <code>predict</code>。请求 <code>{context, k?, max_tokens?, stop?}</code>：<code>k</code>、<code>max_tokens</code> 不给取任务参数 <code>k</code>（默认 8）、<code>max_tokens</code>（没写取 <code>n</code>，默认 6），也不能超过它们；<code>stop</code> 最多 64 个、每个 1–8 字；前文 ≤ <code>max_chars</code>（默认 2000）。答复 <code>{branches: [{tokens: [{text, logprob}], finish}], model, cache_hit, ms}</code>，<code>finish</code> 为 <code>stop</code>、<code>length</code> 或 <code>eos</code>。超时 10 秒。旧接口 <code>/v1/predict</code>（请求 <code>{context, k?, n?}</code>，答复 <code>{continuations, model, cache_hit, ms}</code>）仍保留。</p>
 <h3>嵌入 <code>POST /tasks/&lt;task&gt;/v1/embed</code></h3>
-<p>kind <code>embed</code>。请求 <code>{texts: [...]}</code>（任务参数允许时可用多模态 <code>inputs</code>）；答复 <code>{vectors, dims, model, vector_space, ms}</code>。默认每批 32 条、单条 32000 字、合计 320000 字。后台请求走专用模型通道，被挡回时返回 <code>lane_busy</code> 并附 <code>retry_after_ms</code>。</p>
+<p>kind <code>embed</code>。请求 <code>{texts: [...]}</code>（任务参数允许时可改用多模态 <code>inputs</code>，每条恰好一个 <code>text</code>、<code>image</code> 或 <code>audio</code>，答复多一个逐条的 <code>errors</code>）；答复 <code>{vectors, dims, model, vector_space, ms}</code>。默认每批 32 条、单条 32000 字、合计 320000 字；每条在工作进程里按 token 截到任务参数 <code>max_tokens</code>（默认 2048）。<code>X-Luoke-Priority</code> 可选，不带按 <code>background</code>：后台请求不占引擎的后台名额，按全机后台状态、交互和这个任务自己的功耗档间歇接纳（可带 <code>X-Luoke-Allow-Battery: 1</code>），间歇中答 <code>busy</code>（<code>reason</code> 为 <code>lane_busy</code>）并附 <code>retry_after_ms</code>；<code>user-waiting</code> 排到后台批的前面。</p>
+<h3>转写 <code>POST /tasks/&lt;task&gt;/v1/transcribe</code></h3>
+<p>kind <code>transcribe</code>。一次听写是一个会话，音频分块追加，要草稿或终稿时算用户在等。请求 <code>{session, seq, audio, want?, context?, language?}</code>：<code>session</code> 1–64 字；<code>seq</code> 从 0 起逐次加一，0 为新开或从头重送；<code>audio</code> 是上次以后新录的部分，base64 的 PCM16LE、16 kHz、单声道；<code>want</code> 为 <code>none</code>（只追加）、<code>draft</code>、<code>final</code>（默认）或 <code>cancel</code>；<code>context</code> ≤ 任务参数 <code>max_context_chars</code>（默认 2000）；<code>language</code> 是语言的英文名，不给取任务参数。答复 <code>{text, final, audio_secs, ms, model}</code>，<code>none</code>、<code>cancel</code> 答 <code>{ok: true}</code>。音频只在内存里，终稿、取消或 30 秒没消息即丢弃；每个配件同时最多 4 个会话，新开时丢掉最久没动的；一次听写最长为任务参数 <code>max_audio_secs</code>（默认 120 秒）。主控接不上 <code>seq</code> 时答 <code>session_lost</code>，从 <code>seq</code> 0 重送整段；没算成的那一块当没收到，照 <code>retry_after</code> 原样重发。</p>
 <h3>预热 <code>POST /warmup</code></h3>
-<p>请求 <code>{task, lease_id?}</code>；答复 <code>{accepted, lease_id, expires_in: 600}</code>，或 <code>{accepted: false, code}</code>（<code>task_unavailable</code>、<code>unsupported</code>、<code>deferred</code>）。新的预热算作交互，续期不算。打分、联想、嵌入任务的预热会启动工作进程；内存不够时照样答应，真正请求时答 <code>not_ready</code>。</p>
+<p>请求 <code>{task, lease_id?}</code>；答复 <code>{accepted, lease_id, expires_in: 600}</code>，或 <code>{accepted: false, code}</code>：任务现在用不了为 <code>task_unavailable</code>、<code>unsupported</code>，低电量模式或内存压力不正常时新的预热为 <code>deferred</code>。任务不存在答 404 <code>task_unavailable</code>。新的预热算作交互，续期不算。生成任务的预热在底座没加载时加载底座；打分、联想、嵌入、转写任务的预热会启动工作进程（转写的已经起着的也重新热一遍）；内存不够时照样答应，真正请求时答 <code>not_ready</code>。</p>
 
 <h2>配件管理</h2>
 <div class="tbl"><table>
 <tr><th>路由</th><th>说明</th></tr>
-<tr><td><code>GET /accessories</code></td><td>已安装配件的公开字段：accessory、bundle_id、name、version、type、resident、memory、tasks、capabilities、jobs</td></tr>
+<tr><td><code>GET /accessories</code></td><td><code>{contract, accessories}</code>：已安装配件的公开字段 accessory、bundle_id、name、version、type、resident、memory、tasks、capabilities、jobs（只给名字）、data；没开启的螺壳里带的应用不列</td></tr>
 <tr><td><code>PUT /accessory/resident</code></td><td><code>{resident}</code>，声明是否常驻</td></tr>
-<tr><td><code>POST /accessory/exiting</code></td><td>配件主动退出前通知，主控停止只由它使用的工作进程</td></tr>
+<tr><td><code>POST /accessory/exiting</code></td><td>配件主动退出前通知：本体据此不把这次退出当异常，主控停止只由它使用的工作进程</td></tr>
 </table></div>
 
 <h2>主控本体专用</h2>
-<p>以下路由要求身份为 <code>luoke-core</code>，并按内核报告的对端 PID 核对对端是主控进程的父进程（即本体）。<code>/settings</code> 和 <code>/endpoint*</code> 另外接受主控自带的命令行 <code>luoke</code>（与主控同一个 Python 可执行文件、参数为 <code>-m luoke_core.cli</code>）。不符时答 <code>forbidden</code>。</p>
+<p>以下路由（注明不要求身份的除外）要求身份为 <code>luoke-core</code>，并按内核报告的对端 PID 核对对端是主控进程的父进程（即本体）。<code>/settings</code> 和 <code>/endpoint*</code> 另外接受主控自带的命令行 <code>luoke</code>（与主控同一个 Python 可执行文件、参数为 <code>-m luoke_core.cli</code>）。不符时答 <code>forbidden</code>。</p>
 <div class="tbl"><table>
 <tr><th>路由</th><th>说明</th></tr>
-<tr><td><code>GET /status</code></td><td>运行状态（不要求身份）：档、底座、引擎、交互、后台、冒烟、设置、下载、空闲任务、端点（不含密钥）等</td></tr>
-<tr><td><code>GET/POST /downloads</code></td><td>缺少的下载项和进度；POST 开始下载</td></tr>
-<tr><td><code>GET/PUT /settings</code></td><td><code>power_mode</code>、<code>background_on_battery</code>、<code>tier</code>、<code>endpoint_enabled</code>、<code>endpoint_port</code>、<code>endpoint_key</code></td></tr>
+<tr><td><code>GET /status</code></td><td>运行状态（不要求身份，启动期间也答）：档、底座、引擎、交互、后台、冒烟、设置、下载、空闲任务、端点（不含密钥）等</td></tr>
+<tr><td><code>GET/POST /downloads</code></td><td>GET 答 <code>{needed, downloads}</code>：缺少的下载项和进度；POST <code>{names?}</code> 开始下载，不给就下缺的；没有发布清单的开发构建答 <code>unsupported</code></td></tr>
+<tr><td><code>GET/PUT /settings</code></td><td><code>power_mode</code>（<code>full</code>、<code>balanced</code>、<code>quiet</code>）、<code>background_on_battery</code>、<code>tier</code>（只能选内存够的档，空为按内存定）、<code>endpoint_enabled</code>、<code>endpoint_port</code>（1024–65535）；PUT 还收 <code>endpoint_key</code>，只写进密钥文件，GET 不返回；端口往后都被占时答 <code>busy</code></td></tr>
 <tr><td><code>GET /endpoint</code>、<code>POST /endpoint/key</code></td><td>端点状态和密钥；生成新密钥</td></tr>
-<tr><td><code>POST /endpoint/models</code>、<code>/endpoint/models/remove</code></td><td>登记、撤销用户自己的模型</td></tr>
-<tr><td><code>POST /smoke</code></td><td>重新做冒烟检查</td></tr>
-<tr><td><code>POST /uninstall</code></td><td><code>{accessory, data?, forget?, dry_run?}</code>；也删除 <code>previous.noindex</code> 里该配件的旧版（答复 <code>previous</code>）</td></tr>
+<tr><td><code>POST /endpoint/models</code>、<code>/endpoint/models/remove</code></td><td><code>{path, name?}</code> 登记、<code>{name}</code> 撤销用户自己的模型，之后重启引擎</td></tr>
+<tr><td><code>POST /smoke</code></td><td>在后台重新做冒烟检查，答 <code>{started}</code>（已在做时 <code>{started: false, running: true}</code>）；结果看 <code>/status</code> 的 <code>smoke</code></td></tr>
+<tr><td><code>POST /accessories/enable</code></td><td><code>{accessory}</code>：开启螺壳里带的应用；不是螺壳里带的应用答 <code>unsupported</code>（以下几条同）</td></tr>
+<tr><td><code>POST /accessories/disable</code></td><td><code>{accessory}</code>：停用螺壳里带的应用，停掉它的空闲任务和只由它使用的工作进程，不动数据</td></tr>
+<tr><td><code>POST /accessories/permission</code></td><td><code>{accessory, permission, on}</code>：记下或撤回用户对螺壳名下某项系统权限的同意；清单没声明这项权限答 <code>undeclared</code></td></tr>
+<tr><td><code>POST /accessories/first-use</code></td><td><code>{accessory}</code> → <code>{jobs}</code>：清单里标了 <code>first_use</code> 的空闲任务在下一次采样就起，不看安静时刻和电源</td></tr>
+<tr><td><code>POST /accessories/delete-data</code></td><td><code>{accessory, dry_run?, forget?}</code>：删螺壳里带的应用的数据（真删前先记停用），答复同 <code>/uninstall</code></td></tr>
+<tr><td><code>POST /accessories/reregister</code></td><td><code>{accessory}</code> → <code>{accessory, app, unregistered_others, killed}</code>：重新登记单独装的配件（结束进程，注销同 bundle id 的其他副本，复制一份换回原位）；没装答 <code>unsupported</code></td></tr>
+<tr><td><code>POST /accessories/restart</code></td><td><code>{accessory}</code> → <code>{accessory, app, killed}</code>：重新启动输入法（结束进程再拉起）；没装或不是输入法答 <code>unsupported</code></td></tr>
+<tr><td><code>POST /uninstall</code></td><td><code>{accessory, data?, forget?, dry_run?}</code>；<code>dry_run</code> 只答计划（要删的 .app、旧版、数据路径，能从记忆里忘掉多少），真卸载答复另列 <code>removed</code>、<code>errors</code>。先停它的空闲任务；也删除 <code>previous.noindex</code> 里该配件的旧版（答复 <code>previous</code>、<code>previous_copies</code>）；螺壳里带的应用没有 .app 可删，只记停用；螺壳记忆不能单独卸载（<code>invalid_request</code>）；没装答 <code>unsupported</code></td></tr>
 <tr><td><code>GET /accessories/previous</code></td><td>留有旧版的配件：<code>{accessories: [{accessory, name, type, bundle_id, current, previous, verified, release}]}</code>；<code>verified</code> 为假的不能换回</td></tr>
 <tr><td><code>POST /accessories/rollback</code></td><td><code>{accessory}</code> → <code>{accessory, from, to, type, bundle_id}</code>；无旧版或无验证记录 <code>unsupported</code>，签名不过 <code>invalid_request</code>，对调失败 <code>engine_failed</code></td></tr>
-<tr><td><code>POST /jobs/run</code></td><td>让某个空闲任务在下一个安静时刻立即运行（只在内部版、本机版和实验室版可用）</td></tr>
+<tr><td><code>POST /jobs/run</code></td><td>（不要求身份）<code>{job}</code>（<code>&lt;配件&gt;.&lt;任务名&gt;</code>）→ <code>{job, queued}</code>：让某个空闲任务在下一个安静时刻运行，不等最小间隔，其余条件照旧；只在内部版、本机版和实验室版可用，其他答 <code>unsupported</code></td></tr>
 </table></div>
 
 <h2>高级用户端点</h2>
 <ul>
-<li>默认关；开启后监听 127.0.0.1，默认端口 17860（被占则向后找）。</li>
-<li>检查：Host 必须是 <code>127.0.0.1</code> 或 <code>localhost</code>；带 <code>Origin</code> 头一律拒绝；密钥非空时校验 <code>Authorization: Bearer</code>（用户可自定义或留空）。</li>
-<li><code>GET /v1/models</code>：底座名和 <code>user/&lt;名字&gt;</code>（用户登记的模型）。<code>POST /v1/chat/completions</code>：按"用户在等"调度。</li>
-<li>错误：<code>model_not_found</code>（404）、<code>too_large</code>（507，超过独占上限：内存 − 8%（3–8 GB）− 常驻专用模型 − 1 GB）、<code>not_ready</code>、<code>busy</code>、<code>engine_failed</code>（503）。</li>
-<li>命令行 <code>luoke launch pi [--model M]</code> 自动读取端口和密钥，在 pi 的配置中写入 <code>luoke</code> provider 并启动 pi。</li>
+<li>默认关；开启后监听 127.0.0.1，默认端口 17860（被占则往后找，最多试 20 个）。</li>
+<li>检查：Host 必须是 <code>127.0.0.1</code> 或 <code>localhost</code>；带 <code>Origin</code> 头一律拒绝；密钥非空时校验 <code>Authorization: Bearer</code>（用户可自定义或留空）；请求体上限 32 MB。</li>
+<li><code>GET /v1/models</code>：底座名和 <code>user/&lt;名字&gt;</code>（用户登记的模型）。<code>POST /v1/chat/completions</code>：要有 <code>model</code> 和 <code>messages</code>，可流式，按"用户在等"调度；均衡、静音档下一次只做一条，每条做完按用时歇（均衡 1 倍、静音 3 倍，最多 600 秒）。用户模型和底座放得下就一起加载，放不下才独占引擎；闲置 5 分钟卸掉。</li>
+<li>错误体为 <code>{"error": {"type", "message"}}</code>：<code>forbidden</code>（403，Host 或 Origin 不对）、<code>unauthorized</code>（401）、<code>invalid_request</code>（400）、<code>not_found</code>、<code>model_not_found</code>（404）、<code>too_large</code>（413：请求体为空或超过上限；507：模型超过独占上限，即内存 − 8%（3–8 GB）− 正在运行的专用模型 − 1 GB）、<code>not_ready</code>、<code>busy</code>、<code>engine_failed</code>（503）。</li>
+<li>命令行 <code>luoke launch pi [--model M]</code> 自动读取端口和密钥（端点没开时先打开），在 pi 的配置中写入 <code>luoke</code> provider 并启动 pi；<code>luoke endpoint</code> 显示端点状态（不印密钥）。</li>
 </ul>
 </section>
 <section class="page" id="ref-manifest" data-title="配件清单与配方">
@@ -2228,6 +2240,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-08</h2>
+<ul>
+<li>主控任务接口页按代码 67dcf2a 复核：加转写 <code>/v1/transcribe</code>（会话、分块、草稿和终稿、<code>session_lost</code>、<code>superseded</code>）；本体专用表加开启、停用、权限、第一次任务、删数据、重新登记、重新启动输入法七条，写明 <code>/jobs/run</code> 不要求身份；错误表加 409、拆开两种 404，未知路由答 400；连接一节加启动和退出期间怎么答；<code>/tasks</code> 加 <code>main</code> 和 <code>status</code> 的取值；生成、续写、嵌入、预热、<code>/downloads</code>、<code>/settings</code>、<code>/smoke</code>、<code>/uninstall</code> 补字段、默认值和上限，嵌入被挡回改正为 <code>busy</code>（<code>reason</code> 为 <code>lane_busy</code>）；高级用户端点补错误体、请求体上限、功耗档间歇、用户模型和底座一起加载。主控页的本体专用接口列表跟着补全。</li>
+</ul>
 
 <h2>2026-11-07</h2>
 <ul>
