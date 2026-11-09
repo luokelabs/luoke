@@ -9,14 +9,14 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.30.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.31.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
 - **Python 库 `luoke_mem`**：只用标准库，Python 3.9 起。各配件优先用主控里那一份（见下「和使用方定下的」）。自带一份的应用照旧只带 `__init__.py`、`memory.py`、`sensitive.py`（0.28.1 起没有 `prompts/labels.json` 也能导入，标题用 `memory` 里一样的那份）。
   - 写：`record`（库在写入前遮掉凭证）、`state`、`propose`、`conclude`（按"什么记录能推出什么理解"的表定档）、`confirm`、`reject`、`revise`、`later`、`was`（以前是，现在不是）、`redate`（改正本工具记录的时间）。
   - 读：`notes`（默认给比较确定以上；`confidence=[...]` 按档读；每条带 `confidence`、`data`、`auto`、`fresh`）、`note`（全部依据的原文和 `data`）、`records`（默认本工具的，`tool=` 别的工具的，`tool=None` 全部）、`context`、`counts`、`recent`。
-  - 人（0.30）：`entities(kind="person")`、`entity(id)`（名字、别的叫法和地址、关系、关于这个人的理解）；理解带 `entity`，说明是关于谁的，空就是关于用户本人。只认用户自己发出的邮件里写到的人。
+  - 人（0.30）：`entities(kind="person")`、`entity(id)`（名字、别的叫法和地址、关系、写信的档案 `contact`、关于这个人的理解）；理解带 `entity`，说明是关于谁的，空就是关于用户本人。只认用户自己发出的邮件里写到的人和用户常写信给的人（0.31 起读邮件助手的 `mail-contact`）。用户改名、并成一个、拆开、说不是一个人、忘掉一个人在记忆页面上做（`WholeMemory` 的 `rename_person` 等）。
   - 合并和拆开：同一机构的事实是一条（话题「机构:<名>」）；`merged(nid)` 列出并进来的说法，`WholeMemory.split(nid)` 拆出来。
   - 删：`forget`（单条理解）、`forget_records`（本工具的一部分记录，可以留下被引用的）、`forget_tool()`（本工具写的全部）。删别的工具写的、`forget_all` 只在 `WholeMemory`（记忆自己的界面和命令行）里。
   - 想问的和建议（给 agent 和工具页面）：`asks(tool=...)` 读，`reply(id, choice, text)` 交回（yes / no / past / revise / later / answer；建议是 useful / useless / never）。
@@ -66,7 +66,7 @@
 
 - **luoke-core**：螺壳本体照清单 `commands.mcp`（`-m luoke_mem --path {memory} mcp`，用主控自带的 Python）起记忆，作为本体起的工具（工具协议 §2a）；现在本体起的只有扫描和搜索。能起了告诉记忆，记忆再把 `capabilities`（`transport: "stdio"`）写进清单。
 - **luoke-agent**：记忆的清单里有 `capabilities.reports` 时改走记忆的 outbox，不再自己拼记忆的卡片；「设置 · 提醒」里记忆那一类换成清单的 `reports`；从 `luoke-mem/fixtures/agent/` 拷样例。
-- **luoke-mail**（给语音热词的人名）：记一条用户常写信给谁，比如话题 `mail-contact`（用户 / 活动），每个收件人每月一条，`data` 带显示名 `name`、`count`、`month`，`sender` 写收件地址；只记用户发出的信里的收件人和抄送，不记来信的人。字段由邮件助手定，定了告诉记忆。
+- **luoke-mail**（给语音热词的人名，邮件助手已接，PR mail-private#78、0.19.41，记忆 0.31 起读）：记一条用户常写信给谁，比如话题 `mail-contact`（用户 / 活动），每个收件人每月一条，`data` 带显示名 `name`、`count`、`month`，`sender` 写收件地址；只记用户发出的信里的收件人和抄送，不记来信的人。字段由邮件助手定，定了告诉记忆。
 - **luoke-ime**（给语音热词的英文专名）：英文模式下上屏的词也写进 `ime-commit`（输入法提的，等它和主人商量），照中文模式一样不写密码框里的、带验证码和证件号码的；`data` 里标一下是英文模式，记忆只从里面取专名。
 - **luoke-search**（认人，负责人 2026-11-09 同意提，建议排在 ADR 0024 加密之后）：照片图库里用户起了名字的人脸组，每组每月一条记录（比如 `photo-person`，用户 / 活动，带名字、组编号、几张、最早和最近的日期；人脸特征只留在搜索自己的索引里，不写照片和地点）；以后再加用户文档里反复出现的人名、机构名（带出处，记忆当别人说的、只做猜测）。单独的开关，默认关；起了名字才算一个人，不判断亲疏。
 - **luoke-mail**：ADR 0015 说的"必要时向工具要更多原文"还没有通道；beta1 之后商定一个读取接口（比如按发件人取最近几封的正文）。
