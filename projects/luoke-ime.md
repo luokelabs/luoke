@@ -55,7 +55,7 @@ macOS 输入法。壳只管按键、候选窗、上屏和沙盒，出什么候�
 - **语音识别的两处**（2026-11-06 提，来自 sayit 的经验，luoke-ime-private#8；luoke-core 已接，luoke-core-private#114 已合，internal-1107-2 起带。语言是任务参数，请求里可以带 `language` 换掉）：
   - 转写传 `language: "Chinese"`，不让模型自己判断。sayit 实测英文一多时，自动判断会把整句翻成英文。输入法这边用合成声音没复现出来，但固定成中文以后纯英文的句子照样原样出，没有坏处。
   - `warmup` 在模型已经加载时也解一小段静音（1 秒静音、1 个 token）。闲置 30 分钟以上，macOS 会把权重换出内存，sayit 量到松键后那一遍慢约 2.5 倍；按下时解一下，读回权重和说话同时进行。
-- **只在相关文件变了时重跑评测**（主人 2026-11-09 同意提，luoke-ops#104）：输入法每改一处都要升版本（不升发布流水线不收），这阵子多数改动是语音、设置和文档，和重排、联想无关，可 128 档每版都重跑 rerank 600 条、predict 531 条。各项评测实际只看这些文件：
+- **只在相关文件变了时重跑评测**（主人 2026-11-09 同意提，luoke-ops#104；luoke-core 已接，luoke-core-private#137 待批：路径写在主控评测表 `tools/release_evals.json` 每项的 `paths`，不进清单、输入法不用算哈希；transcribe、tidy 也列了，四项都加了 `scripts/evidence.py`；合并后第一版四项各重跑一次。评测程序开始读别的文件时，输入法同一次改动里请主控改 `paths`，写在输入法的 CONTRIBUTING.md）：输入法每改一处都要升版本（不升发布流水线不收），这阵子多数改动是语音、设置和文档，和重排、联想无关，可 128 档每版都重跑 rerank 600 条、predict 531 条。各项评测实际只看这些文件：
   - `luoke-ime.rerank`（`engines/xiaohe/bench.py`，它自己扮演壳、起个人化组件）：`engines/xiaohe/`、`engines/personal/`、`scripts/evidence.py`；
   - `luoke-ime.predict`（`engines/personal/eval_predict.py`）：`engines/personal/`、`scripts/evidence.py`；
   - 都不看壳（`Sources/`）、语音（`engines/voice/`）、`Resources/`、文档和测试。以后 transcribe、tidy 进发布评测时同理：transcribe 看 `evals/transcribe/`，tidy 看 `engines/voice/tidy_prompt.txt`、`tidy_examples.json` 和 `evals/tidy/`。
