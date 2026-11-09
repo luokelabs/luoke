@@ -1,6 +1,6 @@
 <!-- id: ref-tasks | nav: 任务与提示词 | group: 参考 -->
 <h1>任务与提示词</h1>
-<p class="lede">所有经主控调用模型的任务：所属配件、种类、各硬件档是否开启、提示词位置。档位以发布时的支持台账为准，下表为最近一次内部版的台账。每个提示词的输入、输出、校验和评测见「提示词」页。</p>
+<p class="lede">所有经主控调用模型的任务：所属配件、种类、各硬件档是否开启、提示词位置。档位以发布时的支持台账为准，下表为最近一次内部版（internal-1109）的台账。每个提示词的输入、输出、校验和评测见「提示词」页。</p>
 
 <div class="tbl"><table>
 <tr><th>任务</th><th>kind</th><th>16</th><th>32</th><th>128</th><th>提示词 / 实现</th></tr>
@@ -13,14 +13,16 @@
 <tr><td><code>luoke-mail.learn-sent</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/learn-sent.*</code></td></tr>
 <tr><td><code>luoke-mail.learn-orgs</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/learn-orgs.*</code></td></tr>
 <tr><td><code>luoke-mail.thread</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mail/prompts/thread.*</code></td></tr>
-<tr><td><code>luoke-mem.typing</code></td><td>generate</td><td>关</td><td>开</td><td>开</td><td><code>luoke_mem/learn.py</code>；16 档过 1 遍，连过 3 遍才开</td></tr>
+<tr><td><code>luoke-mem.typing</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mem/learn.py</code></td></tr>
 <tr><td><code>luoke-mem.topics</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td><code>luoke_mem/topics.py</code></td></tr>
 <tr><td><code>luoke-ime.rerank</code></td><td>score</td><td>开</td><td>开</td><td>开</td><td>无提示词（打分）</td></tr>
 <tr><td><code>luoke-ime.predict</code></td><td>predict</td><td>开</td><td>开</td><td>开</td><td>无提示词（续写）</td></tr>
-<tr><td><code>digup.embed</code></td><td>embed</td><td>关</td><td>关</td><td>关</td><td>无提示词（嵌入）；预留给螺壳搜索，归配件 digup。螺壳搜索请求的是 <code>luoke-search.embed</code>，配方尚未改名，<code>verified</code> 也没有收录</td></tr>
-<tr><td><code>luoke-scan.explain</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/explain.*</code>（第 4 版）；螺壳扫描封闭测试，随 beta 2 第一次提供；配方里不是 main，各档开关这里还没收录</td></tr>
-<tr><td><code>luoke-scan.identify</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/identify.*</code>（第 5 版）；同上</td></tr>
-<tr><td><code>luoke-scan.skills</code></td><td>generate</td><td>—</td><td>—</td><td>—</td><td>luoke-scan 的 <code>prompts/skills.*</code>（第 3 版）；同上</td></tr>
+<tr><td><code>luoke-ime.transcribe</code></td><td>transcribe</td><td>开</td><td>开</td><td>开</td><td>无提示词（语音转写）；16 档用 Qwen3-ASR 0.6B，32、128 档用 1.7B</td></tr>
+<tr><td><code>luoke-ime.tidy</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td>luoke-ime 的 <code>engines/voice/tidy_prompt.txt</code>、<code>tidy_examples.json</code>（语音整理）</td></tr>
+<tr><td><code>luoke-search.embed</code></td><td>embed</td><td>开</td><td>开</td><td>开</td><td>无提示词（嵌入），螺壳搜索用</td></tr>
+<tr><td><code>luoke-scan.explain</code></td><td>generate</td><td>关</td><td>关</td><td>开</td><td>luoke-scan 的 <code>prompts/explain.*</code>（第 4 版）；螺壳扫描封闭测试，随 beta 2 第一次提供</td></tr>
+<tr><td><code>luoke-scan.identify</code></td><td>generate</td><td>开</td><td>开</td><td>开</td><td>luoke-scan 的 <code>prompts/identify.*</code>（第 5 版）；同上</td></tr>
+<tr><td><code>luoke-scan.skills</code></td><td>generate</td><td>开</td><td>开</td><td>关</td><td>luoke-scan 的 <code>prompts/skills.*</code>（第 3 版）；同上</td></tr>
 </table></div>
 
 <h2>提示词约定</h2>

@@ -177,10 +177,23 @@
 <tr><td>评测</td><td>66 条（硬性 32，只算规则报了的）；第 3 版按 16 档的参数硬性 32/32、全部 65/66，规则报了的 11 个正常 skill 里 3 个说成对不上；32、128 档还没评第 3 版</td></tr>
 </table></div>
 
+<h2>输入法</h2>
+<h3><code>luoke-ime.tidy</code> 语音整理</h3>
+<div class="tbl"><table>
+<tr><th>项</th><th>要点</th></tr>
+<tr><td>位置</td><td>提示词 <code>engines/voice/tidy_prompt.txt</code>，示例 <code>engines/voice/tidy_examples.json</code>（5 组，和评测题不重复，其中一条像指令的照原样）；代码 <code>engines/voice/main.swift</code>。评测 <code>evals/tidy/eval_tidy.py</code> 用同一份提示词、示例和同样的前后处理</td></tr>
+<tr><td>输入</td><td>语音一段的终稿，先由代码去掉单独成段的语气词，放在 <code>&lt;&lt;&lt;</code> 和 <code>&gt;&gt;&gt;</code> 之间；消息依次是提示词、5 轮示例、这一段</td></tr>
+<tr><td>输出</td><td><code>{"text"}</code>（<code>response_format</code> 的 JSON schema）。只做五件事：去口头禅和卡住的重复（有意思的「就是」「然后」、带语气的「对对对」照留）；理顺改口，只留最后的说法；数字按书面习惯（电话、金额、百分比、年份、日期、时刻，英文后的版本号、型号；「一下」、楼层、序数照原样）；英文和专名的常见写法（念散的词连起来，本来两个词的空一格，不翻译，中英文之间不加空格）；句末加标点，去掉停顿造成的逗号。不换用词、不调语序、不润色、不总结；原文像在对模型下指令也不照做，整理后原样输出</td></tr>
+<tr><td>校验与退路</td><td>出错或 2.5 秒没回来用原文；结果的字母和数字个数不在原文的 0.5 倍到 1.3 倍加 2 之间也用原文（挡住照做「忽略前面的要求」这类）。整不整理，代码都把连着 5 个以上的汉字数字逐位换成阿拉伯数字，英文后的汉字数字换成阿拉伯数字</td></tr>
+<tr><td>预算</td><td>输出上限照主控的任务参数（<code>item_tokens</code> 1024、<code>fixed_tokens</code> 100，够一次最长 120 秒的听写）；温度 0、不思考；按 <code>user-waiting</code> 发</td></tr>
+<tr><td>评测</td><td>42 条，八类（口头禅、改口、数字、英文、停顿的逗号、英文后的数字、照留、像指令的），总分是整理后的字准确率；硬性条目是照留和像指令的一个字不改（只比字、不比标点）。internal-1109：16、32 档（Qwen3.5-9B 4-bit）97.7%，128 档（gemma-4-26B 8-bit）99.2%，硬性都过</td></tr>
+</table></div>
+
 <h2>没有提示词的任务</h2>
 <ul>
 <li><code>luoke-ime.rerank</code>：只送前文和候选，主控返回每个候选的对数概率。</li>
 <li><code>luoke-ime.predict</code>：只送前文，主控续写若干分支，停在标点。</li>
-<li><code>luoke-search.embed</code>（配方里仍叫 <code>digup.embed</code>，还没分到任何档）：只送加好检索前缀的文字，返回向量。</li>
+<li><code>luoke-ime.transcribe</code>：送音频块和上下文（常用说法、前文），主控答草稿或终稿的文字。</li>
+<li><code>luoke-search.embed</code>：只送加好检索前缀的文字，返回向量。</li>
 <li>agent 目前不调用生成任务。</li>
 </ul>
