@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.32.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.33.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -55,6 +55,7 @@
   - 记录：`mail-read` 每个发件人每月一条，带 `count`、`opened`（只数用户自己打开的）、`category`、`mails`（这个月打开过的最新 3 封 {subject, date, text}；事务邮件不带正文），同一 `ref` 再写一条带原文的就替掉旧的那条；`digest-open`、`digest-feedback` 带 `source`、`text`；发件方写的文字带 `text_by: "sender"`（`mails` 里每封一个，digest 的 `data` 上一个；luoke-mail 0.19.7 起，旧记录没有）；`sent-mail` 带用户自己写的部分 `text`；`mail-acted` 带 `action`、`label`、`category`、`where`（here / elsewhere）、`count`、`name`；`mail-override` 带 `from`、`to`；`mail-auto`（规则做的，`by=rule`）和 `mail-undo-auto`（带习惯的 `note_id`，算反证）。每条带 `account`、`sender`、`by`、`happened_at`（真实时间）。写进去的文字先过 `mask_secrets`。
   - 机构来信推出的事实，话题写「机构:<完整机构名>」，同一机构的不同说法都用它，由记忆并成一条。从邮件原文里抽事实（发出的邮件、机构来信）是邮件助手的观察，照旧调 `conclude` / `propose`，由记忆的表定档；话题、不感兴趣、习惯由记忆归纳。精选读 `notes(kinds=["taste", "interest"])`；自动执行读 `notes(kinds=["preference"], confidence=["sure"])` 里 `auto` 为真的；页面上的想问的和建议读 `asks(tool="luoke-mail")`。
 - **luoke-ime**：`ime-commit`（用户 / 陈述，`data.app`，`data.context` 是光标前的前文、标成 `third_party`）、`ime-correction`、`ime-forget`（不要的候选）。按应用、按时间段删用 `forget_records`；用户设了保留期就 `forget_records(..., keep_cited=True)`。常用说法由记忆归纳，只数用户自己打的。
+  - 语音热词（0.33）：`hotwords(limit)` 按类分名额（人名最多 40%、英文专名最多 20%、其余给用户自己的说法），请输入法有这个接口时改用它（已提）。
   - 语音热词里的人名和英文专名（输入法 2026-11-09 提，0.30.0 起有）：仍放在 `term` 里，输入法照现在的办法读，不用改；`data.sort` 写 `person`（人名）或 `name`（英文专名），给页面区分用。人名只取用户自己写信给的人，不问用户（常用说法从来不问：错了代价小，页上能点「不对」，候选上 Shift+⌫ 也会否掉）；只给用户写信、用户没回过的人不算。人名来自用户发出的邮件里谈到的人（话题「同事:某人」这类），照表定档（发出的邮件 2 封、相隔 7 天），依据都在 90 天以前的不给；英文专名来自用户打的字（含英文模式），连着的大写开头的词，门槛和别的常用说法一样（3 天、5 次）。
 - **luoke-agent**：想问的、建议从 `asks()` 读，依据从 `note(about_note)["cites"]` 读，回答一律 `reply`；习惯建议（`action.capability == "habit"`）给"好 / 不用 / 别再提"。
 - **luoke-scan**（原名 luoke-audit，luoke-mem#7 商定，0.26.0 起有，0.27.1 改名，话题 0.27.3 起是 `scan-*`）：扫描是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-scan`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`scan-cleaned`（user / receipt）、`scan-ignored`（user / statement）、`scan-auto-cleaned`（system / activity，`by=rule`）、`scan-malware`（user / receipt）、`scan-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康（旧名，留着）。
