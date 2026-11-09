@@ -43,6 +43,14 @@
 <tr><td><code>ime/</code></td><td>输入法的设置、用户引擎、引擎数据、开发记录</td></tr>
 </table></div>
 
+<h2>agent <code>~/.luoke/agent/</code></h2>
+<div class="tbl"><table>
+<tr><th>路径</th><th>内容</th></tr>
+<tr><td>目录本身</td><td>700；设了 <code>LUOKE_HOME</code> 时在它下面</td></tr>
+<tr><td><code>state.db</code></td><td>事项和卡片、设置、简报和少说的状态、每类的反应，0600</td></tr>
+<tr><td><code>run/agent.sock</code>、<code>run/lock</code></td><td>主窗口连核心的 socket、单实例锁，0600，目录 700</td></tr>
+</table></div>
+
 <h2>邮件助手 <code>~/.luoke-mail/</code></h2>
 <p>不是装好的那份螺壳（例如开发版）里的邮件助手用 <code>~/Library/Application Support/luoke-mail/</code>，结构相同。</p>
 <div class="tbl"><table>
