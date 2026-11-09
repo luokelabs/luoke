@@ -15,7 +15,7 @@ macOS 输入法。壳只管按键、候选窗、上屏和沙盒，出什么候�
 
 - 现在：输入法本身；把用户上屏的文字写进记忆（`ime-commit`、`ime-correction`、`ime-forget`）。经输入法上屏的都是用户自己打或说的（粘贴不经过输入法），是记忆里最直接的一类"用户本人说的话"。
 - 计划：重排打分和联想的评测集（给主控的配方，见"对主控的需求"）。
-- 螺壳主窗口里的设置页（ime-private#29，主人 2026-11-09 定范围，输入法 ADR 0018）：包里的 `Contents/MacOS/luoke-ime mcp` 照 luoke-agent 工具协议 §2a（`transport: "stdio"`）答一条请求就退出。两页 `page/settings`（通用页的全部设置，含记忆记录的开关和暂停）、`page/apps`（各应用）；`ime_set` 只改写死的一张表、要 `ai.luoke/user-action`，`ime_page` 只读、换着看各应用。和输入法自己的设置窗口并存，改同一份 `settings.json`；菜单、麦克风权限都不动，清单不写 `permissions`。命令和测试已在 main（0.1.89 起）；配件清单的 `service`、`transport`、`actions` 等主控能起它再加（见对主控的需求）。
+- 螺壳主窗口里的设置页（ime-private#29，主人 2026-11-09 定范围，输入法 ADR 0018）：包里的 `Contents/MacOS/luoke-ime mcp` 照 luoke-agent 工具协议 §2a（`transport: "stdio"`）答一条请求就退出。两页 `page/settings`（通用页的全部设置，含记忆记录的开关和暂停）、`page/apps`（各应用）；`ime_set` 只改写死的一张表、要 `ai.luoke/user-action`，`ime_page` 只读、在「各应用」页展开哪个应用（记在 `~/.luoke/ime/window-page.json`，窗口重读页时照它画）。和输入法自己的设置窗口并存，改同一份 `settings.json`；菜单、麦克风权限都不动，清单不写 `permissions`。0.1.89 起，配件清单写了 `transport: "stdio"`、`service.pages`、`actions`。
 
 ## 依赖
 
@@ -30,7 +30,7 @@ macOS 输入法。壳只管按键、候选窗、上屏和沙盒，出什么候�
 
 **身份**：对主控来说配件只有一个，"luoke-ime"（配件清单 `luoke-accessory.json` 在 LuokeIME.app 的 Contents/Resources，`type` 是 `input-method`，`memory` 为 true；`data` 是 `["~/.luoke/ime"]`：卸载时主控删 `~/Library/Input Methods/LuokeIME.app` 和这个目录，里面只有输入法自己的设置、各引擎的数据、开发模式的记录和用户装的引擎，不含 `mem.db`；另有系统临时目录里的 `luoke-ime/`，空的，删不删都行；2026-10-16 和 luoke-core 对过）。「添加应用」装之前看到的介绍写在清单的 `capabilities.listing`（类别「输入」，0.1.23 起，luoke-ime#19）；输入法不接 agent，没有 `service`；要用户在系统设置里手动添加输入源这一步不是系统授权，不写进 `permissions`，由主控的完成页和输入法的添加引导带着做。只有壳（Swift，不在沙盒里）连主控的 socket；输入法引擎和个人化组件的请求由壳转发，壳只看声明、不看内容。
 
-**起设置页的命令**（ime-private#29，2026-11-09 提，待主控接）：主窗口里「螺壳输入法」的设置页要本体起装在 `~/Library/Input Methods/LuokeIME.app` 里的 `Contents/MacOS/luoke-ime mcp`（不在螺壳.app 的 `Contents/Helpers` 里）。签名和 LuokeIME 同一个 Team，签名标识现在是 `luoke-ime`；要换写法请说。主控能起它以前，输入法的清单不加 `transport: "stdio"`，免得旧螺壳把这一页显示成「没在运行」。
+**起设置页的命令**（ime-private#29，2026-11-09 提，待主控接）：主窗口里「螺壳输入法」的设置页要本体起装在 `~/Library/Input Methods/LuokeIME.app` 里的 `Contents/MacOS/luoke-ime mcp`（不在螺壳.app 的 `Contents/Helpers` 里）。签名和 LuokeIME 同一个 Team，签名标识是 `luoke-ime`。luoke-core 已接（11-09，分支 `claude/ime-in-window`：按已装配件的清单找到输入法的包，核签名标识、Developer ID 和团队，不核版本，一个请求最多 30 秒）。
 
 **任务**（草案，名字和数值待主控定）：
 
