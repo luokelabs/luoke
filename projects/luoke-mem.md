@@ -54,6 +54,7 @@
   - 记录：`mail-read` 每个发件人每月一条，带 `count`、`opened`（只数用户自己打开的）、`category`、`mails`（这个月打开过的最新 3 封 {subject, date, text}；事务邮件不带正文），同一 `ref` 再写一条带原文的就替掉旧的那条；`digest-open`、`digest-feedback` 带 `source`、`text`；发件方写的文字带 `text_by: "sender"`（`mails` 里每封一个，digest 的 `data` 上一个；luoke-mail 0.19.7 起，旧记录没有）；`sent-mail` 带用户自己写的部分 `text`；`mail-acted` 带 `action`、`label`、`category`、`where`（here / elsewhere）、`count`、`name`；`mail-override` 带 `from`、`to`；`mail-auto`（规则做的，`by=rule`）和 `mail-undo-auto`（带习惯的 `note_id`，算反证）。每条带 `account`、`sender`、`by`、`happened_at`（真实时间）。写进去的文字先过 `mask_secrets`。
   - 机构来信推出的事实，话题写「机构:<完整机构名>」，同一机构的不同说法都用它，由记忆并成一条。从邮件原文里抽事实（发出的邮件、机构来信）是邮件助手的观察，照旧调 `conclude` / `propose`，由记忆的表定档；话题、不感兴趣、习惯由记忆归纳。精选读 `notes(kinds=["taste", "interest"])`；自动执行读 `notes(kinds=["preference"], confidence=["sure"])` 里 `auto` 为真的；页面上的想问的和建议读 `asks(tool="luoke-mail")`。
 - **luoke-ime**：`ime-commit`（用户 / 陈述，`data.app`，`data.context` 是光标前的前文、标成 `third_party`）、`ime-correction`、`ime-forget`（不要的候选）。按应用、按时间段删用 `forget_records`；用户设了保留期就 `forget_records(..., keep_cited=True)`。常用说法由记忆归纳，只数用户自己打的。
+  - 语音热词里的人名和英文专名（输入法 2026-11-09 提，记忆接下，正在做）：仍放在 `term` 里，输入法照现在的办法读，不用改；`data.sort` 写 `person`（人名）或 `name`（英文专名），给页面区分用。人名只取用户自己写信给的人，不问用户（常用说法从来不问：错了代价小，页上能点「不对」，候选上 Shift+⌫ 也会否掉）；只给用户写信、用户没回过的人不算。第一步只用记忆里已有的：用户发出的邮件里谈到的人（话题「同事:某人」这类），用户自己打的字和发出的邮件里反复出现的英文专名，门槛和别的常用说法一样（3 天）。
 - **luoke-agent**：想问的、建议从 `asks()` 读，依据从 `note(about_note)["cites"]` 读，回答一律 `reply`；习惯建议（`action.capability == "habit"`）给"好 / 不用 / 别再提"。
 - **luoke-scan**（原名 luoke-audit，luoke-mem#7 商定，0.26.0 起有，0.27.1 改名，话题 0.27.3 起是 `scan-*`）：扫描是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-scan`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`scan-cleaned`（user / receipt）、`scan-ignored`（user / statement）、`scan-auto-cleaned`（system / activity，`by=rule`）、`scan-malware`（user / receipt）、`scan-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康（旧名，留着）。
 - **luoke-peek**（螺壳探头，luoke-mem-private#3 商定，beta1 之后做，还没开工）：记录 `web-event-*`（不记 `web-event-seen`），网页上抽的字段放 `data.event`、标 `event_from: "page"`；来源 `sender = "site:<主机名>"`、`category = page_type`；链接只留主机名和路径，路径里像令牌的一段由记忆遮掉；agent 上线前由探头自己显示 `asks(tool="luoke-peek")`。
@@ -64,4 +65,6 @@
 
 - **luoke-core**：螺壳本体照清单 `commands.mcp`（`-m luoke_mem --path {memory} mcp`，用主控自带的 Python）起记忆，作为本体起的工具（工具协议 §2a）；现在本体起的只有扫描和搜索。能起了告诉记忆，记忆再把 `capabilities`（`transport: "stdio"`）写进清单。
 - **luoke-agent**：记忆的清单里有 `capabilities.reports` 时改走记忆的 outbox，不再自己拼记忆的卡片；「设置 · 提醒」里记忆那一类换成清单的 `reports`；从 `luoke-mem/fixtures/agent/` 拷样例。
+- **luoke-mail**（给语音热词的人名）：记一条用户常写信给谁，比如话题 `mail-contact`（用户 / 活动），每个收件人每月一条，`data` 带显示名 `name`、`count`、`month`，`sender` 写收件地址；只记用户发出的信里的收件人和抄送，不记来信的人。字段由邮件助手定，定了告诉记忆。
+- **luoke-ime**（给语音热词的英文专名）：英文模式下上屏的词也写进 `ime-commit`（输入法提的，等它和主人商量），照中文模式一样不写密码框里的、带验证码和证件号码的；`data` 里标一下是英文模式，记忆只从里面取专名。
 - **luoke-mail**：ADR 0015 说的"必要时向工具要更多原文"还没有通道；beta1 之后商定一个读取接口（比如按发件人取最近几封的正文）。
