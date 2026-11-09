@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-09 12:14</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-09 12:20</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -698,7 +698,7 @@ sequenceDiagram
 <section class="page" id="ime" data-title="输入法 luoke-ime">
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。语音输入是随包自带的快捷键引擎，设置里默认关：按住说话、松开上屏，转写和整理都交给主控。个人化组件把上屏写入记忆，把打分和联想请求转给主控，并给语音提供热词。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.88（build 91），按代码 5f3cf63 核对 · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.88（build 91），按代码 6b827c6 核对 · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
@@ -782,7 +782,7 @@ sequenceDiagram
 <li><b>按键</b>：按下说话键（不在快捷键会话中、不在密码框）就发 <code>arm</code>，引擎开始录音；同一个键 0.3 秒内又来一次按下算同一次。按满 150 ms 且期间没按别的，用同一个号发 <code>start</code>，带光标前最多 200 字（正在组字的先上屏）。不到 150 ms 松开发 <code>cancel short</code>，按着时按了别的键或鼠标发 <code>cancel key</code>，切走发 <code>cancel focus</code>。松开发 <code>stop</code>，10 秒还没结果就把显示着的字上屏、发 <code>cancel timeout</code>。会话中按 Esc 什么都不上屏，按别的键先把显示着的字上屏，再照常处理这个键。</li>
 <li><b>录音</b>：收到 <code>arm</code> 才开麦克风（AudioQueue，只开输入设备），16 kHz 单声道 PCM16，0.1 秒一块；<code>start</code> 之前只录不送。默认输入是蓝牙耳机、机器有内置麦克风且盖子没合上时，改用内置麦克风；内置麦克风开不了或开头 0.3 秒全是零，换回默认输入（选项 <code>bluetooth_mic</code> 为 true 时一律用默认输入）。松开、取消、结束时马上关麦克风，不等识别和整理；0.5 秒内又来一次 <code>arm</code> 就接着录。</li>
 <li><b>光标旁的提示</b>：还没收到声音时黄点闪「准备中…」，有声音了红点跳「正在听」，松开后灰点呼吸「识别中…」，整理时「整理中…」；字比别的提示大、颜色深。识别出的字作为显示串放在输入框里，还没上屏。</li>
-<li><b>草稿</b>：每 0.5 秒（16 档 1 秒）送新录的音频、要一份草稿，同时只有一份在算；新草稿多出来的字每 40 ms 逐字补出，前面变了的字就地换掉，不删了重打。听到说话的块（音量约满幅的 1%）不到 0.3 秒时不显示草稿，松开后也不上屏。</li>
+<li><b>草稿</b>：每 0.5 秒（内存 24 GiB 及以下的 Mac 1 秒）送新录的音频、要一份草稿，同时只有一份在算；新草稿多出来的字每 40 ms 逐字补出，前面变了的字就地换掉，不删了重打。听到说话的块（音量约满幅的 1%）不到 0.3 秒时不显示草稿，松开后也不上屏。</li>
 <li><b>分段</b>：这一段说到 30 秒以后在停顿处分段，一直不停顿时 100 秒硬切（主控一次最长 120 秒）：先要这一段的终稿、在后台整理，再开新的一段；显示的是前面各段的原文接上这一段的草稿。</li>
 <li><b>终稿和上屏</b>：松开后等录到的音频都送出去再要终稿；各段都整理完（最多等 2.5 秒）一起上屏，没整理成的用原文；整段是空的就不上屏。</li>
 <li><b>整理</b>（「说完后整理」开着时）：先由代码去掉单独成段的「嗯、呃、啊、额」，只剩语气词的那段算空的；再交 <code>luoke-ime.tidy</code> 去口头禅、理顺改口，写成书面的数字和英文（提示词见「提示词」页）。结果的字母和数字个数不在原文的 0.5 倍到 1.3 倍加 2 之间、2.5 秒没回来或出错，都用原文。</li>
@@ -828,7 +828,7 @@ sequenceDiagram
 <tr><td><code>luoke-ime.transcribe</code></td><td><code>POST /tasks/&lt;task&gt;/v1/transcribe</code></td><td>语音转写：语音引擎经壳转问，壳只转 <code>session</code>、<code>seq</code>、<code>audio</code>（base64 的 16 kHz 单声道 PCM16）、<code>want</code>（<code>none</code> / <code>draft</code> / <code>final</code> / <code>cancel</code>）、<code>context</code></td></tr>
 <tr><td><code>luoke-ime.tidy</code></td><td><code>POST /tasks/&lt;task&gt;/v1/chat/completions</code>（流式）</td><td>整理语音的终稿，提示词归输入法（见「提示词」页）；壳把流式答复拼成 <code>{text, model}</code> 交回，带 <code>X-Luoke-Priority</code>（默认 <code>user-waiting</code>）</td></tr>
 </table></div>
-<p>主控 socket 默认 <code>~/Library/Application Support/luoke-core/run/hub.sock</code>，可用环境变量 <code>LUOKE_HUB_SOCKET</code> 或设置里的 <code>hub.socket</code> 改；请求头 <code>X-Luoke-Accessory: luoke-ime/&lt;版本&gt;</code>；任务参数缓存 60 秒，<code>X-Luoke-Tasks-Version</code> 变了就重读。请求超时 2 秒（每次读的超时，不是整次请求的上限），tasks、warmup 5 秒，transcribe 10 秒，generate 30 秒。个人化组件收到 <code>hello</code> 时对打分、续写各预热一次；语音引擎在 <code>hello</code> 和每次 <code>arm</code> 时预热转写，带上次答复的 <code>lease_id</code> 续期，并读 <code>GET /tasks</code> 的 <code>tier</code>：16 档草稿间隔 1 秒、没指定 <code>tidy</code> 时不整理。发布版只经主控打分（包里的个人化组件去掉 GPU 权限和 <code>model</code> 选项，<code>scorer</code> 固定为 <code>hub</code>，不带 <code>scorer.py</code>）；主控不可用时没有重排、没有联想，语音在光标旁说明用不了。</p>
+<p>主控 socket 默认 <code>~/Library/Application Support/luoke-core/run/hub.sock</code>，可用环境变量 <code>LUOKE_HUB_SOCKET</code> 或设置里的 <code>hub.socket</code> 改；请求头 <code>X-Luoke-Accessory: luoke-ime/&lt;版本&gt;</code>；任务参数缓存 60 秒，<code>X-Luoke-Tasks-Version</code> 变了就重读。请求超时 2 秒（每次读的超时，不是整次请求的上限），tasks、warmup 5 秒，transcribe 10 秒，generate 30 秒。个人化组件收到 <code>hello</code> 时对打分、续写各预热一次；语音引擎在 <code>hello</code> 和每次 <code>arm</code> 时预热转写，带上次预热答复的 <code>lease_id</code> 续期。语音不看主控的档位：草稿间隔和命令行版的整理默认值都按这台 Mac 的内存定（见「语音输入」）。发布版只经主控打分（包里的个人化组件去掉 GPU 权限和 <code>model</code> 选项，<code>scorer</code> 固定为 <code>hub</code>，不带 <code>scorer.py</code>）；主控不可用时没有重排、没有联想，语音在光标旁说明用不了。</p>
 
 <h2>设置和文件</h2>
 <div class="tbl"><table>
@@ -843,7 +843,7 @@ sequenceDiagram
 </table></div>
 
 <p><b>设置窗口</b>四页：通用（输入方案、模糊音（一个总开关，打开后才列出六组勾选，关着时勾选照样留着）、语音、中英文、排版、候选窗口，装了个人化组件才有联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案学到的词和忘掉的词；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（最前面是使用统计：最近 7 天的上屏次数、首选占比、上屏后马上退格的占比，装了个人化组件时加联想出现、打开、选中的次数和字数，能清零；然后是开发模式记录、记录文件夹、引擎文件夹、设置文件）。联想、记忆记录、记忆页和高级页的行带一句说明；窗口里不放文本框。语音一节：开关「语音输入：按住右 ⌥（Alt）说话，松开上屏」（键名跟着设置变），打开后才出现「按住哪个键说话」（右 ⌥（Alt）、右 ⌘、右 ⌃，说明外接 Windows 键盘、对调过修饰键的选右 ⌘ 试试）和开关「说完后整理：去掉口头禅、理顺改口」，没有麦克风权限时红字提示并给一个去系统设置的按钮；下面说明识别和整理都由螺壳在这台 Mac 上做。</p>
-<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；打字引擎和个人化组件停用、沙盒拦截、等确认的第三方引擎也列在这里；没有语音的项。</p>
+<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用（打字引擎、个人化组件、快捷键引擎包括语音，都带原因和「重新启用」）、沙盒拦截、等确认的第三方引擎也列在这里。</p>
 
 <h2>安全</h2>
 <ul>
@@ -875,12 +875,12 @@ sequenceDiagram
 <ul>
 <li>打分和联想不读记忆中的理解，没有个人化；只有语音的热词读常用说法。</li>
 <li>候选窗不能用鼠标点选；引擎选项没有 A2UI 界面。</li>
-<li>快捷键引擎不检查冲突、停用不进菜单（语音停用时候选窗提示「原因见输入法菜单」，菜单里却没有，也不能在菜单里重新启用）；装了两个声明麦克风的快捷键引擎时都用设置里的说话键，壳只认第一个。</li>
+<li>快捷键引擎不检查冲突；装了两个声明麦克风的快捷键引擎时都用设置里的说话键，壳只认第一个。</li>
 <li>个人化组件卡死不检测；转问没有限流。</li>
 <li>打错纠正只在双拼，只纠整串读不通的，每次只改一处。</li>
 <li>苹果转换引擎依赖私有库 libmecabra，系统升级后可能失效；引擎启动时自检（给不出「你好」就退出，全拼还要求能拿到音节长度），壳把这当崩溃，60 秒内 3 次就停用。</li>
 <li>候选多于一批（默认 16，完整档每步最多约 20 个）时壳串行分批打分，可能赶不上引擎每步等的 0.7 秒。</li>
-<li>语音：内存不大于 24 GiB 的 Mac 默认不整理（设置里的说明写的是 16 GB）；整理 2.5 秒没回来就上屏原文。</li>
+<li>语音：内存 24 GiB 及以下的 Mac 默认不整理；整理 2.5 秒没回来就上屏原文。</li>
 <li>快捷键引擎（包括语音）上屏后的退格不转给个人化组件。</li>
 <li>引擎停用、被沙盒拦下只在候选窗提示和菜单里显示，不发系统通知。</li>
 <li>收起联想时，应用自己插的制表符留着。</li>
@@ -2363,6 +2363,7 @@ sequenceDiagram
 
 <h2>2026-11-09</h2>
 <ul>
+<li>输入法页跟到 6b827c6（仍是 0.1.88）：语音停用后菜单里有原因和「重新启用」；语音不再看主控的档位，草稿间隔（1 秒 / 0.5 秒）和命令行版的整理默认值按内存（24 GiB 及以下）定；取消不再清掉预热的 lease。</li>
 <li>输入法页按代码 5f3cf63（0.1.88）复核：加「语音输入」一节（随包自带、默认关，按住右 ⌥ 或选的键说话；<code>arm</code> 先录、150 ms 才算按住，草稿、分段、终稿、整理和退路，数字的写法，上下文和热词，出错时光标旁的说明，音频不落盘）；加打错纠正（只在双拼、只纠读不通的，标 ✎）、日期和以词定字、本机使用计数 <code>usage.json</code>；联想改成写过的接续也要模型点头、去掉单字、没有模型不给；协议、主控任务、设置窗口、安全、评测、已知限制跟着改。任务表和提示词页按 internal-1109 的配方：加 <code>luoke-ime.transcribe</code>、<code>luoke-ime.tidy</code>（提示词页加语音整理一节），16 档打字归纳已开，嵌入改成 <code>luoke-search.embed</code> 各档都开，螺壳扫描三个任务填上各档开关。已知问题加语音把英文后单独的「一」换成 1。</li>
 </ul>
 
