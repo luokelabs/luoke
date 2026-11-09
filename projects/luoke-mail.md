@@ -41,6 +41,7 @@
 |---|---|---|
 | `sent-mail` | 用户 / 陈述 | 发出的邮件里的一件事（ref `<Message-ID>#<话题>`，`data.text` 是用户在那封里写的部分）；用户发起的邮件主题 |
 | `received-mail` | 第三方 / 陈述 | 一个机构多次来信（封数、跨几个月、打开几封、最近一封） |
+| `mail-contact` | 用户 / 活动 | 用户写信给谁，每个收件地址每个过完的月一条（ref `<地址>@<YYYY-MM>`，sender 是收件地址）：`data` 带 `name`（显示名）、`month`、`count`、`to`、`cc`、`subjects`（那个月写给他的最多 5 个标题，最新的在前，回复、转发、自动回复的不算）；收件人和抄送都算，来信的人、用户自己的地址、noreply 一类不记；封数变了用同一个 ref 再写，读最新的。给语音热词里的人名（luoke-mem 2026-11-09 提，0.19.41 起） |
 | `mail-read` | 用户 / 活动 | 每个订阅每月一条：收到几封、用户打开几封（邮件助手标的已读不算）、`category`；`mails` 是这个月打开过的最新三封原文 {subject, date, text, text_by: "sender"}，事务邮件不带（0.19.7 起标 `text_by`，和 luoke-mem 商定） |
 | `mail-acted` | 用户 / 活动 | 用户亲手的处理：`action`（archive / trash / spam / read / label）、`label`、`category`、`count`、`where`（here：在邮件助手里；elsewhere：在 Gmail 网页或手机上，同步时发现） |
 | `mail-override` | 用户 / 陈述 | 用户改过的一条建议（`from`、`to`、`category`） |
@@ -120,7 +121,7 @@
 
 还没做：
 
-1. `service.summary`、`service.pages`、`service.ask.suggest`：等窗口合并、页面编号定。
+1. ~~`service.summary`、`service.pages`~~：已做。0.19.45 起邮件助手整体在螺壳窗口里（ops#123，主人 11-09 定一次搬完）：`service.pages` 是今日处理 `today`、收件箱 `inbox`、清理 `clean`、精选 `digest`、订阅体检 `subs`、规则 `rules`、处理记录 `activity`、设置 `settings`，数据和动作跟网页同一套。页上的按钮走两个工具：`mail_view`（只读，换显示的内容）和 `mail_do`（写入，要用户点按）；按钮只带页 id 和按钮 id，邮件助手按自己画过的按钮查出做什么。对窗口的需求写在 ops#123：页的组件上限、密码输入框（加邮箱现在开浏览器）、页的刷新、存文件、卡片跳到页（`agent.open_page` 一类）。`service.ask.suggest` 还没做。
 2. `daily-review`：跟着从螺壳自己的邮箱外发走，进不进 beta 2 等主人定。
 3. 打开类工具带 `ai.luoke/where: mac`：等 luoke-agent 的帮手支持 `_meta`。
 4. ~~随 agent 上线的版本把接口改成默认开、清单声明能力~~：0.19.26 已进 main（11-05），连同 agent.sock 的调用方核对（安全审查 S2 邮件这一半）。
