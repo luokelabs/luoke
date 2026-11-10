@@ -27,7 +27,7 @@
   - 签名标识 `ai.luoke.search`。同一个可执行文件也是命令行 `luoke-search`。
   - 开发时照旧能打成独立的 `螺壳搜索.app`。
 - **只做 macOS**，最低 26.2。
-- **首发**：随 beta 2（封闭测试）第一次发布，和 agent 一起。图片和声音的参数 11-03 已经进了主控的配方。
+- **首发**：随 beta 2（封闭测试）第一次发布，和 agent 一起。图片和声音的参数 11-03 已经进了主控的配方，只在 32、128 两档：16 GB 的 Mac 上，图片、视频、录音只能按文件名和 OCR 的字找。
 - **和 digup 的关系**：从头写。原来基于开源 DigUp（MIT）的 digup 不登记；顶层 ADR 0018「digup 的嵌入」一节由本项目接手，任务改名为 `luoke-search.embed`。
 - **现状**：2026-10-20 立项，10-21 第一版代码进 main，11-03 起随内部版出。版本 0.1.17。0.1.4 以后：
   - 收进螺壳.app（11-05）；系统权限交给螺壳本体问（11-06）；
@@ -43,7 +43,7 @@
 
 | 工具 | 只读 | 做什么 |
 |---|---|---|
-| `search_query` | 是 | 参数 `query`（只按时间、类型、来源列时可以不带），可选 `kinds`（文档、PDF、截图、图片、视频、录音、照片）、`sources`（`files`、`photos`）、`since` / `until`、`limit`。答复：结果列表（编号、类型、标题、出处、页码或时刻、命中片段、为什么对得上、分数、`strong`）、`totals`（各来源一共对上几条）、`partial`（还在建索引或缺向量时为真，附一句说明），加一张 A2UI 结果卡片 |
+| `search_query` | 是 | 参数 `query`（只按时间、类型、来源列时可以不带），可选 `kinds`（文档、PDF、截图、图片、视频、录音、照片）、`sources`（`files`、`photos`）、`since` / `until`、`limit`。答复：结果列表（编号、类型、标题、出处、页码或时刻、命中片段、为什么对得上、分数、`strong`）、`totals`（各来源一共对上几条）、`partial`（还在建索引、缺向量或只按字词搜了时为真，附一句说明），加一张 A2UI 结果卡片 |
 | `search_similar` | 是 | 和一条结果相似的（按向量），参数 `id`，可选 `sources`、`limit`；答复和 `search_query` 一样 |
 | `search_open` | 否（列进 `actions`，要用户点按；`ai.luoke/where: mac`） | 按结果编号在 Mac 上打开，跳到那一页或那一刻；`reveal` 为真时在访达中显示 |
 | `search_status` | 是 | 索引了多少、还在等什么（停着的说为什么）、主控能不能算向量、在搜哪些文件夹 |
@@ -68,11 +68,12 @@
 
 **命令行** `luoke-search`：
 - 命令：`serve`、`index`（`index --job` 是能停能续的第一遍）、`search`、`open`、`status`、`settings`、`eval`、`mcp`，开发用的 `photos-probe`、`probe-audio`。
-- `search --json` 的输出和 MCP `search_query` 的答复同一个格式。
+- `search --json` 的输出是 MCP `search_query` 答复的一部分（MCP 的答复另外带卡片、每条的缩略图和按钮）。
 - 只给 agent 用的 `search_similar`、`search_open_system_settings`、`outbox_ack` 没有命令。
 - 开发时 `--index` 指定索引目录、`LUOKE_HUB_SOCKET` 指定主控，开发和测试不碰正式的索引和正在用的主控。
 - 装好的那份（螺壳.app 里的）：
   - 除了 `status` 和帮助，只由螺壳起；
+  - 只接 `serve`、`index`（不带文件夹）、`status`、`search`、`open`、`settings`、`mcp`、`help`，`eval`、`photos-probe`、`probe-audio` 不接；
   - 开发开关里 `--index`、`--socket`、`LUOKE_SEARCH_HOME`、`CFFIXED_USER_HOME` 会让它拒绝启动，别的开关去掉以后照常跑。
 - 照片图库只有装好的这份读，终端里跑的命令行不读。
 
@@ -121,10 +122,10 @@
 ```
 
 **评测集**（交给 luoke-core）：
-- 参考向量集：9 条参考输入和标准向量（文字 5、截图 / 照片 / 视频帧各 1、声音 1），从 digup 原样拷来，文件不改。主控算的向量对它余弦 ≥ 0.999 是及格线（ADR 0018）。
+- 参考向量集：9 条参考输入和标准向量（文字 5、截图 / 照片 / 视频帧各 1、声音 1），从 digup 原样拷来，文件不改；另加了 7 条中文和中英混排的文字向量（11-03）。主控算的向量对它余弦 ≥ 0.999 是及格线（ADR 0018）。
 - 检索评测：全部是合成语料和题目。
   - 起点是 digup 的四组：中文 51 题、文档格式 11 题、英文 37 题、孟加拉文和阿拉伯文 48 题（后两组是现在的题数）。
-  - 加了：小票 7 题；英文有答案的 36 题；"语料里没有答案"的题（中文 37、英文 39）；文档多、图少的几组；同主题的文档和图（护照、钢琴课、发票这类）；录音的题。
+  - 加了：小票 7 题；英文有答案的 36 题；"语料里没有答案"的题（中文 37、英文 39）；文档多、图少的几组；同主题的文档和图（护照、钢琴课、发票这类）；问照片的 25 题（在测试语料的图片上，不是照片图库）；录音的题。
   - 照片图库的题、带时间范围的口语问题还没有。
   - 去掉弱结果、`strong` 的门槛是在这些题上量的，数字在 `luoke-search/evals/README.md`。
 
@@ -132,7 +133,7 @@
 
 | 依赖 | 用来做什么 | 现状 |
 |---|---|---|
-| luoke-core | 嵌入任务 `luoke-search.embed`（`POST /tasks/luoke-search.embed/v1/embed`）、`GET /tasks`；本体拉起常驻程序、核签名和版本、替它问系统权限、播放视频片段 | 任务名 `luoke-search.embed`（11-02 改名），三档都分到 embeddinggemma-2；图片和声音的参数 11-03 进了配方 |
+| luoke-core | 嵌入任务 `luoke-search.embed`（`POST /tasks/luoke-search.embed/v1/embed`）、`GET /tasks`；本体拉起常驻程序、核签名和版本、替它问系统权限、播放视频片段 | 任务名 `luoke-search.embed`（11-02 改名），三档都分到 embeddinggemma-2；图片和声音的参数 11-03 进了配方（32、128 档，16 档只有文字） |
 | luoke-agent | 唯一的入口：调 MCP 工具、画结果卡片、转达 outbox；窗口的全局搜索和侧栏应用页 | 照工具协议版本 1（含 §1a 的 `service`、`pages`、`permissions`、`listing`）接好了 |
 | luoke-mem | 第二步：读记录和依据原文 | 第一版不用 |
 | luoke-mail | 第二步：搜全部邮件 | 待商定 |
@@ -144,7 +145,7 @@
 1. 任务 `digup.embed` 改名为 `luoke-search.embed`，接口不变 —— **已做**（11-02）。
 2. 分档 —— **已做**：16、32、128 三档都分到 embeddinggemma-2。
 3. 配方的 `verified` 加 luoke-search（不加的话全部 403）—— **已做**。
-4. 图片和声音：配方里打开图片和声音的参数（`image_batch`、`audio_batch` 等）—— **已做**（11-03）。参考向量集里 4 条媒体向量也要余弦 ≥ 0.999。
+4. 图片和声音：配方里打开图片和声音的参数（`image_batch`、`audio_batch` 等）—— **已做**（11-03，32、128 两档；16 档先不开）。参考向量集里 4 条媒体向量也要余弦 ≥ 0.999。
 5. 进内部版的流水线 —— **已做**（11-03）。
 6. 嵌入的对拍工具改成 luoke-search 的说法 —— **已做**。
 7. 清单登记 `jobs`（第一遍建索引交给主控的空闲任务）—— **还没登记**，现在由常驻程序里的兜底跑第一遍。
