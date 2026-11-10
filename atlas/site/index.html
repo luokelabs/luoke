@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-09 17:09</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-10 12:00</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -526,13 +526,13 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.35，按代码 c376348 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.45，按代码 aeb57b7 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
-<li>为每封邮件给出建议（回复、加入日程、待跟进、归档、移到垃圾箱），附类别、优先级、摘要、截止日期、日程（一封最多 4 个，往返、多段行程各段分开，各有自己的时间）、回复要点和可疑标记。</li>
-<li>执行用户的操作并保留撤销步骤：归档、移到垃圾箱、移到垃圾邮件、加星标、标已读、加标签、写草稿、加入日历（Gmail 打开 Google 日历的新建日程页面，一次一个日程，一封有几个日程时每个日程一行、各有「添加」；其他邮箱下载一个 .ics 文件，含这封的全部日程，每个日程有固定的 UID，重复导入是更新而不是新增）、退订。</li>
-<li>不发信，不永久删除：删除即移到垃圾箱，回复只存入草稿箱。</li>
+<li>为每封邮件给出建议（回复、加入日程、加星标、归档、删除；代码里的代号是 reply、schedule、follow_up、archive、ignore），附类别、优先级、摘要、截止日期、日程（一封最多 4 个，往返、多段行程各段分开，各有自己的时间）、回复要点和可疑标记。</li>
+<li>执行用户的操作并保留撤销步骤：归档、删除（移到邮箱的「已删除」）、移到垃圾邮件、加星标、标已读、加标签、写草稿、加入日历（Gmail 打开 Google 日历的新建日程页面，一次一个日程，一封有几个日程时每个日程一行、各有「添加」；其他邮箱下载一个 .ics 文件，含这封的全部日程，每个日程有固定的 UID，重复导入是更新而不是新增）、退订。</li>
+<li>不发信，不永久删除：界面上的「删除」是把邮件移到邮箱的「已删除」，回复只存入草稿箱。</li>
 <li>把用户的操作写成记忆记录；关于用户的结论由记忆形成。</li>
 </ul>
 
@@ -560,7 +560,7 @@ sequenceDiagram
 <li>对照收件箱现状：已不在的标记为完成；推断用户在别处做了什么（归档、删除、读过、加标签，写入 <code>mail-acted</code>，<code>where=elsewhere</code>；每次最多查 30 封的去向）；邮件助手 3 天内操作记录里动过的邮件不算用户的处理，分析后标已读不移动邮件、不在此列；记为已移走却仍在收件箱的放回待处理。已入库却还没有身份或寄出日期的，按上一步的规则补上，补到日期的待处理邮件重新分拣。同一发件人 90 天内 5 封以上、没有群发标记、用户在已发送里从没写信给他的（每次最多查 20 个，查不了已发送就当写过），合成一组按群发显示；主题开头有 [AD] 或末尾有 (AD) 的也算群发。网易邮箱的收件箱里没有 31 天以前的邮件时，记下只开放了最近 30 天。</li>
 <li>邮箱第一次同步时，把收件箱里当时未读、在分拣范围以前的邮件记成一个队列（新的在前，只记这一次）。</li>
 <li>补充发件人校验结论：Gmail、QQ、网易 163/126 只认服务商在最上面加的那条 Authentication-Results（第一段要是这家的标识）。有 DMARC 看 DMARC：Gmail 写的是机构主域名，发件域名是它的子域名也算对上；失败只在策略为 quarantine、reject 时算没通过。只有 DKIM、SPF 时，签名域名和发件域名同主域名算通过，两者都失败算没通过。139 平台自己投递的，以及网易内部投递、发件人是 netease.com 的通知，记为平台投递（<code>platform</code>）；其他自定义 IMAP 没有校验。已分拣、还在等用户的邮件补到结论后，判了可疑却通过校验或是平台投递的、没判可疑却没通过的，重新分拣（每次最多 100 封）。另外补充用户最近 7 天自己归档但可能仍需处理的邮件（Gmail，最多 50 封）。</li>
-<li>逐封分拣（<code>luoke-mail.triage</code>）。命中的规则作为上下文提供给模型；模型可提出不同建议。寄出日期早于今天的邮件，提示词多一行寄出日期，没写年份的日期和「明天」这类说法按寄出日期换算，代码兜底 <code>triage.settle_dates</code>。用户只在抄送、不在收件人里时，提示词多一行「一般 archive，priority 不超过 medium」，代码再把 high 降为 medium（<code>triage.settle_cc</code>）。有发件人校验结论的，提示词多一行：通过（说明只证明来自这个域名）、没通过（按可疑处理）或平台自己投递（发件域名和机构不同不算可疑）；任务参数 <code>sender_verdict</code> 为 false 时（16、32 GB 档）不给「通过」，「没通过」和平台投递照给。模型判为可疑时同时答原因属于哪几类（<code>risks</code>：冒充、索要个人信息、催促转账、指挥AI、可疑链接）。邮箱的结论是通过、照配方没告诉模型、原因又只有冒充的，代码改成不可疑（<code>triage.settle_risks</code>）：动作和类别用模型原来给的（忽略改成归档、钓鱼改成通知），优先级降为低，理由换成「邮箱服务商已验证这封邮件来自 某域名。」，摘要里说它是诈骗、钓鱼、冒充、可疑的换成主题。告诉了模型的「通过」、平台投递、别的原因和没答原因的，都照模型的判断。正文不到 80 字而有图片时，提示词说明有几张图片、看不到图里的字不算可疑；图片 3 张以上、正文里单独成行的金额和日期 3 个以上时，提示词要求不推测应还金额和还款日，代码兜底（<code>triage.settle_figures</code>）：不填截止日期，摘要带数字的换成「金额和日期在图片里，请打开原信核对」。机票车票、出票通知也算加入日程；一封有几个时间不同的日程（往返、多段行程、几次课）时，第一个写在 event 字段，其余写在 <code>more_events</code>（最多再 3 个）。</li>
+<li>逐封分拣（<code>luoke-mail.triage</code>）。命中的规则作为上下文提供给模型；模型可提出不同建议。寄出日期早于今天的邮件，提示词多一行寄出日期，没写年份的日期和「明天」这类说法按寄出日期换算，代码兜底 <code>triage.settle_dates</code>。用户只在抄送、不在收件人里时，提示词多一行「一般 archive，priority 不超过 medium」，代码再把 high 降为 medium（<code>triage.settle_cc</code>）。有发件人校验结论的，提示词多一行：通过（说明只证明来自这个域名）、没通过（按可疑处理）或平台自己投递（发件域名和机构不同不算可疑）；任务参数 <code>sender_verdict</code> 为 false 时（16、32 GB 档）不给「通过」，「没通过」和平台投递照给。模型判为可疑时同时答原因属于哪几类（<code>risks</code>：冒充、索要个人信息、催促转账、指挥AI、可疑链接）。邮箱的结论是通过、照配方没告诉模型、原因又只有冒充、这个发件方以前来过信的（<code>sender_seen</code>：同一邮箱里有别的没判可疑的邮件来自同一个注册域名；谁都能注册邮箱的公共域名要整个地址相同），代码改成不可疑（<code>triage.settle_risks</code>）：动作和类别用模型原来给的（忽略改成归档、钓鱼改成通知），优先级降为低，理由换成「这封邮件确实从 某域名 发出（邮箱服务商已验证），以前也收到过这个域名的邮件；请确认是你认识的发件方。」，摘要里说它是诈骗、钓鱼、冒充、可疑的换成主题。告诉了模型的「通过」、平台投递、别的原因、没答原因的和没来过信的发件方，都照模型的判断。显示和排序用 <code>triage.priority_now</code>：模型给了高、但截止日期或最后一个日程已过的，按中显示和排序，库里仍存模型的答案（页面列表、通知挑最急的、agent 卡片排序都用它）。正文不到 80 字而有图片时，提示词说明有几张图片、看不到图里的字不算可疑；图片 3 张以上、正文里单独成行的金额和日期 3 个以上时，提示词要求不推测应还金额和还款日，代码兜底（<code>triage.settle_figures</code>）：不填截止日期，摘要带数字的换成「金额和日期在图片里，请打开原信核对」。机票车票、出票通知也算加入日程；一封有几个时间不同的日程（往返、多段行程、几次课）时，第一个写在 event 字段，其余写在 <code>more_events</code>（最多再 3 个）。</li>
 <li>依次执行：最近归档的邮件只留需要用户处理的、精选来源排队、自动标已读、按习惯处理、处理螺壳自己的邮箱、更新往来邮件状态（每次最多问 10 串，只问有新邮件的）。</li>
 </ol>
 <h3>以前的未读邮件</h3>
@@ -580,14 +580,14 @@ sequenceDiagram
 <tr><th>动作</th><th>条件</th><th>撤销</th></tr>
 <tr><td>标已读</td><td>收件箱中已分析、没出错的邮件（设置 <code>flow.mark_read</code>，默认开）；每次同步一条操作记录（动作 <code>seen</code>）；邮件助手标的已读另行记录（<code>read_by_us</code>），不当作用户读过</td><td>今日处理中逐封"标为未读"，或在操作记录中整批撤销（"分析后标为已读 N 封"）；撤销过的不再自动标。不写入记忆（不是用户的动作）</td></tr>
 <tr><td>按习惯归档、标已读、加标签</td><td>记忆中确定的处理习惯（发件人 × 邮件类别）；跳过可疑、需用户处理、高优先级、登录和安全类通知、撤销过的邮件</td><td>今日处理中逐封撤销，记一次反证（<code>mail-undo-auto</code>）</td></tr>
-<tr><td>螺壳自己的邮箱</td><td>设置中标为 <code>own</code> 的邮箱：照建议归档或移到垃圾箱</td><td>今日处理中逐封撤销</td></tr>
+<tr><td>螺壳自己的邮箱</td><td>设置中标为 <code>own</code> 的邮箱：照建议归档或删除</td><td>今日处理中逐封撤销</td></tr>
 </table></div>
-<p>用户自己的邮箱里，移到垃圾箱、垃圾邮件、退订不会自动执行。<b>处理模式</b>（默认关，开启需确认）只控制不可逆的批量操作：批量移到垃圾箱或垃圾邮件、含删除的清理、清理某发件人的历史邮件。需要处理模式的批量按钮照样能点，旁边写明需要处理模式，点了弹出开启说明，开启后接着执行。</p>
+<p>用户自己的邮箱里，删除、移到垃圾邮件、退订不会自动执行。<b>处理模式</b>（默认关，开启需确认）只控制不可逆的批量操作：批量删除或移到垃圾邮件、含删除的清理、清理某发件人的历史邮件。需要处理模式的批量按钮照样能点，旁边写明需要处理模式，点了弹出开启说明，开启后接着执行。</p>
 
 <h2>通知</h2>
-<p>系统通知由后台整理在每个邮箱同步后发出：邮件助手经管道交给本体，本体以「螺壳」的名义发（还没问过时 macOS 先问一次），点了打开邮件助手的页面。agent 正在读 outbox 时（10 分钟内读过），新邮件、快到期、精选、清理分析完、今日处理这五类不再发通知，交给 agent。收件箱中的旧邮件全部分析完时通知一次建议归档、移到垃圾箱、待确认各几封，点开进入清理。</p>
+<p>系统通知由后台整理在每个邮箱同步后发出：邮件助手经管道交给本体，本体以「螺壳」的名义发（还没问过时 macOS 先问一次），点了打开邮件助手的页面。agent 正在读 outbox 时（10 分钟内读过），新邮件、快到期、精选、清理分析完、今日处理这五类不再发通知，交给 agent。收件箱中的旧邮件全部分析完时通知一次建议归档、删除、待确认各几封，点开进入清理。</p>
 <ul>
-<li>需要回复、加入日程、待跟进的新邮件（3 天内到达、非可疑）：封数和最急的两封。</li>
+<li>需要回复、加入日程、加星标的新邮件（3 天内到达、非可疑）：封数和最急的两封。</li>
 <li>自动处理后（按习惯，以及螺壳自己的邮箱）：「已自动处理 N 封」，点开进入"今日处理"。</li>
 <li>截止日期在明天及以前的：每件只提醒一次。</li>
 <li>精选：每周一 08:00 之后的第一次后台整理；今日处理：每晚 20:00 之后一次。</li>
@@ -596,10 +596,11 @@ sequenceDiagram
 </ul>
 
 <h2>页面</h2>
+<p>页面有两处：浏览器里的页面（下表），和螺壳主窗口里的页面（见下一小节）。两边的按钮背后是同一批处理函数。</p>
 <div class="tbl"><table>
 <tr><th>页面</th><th>内容</th></tr>
 <tr><td>今日处理</td><td>某天每封邮件的结果，需要用户处理的排在前面；可撤销、标未读、改建议；可查看前 7 天。补分的以前未读邮件单列"以前的未读邮件"一节，仍等用户处理的标"已过期"（截止日期已过）、"快到期"（3 天内）或收到日期（一个多月前收到）</td></tr>
-<tr><td>收件箱</td><td>同步、分组显示建议、快到期（3 天内到期或过期不到 7 天；有几个日程的按下一个还没到的）、等对方回复的往来、逐封或批量处理、草稿、日历。默认按建议排（回复、加入日程、待跟进、归档、可疑、移到垃圾箱、未分析，建议和优先级相同的新的在前），可切换为按时间（全部新的在前），选择记在这个浏览器里。卡片时间显示「今天 HH:MM」「昨天 HH:MM」或日期。有几个日程的每个日程一行，标「已过」「已添加」，Gmail 另给「添加」。日程全部已过的不进快到期，显示「日程已过」；每个日程都已从别的邮件加过日历的显示「已在日程中」。草稿里有原信（发件人、收件人、抄送、主题、正文）和用户自己的地址、签名里都没有的电子邮件地址或电话号码时，草稿框下提示「草稿里有原信没有的联系方式（…），发出前请核对。」</td></tr>
+<tr><td>收件箱</td><td>同步、分组显示建议、快到期（3 天内到期或过期不到 7 天；有几个日程的按下一个还没到的）、等对方回复的往来、逐封或批量处理、草稿、日历。默认按建议排（回复、加入日程、加星标、归档、可疑、删除、未分析，建议和优先级相同的新的在前；优先级按 <code>priority_now</code>），可切换为按时间（全部新的在前），选择记在这个浏览器里。卡片时间显示「今天 HH:MM」「昨天 HH:MM」或日期。有几个日程的每个日程一行，标「已过」「已添加」，Gmail 另给「添加」。日程全部已过的不进快到期，显示「日程已过」；每个日程都已从别的邮件加过日历的显示「已在日程中」。草稿里有原信（发件人、收件人、抄送、主题、正文）和用户自己的地址、签名里都没有的电子邮件地址或电话号码时，草稿框下提示「草稿里有原信没有的联系方式（…），发出前请核对。」</td></tr>
 <tr><td>清理</td><td>收件箱中的旧邮件和已归档邮件：只读邮件头，模型在后台逐封判断，按类别和来源分组执行；星标和保留类标签的邮件不参与；切换邮箱或标签后迟到的答复不再绘制，分析开启但在等其他任务时显示"已分析 x / y"</td></tr>
 <tr><td>精选</td><td>最近 7 天约 20 条、更早每月约 10 条；收藏和"没兴趣"写入记忆</td></tr>
 <tr><td>订阅体检</td><td>按发件人统计（邮件助手分析后标的已读不算用户读过），建议退订、无法退订（没有退订方式）、可疑发件人（不退订）、常读或建议保留（模型看过最近的主题，判为账单交易、登录安全、个人往来或拿不准的）；只有广告、订阅、通知三类留退订建议，模型没答到的发件人照收信和阅读情况给建议，页面说明有几个；可退订、批量归档、清理历史、生成规则。网易只开放最近 30 天时，这里和清理页提示怎么改成收取全部邮件（每个邮箱在每个浏览器里说一次）</td></tr>
@@ -607,7 +608,29 @@ sequenceDiagram
 <tr><td>记忆</td><td>想问你的、全部类别的理解及依据、用户网站（每 30 天重读一次；feed 只读 http(s) 地址，不读本机和局域网地址，用户给的网址本身在那里的除外）、学习的暂停与继续、打开整份记忆</td></tr>
 <tr><td>设置</td><td>邮箱（含"螺壳自己的邮箱"；连接说明写明 QQ 要在收取选项里选全部并勾选「收取“我的文件夹”」，网易要选「收取全部邮件」）、本机模型（打包版显示"螺壳 · 模型名"和就绪标记，模型名取 <code>GET /tasks</code> 中分拣任务的 <code>model_name</code>，不解析 <code>combo</code>；换档在主控设置里）、处理模式、后台整理（含通知权限提示和"发送测试通知"）、自动标已读、往来邮件、功耗、分析范围</td></tr>
 </table></div>
-<p>页面在浏览器的 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
+<p>浏览器页面在 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
+
+<h3>螺壳主窗口里的页面</h3>
+<p>邮件助手把自己的页面画成 A2UI v0.9 的组件（目录 <code>ai.luoke/a2ui/agent/1</code>），由螺壳主窗口显示。每页是一个 MCP 资源 <code>luoke://luoke-mail/page/&lt;id&gt;</code>，共八页（清单 <code>service.pages</code>），代码在 <code>luoke_mail/window/</code>。</p>
+<div class="tbl"><table>
+<tr><th>id</th><th>页面</th><th>内容和动作</th></tr>
+<tr><td><code>today</code></td><td>今日处理</td><td>可看前 7 天；分「等你处理」「以前的未读」「已读，留在收件箱」「已自动处理」「你处理的」；每封可撤销、标为未读、改建议</td></tr>
+<tr><td><code>inbox</code></td><td>收件箱</td><td>统计、同步新邮件、快到期（前 3 封）、「需要你处理」「可以直接处理」「全部」三个列表；每封按建议给按钮（移到垃圾邮件、写草稿、加入日程（最多 3 个）、加星标、完成并归档、归档、删除）、查看原文、改建议（可同时记成发件人、域名、邮件列表的规则）、跳过、看草稿并存进草稿箱</td></tr>
+<tr><td><code>clean</code></td><td>清理</td><td>收件箱中的旧邮件和已归档的邮件；分「建议删除」「待确认」「建议归档」「未分析」（已归档的是「建议删除」「建议保留」「未分析」）；读取邮件、继续分析或暂停、勾选和全选、处理、开启处理模式</td></tr>
+<tr><td><code>digest</code></td><td>精选</td><td>精选、收藏、已归档三栏和精选来源；打开、收藏、没兴趣、归档或移回、移出来源、暂停阅读</td></tr>
+<tr><td><code>subs</code></td><td>订阅体检</td><td>开始体检、退订等发件人操作、清理历史邮件；网页退订给 https 链接，要发信退订的写明寄到哪；可疑发件人不给退订</td></tr>
+<tr><td><code>rules</code></td><td>规则</td><td>添加、删除、预演 Gmail 过滤器；列出按习惯自动处理的那些习惯</td></tr>
+<tr><td><code>activity</code></td><td>处理记录</td><td>操作记录逐条可撤销（退订除外）</td></tr>
+<tr><td><code>settings</code></td><td>设置</td><td>邮箱（设为螺壳自己的邮箱或改回、移除；添加邮箱打开浏览器页面）、处理模式、后台自动整理、自动标已读、往来邮件、功耗、分析范围和署名、学习的开关、用户网站、全部清除</td></tr>
+</table></div>
+<ul>
+<li><b>两个工具</b>：<code>mail_view{page, button}</code> 只读，换显示的内容（翻页、筛选、展开、切换邮箱）；<code>mail_do{page, button, fields, choices, checks}</code> 会改东西，要用户在页面上点过：<code>ai.luoke/user-action</code> 里的 <code>componentId</code> 要等于 <code>button</code>、<code>surfaceId</code> 要以这一页结尾，否则拒绝；页面已经变了就请用户再点一次。</li>
+<li><b>能做什么</b>：按钮只带页面和按钮的编号，动作从最近 8 次画出的页面里查；能调的处理函数只在允许清单 <code>window.OPS</code> 里，另有两个本机动作：把 .ics 交给「日历」、打开浏览器里的设置或邮箱页。输入只收这一页画出来的输入框、选项和勾选，文字截到 2000 字。</li>
+<li><b>大小</b>：一页最多 200 个组件，每段文字最多 2000 字，列表一屏 10 封。</li>
+<li><b>来自邮件的文字</b>先遮凭证、只当纯文字显示；链接只给 https，由螺壳先说明去哪。</li>
+<li><b>确认和结果</b>：要确认的操作在页面里显示「确认 / 取消」；做完在页面顶上显示结果和「撤销 / 知道了」；有任务在跑时顶上有一行「停止 / 刷新」。选的邮箱各页共用，记在邮件助手这边。</li>
+<li><b>留在浏览器页面的</b>：填邮箱授权码（添加邮箱）、选模型服务、外观、打开整份记忆、保存 Gmail 过滤器文件、「记忆」页。</li>
+</ul>
 
 <h2>主控任务</h2>
 <p>提示词是包里的文件 <code>luoke_mail/prompts/</code>（随包打进螺壳.app）：每个任务一组 <code>.system.txt</code>、<code>.user.txt</code>、<code>.schema.json</code>，要重问的另有 <code>.retry.txt</code>，几个任务共用的句子在 <code>_shared.txt</code>；分拣自己的说明和 schema 还在 <code>triage.py</code>。每个任务的要点见<a href="#ref-prompts">提示词</a>页。</p>
@@ -635,6 +658,7 @@ sequenceDiagram
 <tr><td><code>mail-undo-auto</code></td><td>user / activity</td><td>撤销习惯的自动处理</td><td>习惯编号</td></tr>
 <tr><td><code>mail-cleared</code></td><td>user / activity 或 receipt</td><td>清理执行后</td><td>发件人、类别、封数</td></tr>
 <tr><td><code>sent-mail</code></td><td>user / statement</td><td>从发出的邮件中抽出事实（至少两封一致）；用户发起的邮件主题</td><td>本人写的部分（≤ 800 字）</td></tr>
+<tr><td><code>mail-contact</code></td><td>user / activity</td><td>每周一次读「已发送」的信头（最近 730 天、最多 2000 封，不用模型）：用户写过信的每个地址（收件人或抄送）每个已结束的月份一条，当月不写；封数变了用同一个 <code>ref</code> 重写。用户自己的地址、no-reply 一类地址不写；用户在记忆里忘掉的人，旧月份不再写回</td><td><code>name</code>（遮凭证）、<code>month</code>、<code>count</code>、<code>to</code>、<code>cc</code>、<code>subjects</code>（那个月用户自己起的主题，最多 5 个、各 ≤ 40 字，遮凭证；回复、转发的不算）；<code>sender</code> 是对方地址。给语音输入的热词提供人名，给记忆的「常谈的话题」提供主题</td></tr>
 <tr><td><code>received-mail</code></td><td>third_party / statement</td><td>往来机构的推测依据</td><td>封数、首末月份、月数、打开数</td></tr>
 <tr><td><code>own-label</code></td><td>user / statement</td><td>用户的邮箱标签</td><td>封数、首末日期（<code>happened_at</code> 为标签下最新一封的日期）</td></tr>
 <tr><td><code>own-site</code></td><td>user / statement</td><td>用户网站的文章</td><td>发布日期</td></tr>
@@ -655,10 +679,10 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>位置</th><th>内容</th></tr>
 <tr><td><code>~/.luoke-mail/config.json</code></td><td>邮箱、模型、处理模式、后台整理、功耗、学习、往来、自动标已读等设置</td></tr>
-<tr><td><code>~/.luoke-mail/luoke.db</code></td><td>邮件和建议（<code>items</code>，<code>older</code> 标记补分的以前未读邮件）、规则、发件人决定、缓存、清理（<code>old_mail</code>）、操作记录和撤销步骤（<code>log</code>）、精选、学习候选、agent 的方案（<code>agent_plans</code>）；<code>items.images</code> 是图片张数</td></tr>
+<tr><td><code>~/.luoke-mail/luoke.db</code></td><td>邮件和建议（<code>items</code>，<code>older</code> 标记补分的以前未读邮件）、规则、发件人决定、缓存、清理（<code>old_mail</code>）、操作记录和撤销步骤（<code>log</code>）、精选、学习候选、agent 的方案（<code>agent_plans</code>，记下每封邮件出方案时的建议、可疑、星标）；缓存里另有 <code>contacts</code>（写过哪些 <code>mail-contact</code> 记录）、<code>agent_mailbox_asked</code>（「还没连邮箱」提过没有）；<code>items.images</code> 是图片张数</td></tr>
 <tr><td>钥匙串 <code>luoke-mail:imap</code>、<code>luoke-mail:engine</code></td><td>邮箱授权码（每个邮箱一条）、直连模型服务的密钥；一份数据目录一份：数据目录不是 <code>~/.luoke-mail</code> 时服务名后面加这个目录的标识（<code>luoke-mail:imap:&lt;8 位十六进制&gt;</code>），副本里加同一个邮箱不会覆盖、删副本的数据也删不到真实的授权码；Mac 锁定时读不到会跳过本轮，不视为未保存</td></tr>
 <tr><td><code>service.log</code></td><td>常驻实例的标准错误（启动时超过 2 MB 先另存为 <code>service.log.1</code>）；每行带时间，一分钟内的重复行只计数；只有元数据，没有邮件内容（见「运行形态」的日志一条）</td></tr>
-<tr><td><code>run/notifications.json</code>、<code>run/old-logs-cleared</code></td><td>最近 100 条通知：时间、发送方式、本体的答复（posted / not allowed / failed / no answer），不记标题和内容；旧版本留下的日志文字已清掉的标记</td></tr>
+<tr><td><code>run/notifications.json</code>、<code>run/old-logs-cleared</code>、<code>run/old-app-log-cleared</code></td><td>最近 100 条通知：时间、发送方式、本体的答复（posted / not allowed / failed / no answer），不记标题和内容；旧版本留下的日志文字已清掉的标记；旧的 <code>app.log</code> 已清掉的标记（升级后第一次启动清一次）</td></tr>
 <tr><td><code>token</code>、<code>server.json</code>、<code>server.lock</code></td><td>页面令牌（0600）；运行中实例的 pid、端口、是否常驻；单实例锁</td></tr>
 <tr><td><code>idle.lock</code>、<code>service.pid</code></td><td>空闲工作锁（常驻实例和主控的空闲任务不同时做）；常驻实例起来时写下的 pid</td></tr>
 <tr><td><code>account-salt</code></td><td>生成邮箱不透明键（写入记忆的 <code>account</code>）的随机值；删除数据目录后邮箱得到新键</td></tr>
@@ -668,12 +692,20 @@ sequenceDiagram
 <h2>agent 接口</h2>
 <ul>
 <li><b>谁能连</b>：<code>run/agent.sock</code> 是 0600，本账户的程序都连得上。打包版每个连接先核对端（<code>agent.Callers</code>）：连上来的进程要是邮件助手所在的那个螺壳.app（装在哪里都一样）自带的 Python（<code>Contents/Resources/python/bin/python3</code>），它的父进程是这个螺壳.app 的主程序，而且这个螺壳.app 签名完好、bundle id 是 <code>ai.luoke.core</code>、由开发者团队签名（<code>codesign</code> 核对；临时签名的谁都不放）。开发版螺壳（bundle id <code>ai.luoke.core.dev</code>，总是临时签名）照核进程和父进程，不核签名。签名每个螺壳版本核一次，没通过的下次再核，核对出错也当没通过；对不上的连上就断开，每个进程在日志里记一行。源码运行不核。这道核对挡普通程序和连错的，挡不住本账户里有意冒充 agent 的程序：「用户点过」（<code>ai.luoke/user-action</code>）现在是调用方自己写的。</li>
-<li><b>outbox</b>（<code>luoke://luoke-mail/outbox</code>）：每个邮箱报三类事。新邮件分拣好了：要用户处理的最多 8 封各给选项（回复：写草稿 / 待跟进 / 归档 / 先不动；加入日程、待跟进：待跟进 / 归档 / 先不动），其余建议归档或移到垃圾箱的合成一行「照建议处理 / 先不动」，加入日程的另给最多 3 个日历按钮。可疑邮件：每封一张，急，只给「移到垃圾邮件 / 先不动」，默认选移到垃圾邮件。按习惯自动处理的：今天还没撤销的合成一张，每批一个「撤销」，撤销习惯做的记成反证。选了「先不动」的邮件一天内不再主动提。</li>
-<li><b>资源</b> <code>permissions</code>：连了邮箱报 <code>mailbox: granted</code>，没连报 <code>ask</code>。</li>
-<li><b>要用户在卡片上点过才执行的</b>（没有 <code>ai.luoke/user-action</code> 就拒绝）：<code>mail_apply_plan</code>、<code>mail_undo</code>、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
-<li><b>只读、不用点的</b>：<code>outbox_ack</code>；<code>mail_search</code>（只搜本机已存的邮件，近期的按主题、发件人和正文，更早的只按信头，不含已移到垃圾箱、垃圾邮件的；不连邮箱、不经模型、不记日志；默认 20 条，最多 50）；<code>mail_read</code>（一封的正文，遮凭证，最多 4000 字，标 <code>untrusted</code>；只有信头的旧邮件现取、不标已读，取到的 Message-ID 对不上就不给）；<code>mail_plan</code>（对同一邮箱里还在待处理的最多 8 封出一张方案卡片，不改邮箱）；<code>mail_open</code>、<code>mail_open_settings</code>、<code>mail_open_page</code>。</li>
-<li>只执行邮件助手自己做出的方案、只用卡片给出的选项，执行前再核对邮件仍在待处理；移到垃圾箱、垃圾邮件合计超过 1 封要处理模式；退订和开启处理模式不经 agent。</li>
-<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告 <code>new-mail</code>、<code>suspicious</code>（urgent）、<code>auto-done</code>；写入动作就是上面要点按的五个；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
+<li><b>outbox</b>（<code>luoke://luoke-mail/outbox</code>）：每个邮箱依次报可疑、要处理、可整理、已自动处理四类；一个邮箱都没连时只报一条「还没连邮箱」。时间是带 T 的 ISO 格式。
+<ul>
+<li><b>要你处理的邮件</b>（<code>new-mail</code>）：建议是回复、加入日程、加星标，而且还没加星标的；按 <code>priority_now</code> 再按时间排，最多 8 行，多出来的写「还有 N 封在邮件助手里」。同一地址群发、建议相同、主题去掉数字后相同的合成一行（合并的行不给写草稿，加入日程的不合并）。选项：回复给「写草稿 / 加星标 / 归档 / 先不动」（类别是工作或个人、又不是群发的默认写草稿，其余默认加星标）；加入日程、加星标给「加星标 / 归档 / 先不动」（默认加星标）。加入日程的另给最多 3 个日历按钮，期限已过的标「已过」。</li>
+<li><b>可以整理的邮件</b>（<code>tidy</code>，low）：建议归档或删除的单独一张卡，一行，默认「先不动」，按钮「归档 N 封、删除 N 封」「先不动」「在邮件助手里看」。做方案时的那批邮件还有九成以上在等就沿用原卡，后来的新邮件等下一张卡。</li>
+<li><b>可疑邮件</b>（<code>suspicious</code>）：收到不到 2 天的每封一张、急，最多 3 张，两个按钮「移到垃圾邮件 / 先不动」；更早的和超出 3 张的合成一张不急的卡（8 行，多的合成一行）。每一行默认「先不动」。</li>
+<li><b>按习惯自动处理的</b>（<code>auto-done</code>）：今天还没撤销的合成一张，每批一个「撤销」，撤销习惯做的记成反证。</li>
+<li><b>还没连邮箱</b>（<code>needs-access</code>，low）：按钮「去设置」调 <code>mail_open_page{page: "accounts"}</code>；用户答过或关掉后不再提。</li>
+<li>选了「先不动」的邮件一天内不再主动提。</li>
+</ul></li>
+<li><b>资源</b>共 11 个：<code>outbox</code>；<code>permissions</code>（连了邮箱报 <code>mailbox: granted</code>，没连报 <code>ask</code>）；<code>summary</code>（<code>{count, text}</code>：<code>count</code> 是要处理的加可疑的，一天内选过「先不动」的、已加星标的不算；<code>text</code> 是一句各类几封的话）；八个 <code>page/&lt;id&gt;</code>（见「页面」）。</li>
+<li><b>要用户在卡片或页面上点过才执行的</b>（六个，没有 <code>ai.luoke/user-action</code> 就拒绝）：<code>mail_apply_plan</code>（出方案之后在页面上改过的那几封不再动，回话里说明几封没动）、<code>mail_undo</code>（收方案编号，也收单条操作记录和自动处理记录的编号）、<code>mail_do</code>（照窗口页面上点的按钮处理，见「页面」）、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
+<li><b>只读、不用点的</b>：<code>outbox_ack</code>；<code>mail_view</code>（换窗口页面上显示的内容）；<code>mail_search</code>（只搜本机已存的邮件，近期的按主题、发件人和正文，更早的只按信头，不含已删除、已移到垃圾邮件的；不连邮箱、不经模型、不记日志；默认 20 条，最多 50）；<code>mail_read</code>（一封的正文，遮凭证，最多 4000 字，标 <code>untrusted</code>；只有信头的旧邮件现取、不标已读，取到的 Message-ID 对不上就不给）；<code>mail_plan</code>（对同一邮箱里还在待处理的最多 8 封出一张方案卡片，不改邮箱）；<code>mail_open</code>、<code>mail_open_settings</code>、<code>mail_open_page</code>。会在 Mac 上打开东西的六个工具（这三个和 <code>mail_open_calendar</code>、<code>mail_show</code>、<code>mail_disconnect</code>）在工具说明里带 <code>_meta: {"ai.luoke/where": "mac"}</code>。</li>
+<li>只执行邮件助手自己做出的方案、只用卡片给出的选项，执行前再核对邮件仍在待处理；删除、移到垃圾邮件合计超过 1 封要处理模式；退订和开启处理模式不经 agent。</li>
+<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告五类：<code>new-mail</code>（normal）、<code>suspicious</code>（urgent）、<code>tidy</code>（low）、<code>auto-done</code>（normal）、<code>needs-access</code>（low）；写入动作就是上面要点按的六个；<code>service.summary</code> 为 true；<code>service.pages</code> 是八页（today、inbox、clean、digest、subs、rules、activity、settings）；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」、<code>rules</code>「规则」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
 </ul>
 
 <h2>可靠性</h2>
@@ -687,12 +719,16 @@ sequenceDiagram
 <h2>已知限制</h2>
 <ul>
 <li>最近归档的分拣、加标签、过滤器导出只支持 Gmail。发件人校验支持 Gmail、QQ、网易 163/126；139 只认出平台自己投递的信，其他自定义 IMAP 没有校验。</li>
-<li>单封移到垃圾箱和退订不需要处理模式。</li>
+<li>单封删除和退订不需要处理模式。</li>
 <li>往来邮件只看最近 30 天、已发送中最新 60 封，按主题和对方一人归串，等待阈值固定为 3 天。</li>
 <li>在别的邮件客户端里把邮件助手标的已读改回未读、之后再打开的，仍算邮件助手标的已读，订阅体检和每月阅读记录都不计入打开。</li>
 <li>正文只有图片的邮件，模型看不到图里的字。一封邮件最多识别 4 个日程。</li>
 <li>网易默认只开放最近 30 天的邮件给 IMAP。</li>
 <li>agent.sock 的对端核对挡不住本账户里有意冒充螺壳 agent 的程序（见「agent 接口」）。</li>
+<li>螺壳窗口里的页面：一页最多 200 个组件、列表一屏 10 封，要翻页；不会自己更新进度，任务在跑时要点「刷新」；不能填凭证，添加邮箱要到浏览器页面；存不了文件，Gmail 过滤器的导出只在浏览器页面；没有「记忆」页、选模型服务和外观设置；从 agent 的卡片不能直接跳到窗口里对应的页面。</li>
+<li>模型给的「高」优先级偏多：代码只把已过期的按「中」显示，没过期的照旧。</li>
+<li><code>settle_risks</code> 只放行以前来过信的发件方：新连的邮箱、或某个官方域名第一次来信时，被模型当成冒充的正常邮件仍标可疑。</li>
+<li>交给模型的话里，建议仍叫「待跟进」「移到垃圾箱」（<code>PROMPT_ACTIONS</code>），和界面上的「加星标」「删除」不同。</li>
 </ul>
 </section>
 <section class="page" id="ime" data-title="输入法 luoke-ime">
@@ -1428,7 +1464,7 @@ sequenceDiagram
 <li>拒答门槛未开启，<code>confident</code> 有结果时恒为 <code>null</code>，答复不表示"有把握"。</li>
 <li>默认打分 A 在文档多、图少于 20 张的文件夹里，对的图 z 余量小（测得最低约 2.3）。问"X 的照片"而同文件夹文档写了 X 时，可能文档排第一。录音题成绩不稳定（3 题对 1 题），原因是模型的声音向量对中文说话声差。</li>
 <li>配件清单没有登记 <code>jobs</code>，螺壳本体也没给它留空闲任务的参数：第一遍由常驻服务兜底读，<code>index --job</code> 没有接上主控的空闲任务。</li>
-<li>只有类型词或只给时间时的兜底列表会列出读不了、等着读和放一边的条目（<code>strong: true</code>、分数 0）；点开只在 iCloud 的会触发下载。</li>
+<li>只有类型词或只给时间时的兜底列表会列出读不了和等着读的条目（<code>strong: false</code>、分数 0；已经不在的文件不列）；点开只在 iCloud 的会触发下载。</li>
 <li>录音和视频音轨不转文字；mkv、webm 等 AVFoundation 打不开的视频读不了。</li>
 <li>照片图库测过假图库和一次真图库只读测试；iCloud"优化 Mac 储存空间"的图库和几万张的图库没测；PDF 无法从外部定位到页，只在答复中说明页码；「照片」无法定位到某一张。</li>
 <li>邮件、记忆、打字记录的搜索（第二步）未做；判断要不要搜归 agent，手机端先纯文字。找相似的效果只在假主控的向量上试过。</li>
@@ -2093,11 +2129,11 @@ sequenceDiagram
 <h3><code>luoke-mail.triage</code> 分拣</h3>
 <div class="tbl"><table>
 <tr><th>项</th><th>要点</th></tr>
-<tr><td>位置</td><td>还没搬进文件：<code>luoke_mail/triage.py</code> 的 <code>SYSTEM_PROMPT</code>（固定说明，<code>{language}</code> 填设置的语言）、<code>SCHEMA</code>（选项是代码里的 <code>CATEGORIES</code>、<code>PRIORITIES</code>、<code>ACTIONS</code>）、<code>build_messages</code>（邮件前面那几行）、<code>parse_output</code> 和 <code>settle_dates</code>、<code>settle_cc</code>、<code>settle_figures</code>、<code>settle_risks</code>（可疑原因的五类是 <code>RISKS</code>），重问那句在 <code>analyze</code>；邮件本身那一段是 <code>prompts/_shared.txt</code> 的 <code>mail</code>，由 <code>mail_values</code> 备值</td></tr>
+<tr><td>位置</td><td>还没搬进文件：<code>luoke_mail/triage.py</code> 的 <code>SYSTEM_PROMPT</code>（固定说明，<code>{language}</code> 填设置的语言）、<code>SCHEMA</code>（选项是代码里的 <code>CATEGORIES</code>、<code>PRIORITIES</code>、<code>ACTIONS</code> 的代号；用户规则那句里的中文叫法取自 <code>PROMPT_ACTIONS</code>，仍是「待跟进」「移到垃圾箱」，和界面用的「加星标」「删除」分开）、<code>build_messages</code>（邮件前面那几行）、<code>parse_output</code> 和 <code>settle_dates</code>、<code>settle_cc</code>、<code>settle_figures</code>、<code>settle_risks</code>（可疑原因的五类是 <code>RISKS</code>），重问那句在 <code>analyze</code>；邮件本身那一段是 <code>prompts/_shared.txt</code> 的 <code>mail</code>，由 <code>mail_values</code> 备值</td></tr>
 <tr><td>输入</td><td>今天的日期和星期；邮件寄出日期早于今天时，再给寄出日期和星期，并要求没写年份的日期和"明天""下周三"这类说法按寄出日期换算；用户邮箱；用户只在抄送里、不在收件人里时加一句：除非邮件点名要用户做事或回答问题，一般 archive，priority 不超过 medium，回复要点不替用户答应派给别人的事；记忆的"关于用户 / 处理习惯"块（≤ 600 字）；用户给这个发件人定的规则（有就给）；是否精选来源；发件域名验证结论（通过、没通过或平台自己投递；配方参数 <code>sender_verdict</code> 为 false 的 16、32 档只不给「通过」）；邮件头（发件人、收件人、抄送、时间、主题、附件名 ≤ 10 个）和正文；正文不到 80 字而有图片时加一句有几张图片、看不到图里的字不算可疑；图片 3 张以上、正文里单独成行的金额和日期 3 个以上时，要求不推测哪个是应还金额和还款日，<code>due_date</code> 填 null，摘要不写金额和日期。正文先去掉引用的往来、以 &gt; 开头的行和不可见字符，超过 60 个字符的链接写成 <code>https://域名/…</code>，最多 6000 字；整条消息再按档的字符上限截短（16 / 32 / 128 GB：6000 / 12000 / 32000 字）</td></tr>
 <tr><td>输出</td><td>15 个字段都必填：<code>category</code>（8 选 1）、<code>priority</code>（high / medium / low）、<code>action</code>（reply / schedule / follow_up / archive / ignore）、<code>summary</code>（≤ 40 字，只写内容、不写是否可疑）、<code>reason</code>、<code>due_date</code>（只填邮件明写的期限）、5 个 <code>event_*</code>（只在 schedule 时填，第一个日程）、<code>more_events</code>（同一封里其余时间不同的日程，最多 3 个，各有 title、date、start、end、location；没有时为空数组）、<code>reply_points</code>（≤ 3 条）、<code>suspicious</code>、<code>risks</code>（可疑时原因属于哪几类，可多选：冒充 / 索要个人信息 / 催促转账 / 指挥AI / 可疑链接；不可疑时为空数组）；文字字段用设置的语言</td></tr>
 <tr><td>判断规则</td><td>reply：对方在等用户回信（回答问题、确认时间、发回要的资料都算）；对方还在问能不能来、或请用户从几个时间里挑一个，也是 reply；schedule 只给时间已定的会议、预约、活动和要出行的机票车票（确认函、出票通知、已接受的邀请）；follow_up：要用户做、但不用回信的事（付账单、填表、取件、续费）；只被抄送、且邮件明确让别人处理的，通常 archive；<code>due_date</code> 只填邮件明写的期限，"下周三"这类按今天换算；回复要点不编邮件里没有的人名、名单和数字。用户的规则一般照办，只有明显要用户亲自处理或看起来可疑时才给不同的 action，并在 <code>reason</code> 里说明；"移到垃圾邮件"的规则让模型给 ignore；精选来源的邮件一般 archive</td></tr>
-<tr><td>校验与退路</td><td>解析不出 JSON 或 <code>action</code> 不在枚举：带一句纠正重问一次，再不行报错；<code>category</code> / <code>priority</code> 不在枚举改成 other / medium；日期须 YYYY-MM-DD、时间须 HH:MM，否则置空；只有 schedule 且日期有效才生成日程，<code>more_events</code> 里日期无效的、和第一个同一天同一开始时间的丢掉，最多留 3 个；<code>suspicious</code> 为真时强制 ignore + phishing；<code>risks</code> 只留五类里的、去掉重复；配方不给「通过」（<code>sender_verdict</code> 为 false）而邮箱的结论是通过、<code>risks</code> 只有冒充时，改成不可疑（<code>settle_risks</code>）：动作和类别回到模型原来给的（ignore 改 archive、phishing 改 notification），priority 降为 low，reason 换成「邮箱服务商已验证这封邮件来自 某域名。」，summary 里有诈骗、钓鱼、冒充、可疑这类词的换成主题；没答 <code>risks</code>、有别的原因、「通过」已告诉模型的都不放；<code>risks</code> 和放行标记 <code>cleared</code> 只在评测结果里，不存库；没写年份、又比寄出日期晚 300 天以上的期限和日程日期，按整年往回拉（邮件里写了那一年或"明年"的不拉）；用户只在抄送里的邮件，模型给了 high 也降成 medium；上面那种金额和日期在图片里的邮件，代码清掉 <code>due_date</code>，摘要带数字的换成「金额和日期在图片里，请打开原信核对」</td></tr>
+<tr><td>校验与退路</td><td>解析不出 JSON 或 <code>action</code> 不在枚举：带一句纠正重问一次，再不行报错；<code>category</code> / <code>priority</code> 不在枚举改成 other / medium；日期须 YYYY-MM-DD、时间须 HH:MM，否则置空；只有 schedule 且日期有效才生成日程，<code>more_events</code> 里日期无效的、和第一个同一天同一开始时间的丢掉，最多留 3 个；<code>suspicious</code> 为真时强制 ignore + phishing；<code>risks</code> 只留五类里的、去掉重复；配方不给「通过」（<code>sender_verdict</code> 为 false）而邮箱的结论是通过、<code>risks</code> 只有冒充、这个发件方以前来过信（<code>sender_seen</code>）时，改成不可疑（<code>settle_risks</code>）：动作和类别回到模型原来给的（ignore 改 archive、phishing 改 notification），priority 降为 low，reason 换成「这封邮件确实从 某域名 发出（邮箱服务商已验证），以前也收到过这个域名的邮件；请确认是你认识的发件方。」，summary 里有诈骗、钓鱼、冒充、可疑这类词的换成主题；没答 <code>risks</code>、有别的原因、「通过」已告诉模型的、没来过信的都不放；显示和排序另用 <code>priority_now</code>（过期的 high 按 medium），不改模型的输出，也不进评测；<code>risks</code> 和放行标记 <code>cleared</code> 只在评测结果里，不存库；没写年份、又比寄出日期晚 300 天以上的期限和日程日期，按整年往回拉（邮件里写了那一年或"明年"的不拉）；用户只在抄送里的邮件，模型给了 high 也降成 medium；上面那种金额和日期在图片里的邮件，代码清掉 <code>due_date</code>，摘要带数字的换成「金额和日期在图片里，请打开原信核对」</td></tr>
 <tr><td>预算</td><td>输出 320 + 80 token；温度 0</td></tr>
 <tr><td>评测</td><td>48 封（20 封难题，含钓鱼、注入、发件域名验证、长跟踪链接后的期限）；硬性：正常邮件 0 误报，可疑邮件最多漏 1 封。另有不计分的观察题，评测结果里单列（含发件域名验证通过的官方子域名通知、安全代码、外文订阅，和同样通过、只给登录链接的仿冒信）。不覆盖规则、记忆块、精选来源、非中文输出，也不评摘要和回复要点</td></tr>
 </table></div>
@@ -2530,6 +2566,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-10</h2>
+<ul>
+<li>邮件页按代码 aeb57b7（0.19.45）复核：建议的叫法改成「加星标」「删除」（交给模型的话不变）；新增「螺壳主窗口里的页面」（八页、<code>mail_view</code> / <code>mail_do</code>、大小和边界）；outbox 重写成可疑、要处理、可整理、已自动处理四类加「还没连邮箱」，可疑邮件默认「先不动」；资源加 <code>summary</code> 和八个页面；记忆记录加 <code>mail-contact</code>；<code>settle_risks</code> 只放行以前来过信的发件方，过期的高优先级按中显示（<code>priority_now</code>）；已知限制加四条。提示词页同步分拣的代码后处理。搜索页的兜底列表一条按现在的代码改（不列已不在的文件，<code>strong: false</code>）。</li>
+</ul>
 
 <h2>2026-11-09</h2>
 <ul>
