@@ -1,14 +1,15 @@
 <!-- id: mem | nav: 记忆 luoke-mem | group: 组件 -->
 <h1>记忆</h1>
 <p class="lede">螺壳各组件共用的本机记忆：一个 SQLite 文件。工具写入"发生了什么"（记录）；记忆是唯一形成结论的地方，从记录归纳出带依据、分三档把握程度的理解，并在空闲时整理，产出想问用户的问题和建议。</p>
-<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.29.1，按代码 f9d0a7c 核对 · 许可 Apache-2.0 · schema 7 · 接口和表结构见「参考 · 记忆」</p>
+<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.36.0，按代码 8424207 核对 · 许可 Apache-2.0 · schema 8 · 接口和表结构见「参考 · 记忆」</p>
 
 <h2>职责</h2>
 <ul>
 <li>保存三类数据：<b>记录</b>（records）、<b>理解</b>（notes，每条引用它所依据的记录）、<b>想问的和建议</b>（asks）。</li>
 <li>归纳关于用户的理解：事实、关注的话题、不感兴趣、处理习惯、常用说法，以及只供精选使用的口味。</li>
 <li>写入时遮去凭证；提供整份记忆的查看和管理界面。</li>
-<li>按 luoke-agent 的工具协议给螺壳主窗口供内容：想问的和建议做成卡片放进 outbox，另有概览和四页，用户的点按交回记忆（还没接上，见「工具协议」）。</li>
+<li>认人：从用户发出的邮件和写信的记录里认出反复出现的人，同一个人的事并在一起；人名和用户常打的英文专名成为常用说法，给语音输入当热词（见「人」）。</li>
+<li>按 luoke-agent 的工具协议给螺壳主窗口供内容：想问的和建议做成卡片放进 outbox，另有概览和七页，用户的点按交回记忆；记忆自己网页上的事在窗口里都能做（见「工具协议」）。</li>
 </ul>
 
 <h2>运行形态</h2>
@@ -17,7 +18,7 @@
 <tr><td>库</td><td>工具进程内 <code>Memory(path, tool)</code></td><td>WAL、<code>secure_delete</code>、10 秒锁等待；工具使用主控内置的那份 <code>luoke_mem</code></td></tr>
 <tr><td>归纳任务</td><td>主控空闲任务：<code>python -m luoke_mem --path {memory} learn</code>，最短间隔 120 分钟、超时 30 分钟、不在电池上跑</td><td>文件锁 <code>mem.db-learn.lock</code> 保证同一份记忆只跑一个；收到 SIGTERM 时已完成的批次保留；记忆文件不存在时什么都不做也不创建；主控不可达或任务报错时退出码 1，标准错误只写计数和原因码</td></tr>
 <tr><td>界面</td><td><code>luoke://memory</code> → 主控执行 <code>-m luoke_mem app</code></td><td>独立进程，监听 127.0.0.1 随机端口，带令牌；600 秒无请求退出</td></tr>
-<tr><td>工具协议</td><td>清单 <code>commands.mcp</code>：<code>-m luoke_mem --path {memory} mcp</code>，一个请求一个进程</td><td>给螺壳本体当子进程起（<code>transport: "stdio"</code>；本体还不起它，见「工具协议」）：标准输入一行 JSON-RPC、读到结尾，标准输出答一行；不常驻、不开 socket；打开记忆时不重新定档，记忆文件不存在时不创建</td></tr>
+<tr><td>工具协议</td><td>清单 <code>commands.mcp</code>：<code>-m luoke_mem --path {memory} mcp</code>，一个请求一个进程</td><td>螺壳本体当子进程起（<code>transport: "stdio"</code>；本体用自带的 Python，前面加 <code>-I -B</code>，一个请求最长 120 秒）：标准输入一行 JSON-RPC、读到结尾，标准输出答一行；不常驻、不开 socket；打开记忆时不重新定档，记忆文件不存在时不创建</td></tr>
 <tr><td>命令行</td><td><code>python -m luoke_mem …</code></td><td><code>sources</code>、<code>forget-tool</code>、<code>ui</code>、<code>app</code>、<code>learn</code>、<code>record --tool &lt;工具&gt;</code>（替没有 Python 的工具写记录，螺壳扫描用）、<code>mcp</code>（工具协议的一个请求）</td></tr>
 </table></div>
 
@@ -33,7 +34,7 @@
 <tr><td><code>interest</code></td><td>关注的话题</td><td>邮件助手订阅精选（还没有精选口味时）</td></tr>
 <tr><td><code>dislike</code></td><td>不感兴趣</td><td>精选</td></tr>
 <tr><td><code>preference</code></td><td>处理习惯（发件人 × 邮件类别 → 动作）</td><td>邮件助手自动执行</td></tr>
-<tr><td><code>term</code></td><td>常用说法</td><td>输入法候选加分（输入法目前还不读理解，见「已知问题」）</td></tr>
+<tr><td><code>term</code></td><td>常用说法</td><td>语音输入的热词（输入法的个人化组件经 <code>hotwords()</code> 取）</td></tr>
 <tr><td><code>taste</code></td><td>精选口味，不算对用户的了解，不提问</td><td>精选</td></tr>
 </table></div>
 <h3>三档把握程度</h3>
@@ -57,7 +58,7 @@
 <tr><td>interest</td><td><code>sent-mail</code>、<code>own-site</code>、<code>digest-feedback</code> (2, 2, 7)；<code>mail-read</code> (3, 3, 60，另需合计打开 ≥ 5 封、发件人 ≥ 2 个)；<code>digest-open</code> (3, 2, 28)；<code>ime-commit</code> (3, 3, 0)</td></tr>
 <tr><td>dislike</td><td><code>digest-feedback</code> (2, 2, 7)</td></tr>
 <tr><td>preference</td><td><code>mail-override</code> (2, 2, 7)</td></tr>
-<tr><td>term</td><td><code>ime-commit</code> (3, 3, 0)</td></tr>
+<tr><td>term</td><td><code>ime-commit</code> (3, 3, 0)；<code>sent-mail</code> (2, 2, 7)；<code>mail-contact</code> (2, 2, 28)（后两项撑的是人名）</td></tr>
 <tr><td>taste</td><td>用户的任何记录</td></tr>
 </table></div>
 <ul>
@@ -69,7 +70,7 @@
 <li><b>一类不牵连别的类</b>：处理习惯按「动作 × 邮件类别」分，事实按话题冒号前的部分（如 <code>服务:</code>、<code>账户:</code>，全角冒号同样认），兴趣和口味按来源（打字或邮件），常用说法一类，退订建议一类。</li>
 <li><b>门槛动了什么</b>：处理习惯要的次数（升档后已有的也先不提）；常用说法和打字话题生效要的天数、次数；打字话题升档后不提前问；退订建议要的清理次数；事实升档后，待确认的挪到「观察中」（<code>observed</code>）。默认门槛不变。</li>
 <li><b>定档表也按反馈调</b>：某类理解里引用某个记录话题的，用户表过态的否定 ≥ 2 且多于确认时，这一格要的条数和日子数各多 1、相隔天数翻倍（至少 7 天）；确认 ≥ 3 次且从未否定时，条数和日子数各少 1（至少 1）、相隔天数减半（日子数降到 1 时为 0）。</li>
-<li><b>以前的事</b>：会变的理解（包括猜测和用户确认过的）最新依据超过 730 天，标为 <code>past</code>，不再使用也不再提问，相关的未答问题撤回；姓名、学校、家人等不会变的不受影响。用户说"现在还是"即恢复为确定；同一类被这样唤回 ≥ 2 次后，这一类的期限加倍为 1460 天。</li>
+<li><b>以前的事</b>：会变的理解（包括猜测和用户确认过的）最新依据超过 730 天，标为 <code>past</code>，不再使用也不再提问，相关的未答问题撤回；姓名、学校、家人等不会变的不受影响。用户说"现在还是"即恢复为确定；同一类被这样唤回 ≥ 2 次后，这一类的期限加倍为 1460 天。同事、客户这类<b>关系</b>（话题头是上级、同事、下属、客户、合作方、朋友的事实）期限是 365 天，新不新看最新依据和最近一次写信给这个人里较新的那个：还在写信就当关系还在，一年里既没提到也没写信，关系退成以前的事，人留着；被唤回 ≥ 2 次后同样加倍。家人不会退。</li>
 <li><b>以前的事再次出现</b>（工具又提出同一条）：只因太久而变成以前的事的，按原样回来——用户确认过的回到确定，否则为猜测、按新依据定档；用户自己说过"以前是，现在不是"的回到猜测，保留表态时间，新依据不能让它自行生效，只能再问用户。</li>
 <li><b>邮件推出的兴趣</b>：关于用户的、由邮件记录撑起的兴趣最多 8 条生效；重新定档时按依据条数保留前 8 条，其余回到猜测。</li>
 <li><b>取代与合并</b>：同类同话题的新理解生效时，取代用户未表态的旧推断（"其他"话题除外）；说法相近的话题合并为一条。同一机构的事实只留一条：机构类话题（「机构:X」，以及旧的「账户:」「服务:」「会员:」「学校:」「住房:」「出行:」「其他:」）的名字相同即合并，「同事:」「客户:」「工作:」这类不算机构、不合并；被否定的那条只挡住同样的说法，新说法并进已有那条；未表态的只在说法相同而更完整时换字，用户确认过的保留原话，新说法另记、反刍时问"现在还是这样吗"。已有的重复在反刍时并进先有的（确认过的优先）；界面上可把并进来的说法拆出来，拆出的不再合并。</li>
@@ -92,46 +93,73 @@
 <p>两个任务的提示词是包里的文件 <code>luoke_mem/prompts/</code>：每个任务 <code>.system.txt</code>（固定说明）、<code>.user.txt</code>（输入的措辞和顺序：<code>{{名字}}</code> 由代码填，<code>{{#名字}}…{{/名字}}</code> 是可选段，名字为空时整段不出）、<code>.schema.json</code>（输出格式）；文件末尾的换行不算。<code>prompt_files</code> 加载时核对占位符：代码填的和文件里的对不上（没填、多填、认不出的 <code>{{…}}</code>），或固定说明里出现占位符，导入时就报错。两个任务都不重问，没有 <code>.retry.txt</code>，也没有 <code>_shared.txt</code>。每段打字、每个来源怎么拼成一行（编号、截短、「讲的是：」）在代码里。评测结果带 <code>prompt_sha256</code>（这个任务全部提示词文件的指纹）和 <code>prompt_files</code>。<code>tests/test_prompts.py</code> 把评测拼出的每条请求和快照逐字节比对：改提示词要在同一提交里更新快照、升版本号、三档重评；改 <code>luoke_mem/prompts/</code> 走 PR，要作者以外的一位成员 Approve，附三档评测改动前后的逐题对比。话题线的问法变了时 <code>topics.VERSION</code> 加一，已有话题从头归纳。</p>
 
 <h2>反刍</h2>
-<p>不使用模型，每次归纳任务开头和结尾各执行一次；结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
+<p>不使用模型，每次归纳任务开头和结尾各执行一次；依次是整理、降档、处理习惯、撤销过的习惯、人、英文专名、想问的、建议，结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
 <ul>
 <li><b>降档</b>：记忆自己归纳的兴趣（打字和邮件两条线）和常用说法，最新依据超过 90 天且用户未表态，回到猜测。</li>
 <li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、靠长词里的字母才够门槛的常用说法（拉丁字母按整词数，「hub」不算进「github」；已生效的退回猜测，用户表过态的不动）、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
 <li><b>处理习惯</b>：同一（邮箱, 发件人, 邮件类别, 动作）出现 ≥ 2 次形成一条习惯；来源是 <code>mail-override</code> 的新建议和 <code>mail-acted</code> 的动作，只认 <code>ACTION_NAMES</code> 里的动作（archive、read、trash、spam、flag、keep、label、filter）。来自改建议的按定档规则判定，仅来自亲手处理的为猜测。用户撤销一次自动执行即回到猜测。改建议后当场处理只算一次（<code>mail-acted</code> 的 <code>after_override</code> 覆盖整批，或 10 分钟内同一发件人、同一动作）。</li>
+<li><b>人</b>：从头重新认一遍人（见「人」），再看关系有没有退成以前的事；每个生效的人、最新依据在 90 天内的，名字记成常用说法（<code>data.sort</code> 为 <code>person</code>，带上是哪个人）。人名不受「打得不够次数就收起」的整理。</li>
+<li><b>英文专名</b>：上次之后新打的字里，大写开头的英文词串（如产品名、公司名；两端去掉句子里的普通词，最长 30 字）记成常用说法（<code>data.sort</code> 为 <code>name</code>），门槛和别的常用说法一样。</li>
 <li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的话题（天数只算最近 90 天；这一类门槛升档后不提前问）；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
 <li><b>常用说法不问用户</b>：只影响候选排序，错了几乎没代价，够门槛自己记下，不要的在记忆页删。</li>
 <li><b>建议</b>：每天最多 3 条。"以后都这样？"（有发件人和类别、动作可自动执行的处理习惯，用户点"好"即成为确定并可自动执行）；"退订？"（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
+<li><b>归档</b>：用户可以把想问的事和建议先收起来（状态 <code>archived</code>）。不算回答：记忆不从它学什么，按反馈调门槛也不算它；归档着的不过期，同一件事归档着时不另问。已经过期、还没撤下的不能归档。用户在页上定了那条理解，归档着的问题跟着关掉；理解被并掉、让位或成了以前的事，归档着的问题跟着撤回，不算过期没答。放回后重新开着，归档时还剩几天就还剩几天，换一个新编号。</li>
 <li><b>去重</b>：同一件事已有未答的问题时不再生成；"以后再说"或过期未答 7 天后、已答或"不用"60 天后才可能再问；"别再提"永不再问。</li>
+</ul>
+
+<h2>人</h2>
+<p>记忆认得用户身边反复出现的人，记在 <code>entities</code> 表里（种类只有 <code>person</code>），关于某个人的理解带上是哪个人（<code>notes.entity</code>）。认人不用模型，每次反刍从头认一遍（<code>link_people</code>）；合并、拆开之后也当场重认。</p>
+<ul>
+<li><b>从哪里认</b>：一是关于人的事实，话题写作「关系:谁」，关系是上级、同事、下属、客户、合作方、家人、朋友，要是用户自己写的或依据里有用户说的话；二是邮件助手每月记一条的「写信给谁」（<code>mail-contact</code>：地址、月份、几封、是收件人还是抄送、最多 5 个标题、名字）。</li>
+<li><b>只凭写信算不算一个人</b>：写给对方（收件人，只抄送不算）合计 ≥ 2 封、分在 ≥ 2 个月；地址或名字像邮件列表、客服、通知的（all、team、support、info 这类）不算。</li>
+<li><b>并成一个</b>：依次看用户定过的、理解已经挂着的那个人、同一个邮箱地址、同一个名字（不分大小写），都对不上才新建。显示的名字先用用户起的，否则取依据最多的叫法，再否则用地址。</li>
+<li><b>状态</b>：有生效的事实或够格的写信记录的是 <code>active</code>，其余 <code>proposed</code>（猜测）；什么依据都不剩、用户也没定过的删掉。忘掉一条理解时，它带来的叫法和地址当场从人身上去掉。</li>
+<li><b>写信的档案</b>：从哪个月起、最近一次、几个月、几封、其中抄送几封、近 12 个月每月几封、最近的 3 个标题；最近一次早于 180 天的标「很久没联系」。<b>常谈的话题</b>：用户已有的话题和常用说法（至少 2 字）里，出现在写给这个人的信的标题里最多的前 3 个；拉丁字母按整词比。</li>
+<li><b>用户定过的照着来</b>：改名（同时记一条用户说的常用说法）、把两个人并成一个、把某个叫法或地址拆成另一个人、说「不是一个人」（这个人和它名字的常用说法都作废）、忘掉一个人（删关于他的理解、他地址的写信记录和这个人）。这样定过的，之后的反刍不改回去。</li>
+<li><b>热词</b>（<code>hotwords(limit=50)</code>）：从常用说法里取，不取敏感的、超过 24 字的。人名最多占 40%，英文专名最多占 20%，其余给用户自己打的说法；哪一类没用完，名额让给别的类。把握大的在前，人名里近半年写信多的在前。</li>
 </ul>
 
 <h2>读写关系</h2>
 <div class="tbl"><table>
 <tr><th>组件</th><th>写入的记录</th><th>读取</th></tr>
-<tr><td>邮件助手</td><td><code>mail-read</code>、<code>mail-acted</code>、<code>mail-override</code>、<code>mail-auto</code>、<code>mail-undo-auto</code>、<code>mail-cleared</code>、<code>sent-mail</code>、<code>received-mail</code>、<code>digest-open</code>、<code>digest-feedback</code>、<code>own-label</code>、<code>own-site</code></td><td>事实和习惯（分拣、起草）、可自动执行的习惯、口味、给它的 asks</td></tr>
-<tr><td>输入法</td><td><code>ime-commit</code>、<code>ime-correction</code>、<code>ime-forget</code></td><td>目前只读自己写的 <code>ime-commit</code>（个人化组件还不读理解）；可读全部记录</td></tr>
-<tr><td>agent</td><td>只经 <code>reply</code> 交回回答</td><td>asks 和全文依据</td></tr>
+<tr><td>邮件助手</td><td><code>mail-read</code>、<code>mail-acted</code>、<code>mail-override</code>、<code>mail-auto</code>、<code>mail-undo-auto</code>、<code>mail-cleared</code>、<code>sent-mail</code>、<code>received-mail</code>、<code>digest-open</code>、<code>digest-feedback</code>、<code>own-label</code>、<code>own-site</code>、<code>mail-contact</code>（每月写信给谁）</td><td>事实和习惯（分拣、起草）、可自动执行的习惯、口味、给它的 asks</td></tr>
+<tr><td>输入法</td><td><code>ime-commit</code>、<code>ime-correction</code>、<code>ime-forget</code></td><td>自己写的 <code>ime-commit</code>；语音的热词经 <code>hotwords()</code> 取常用说法（旧的 <code>luoke_mem</code> 没有这个接口时自己从常用说法里挑）</td></tr>
+<tr><td>agent 和螺壳主窗口</td><td>不写记录；用户在卡片和页上的点按经工具协议交回</td><td>outbox、概览和各页</td></tr>
 <tr><td>螺壳扫描</td><td>经命令行 <code>record --tool luoke-scan</code>：<code>scan-cleaned</code>、<code>scan-ignored</code>、<code>scan-auto-cleaned</code>、<code>scan-malware</code>、<code>scan-autoclean</code></td><td>—</td></tr>
 </table></div>
 <p>任何组件都能读取全部记录和依据；删除其他工具写入的内容只能经记忆自己：它的界面、命令行 <code>forget-tool</code> 和工具协议里的页面。</p>
 
 <h2>工具协议</h2>
-<p>记忆照 luoke-agent 的工具协议（版本 1，<code>transport: "stdio"</code>）给螺壳主窗口供内容：螺壳本体每个请求起一次 <code>python3 -m luoke_mem --path {memory} mcp</code>（清单 <code>commands.mcp</code>），agent 读 outbox、概览和四页，把用户的点按交回来。代码在 <code>luoke_mem/agent.py</code>；协议服务端 <code>mcp.py</code> 和拼卡片的 <code>cards.py</code> 拷自 luoke-agent（许可 Apache-2.0 OR MIT），只用标准库。工具名、参数和页面结构见「参考 · 记忆」。</p>
+<p>记忆照 luoke-agent 的工具协议（版本 1，<code>transport: "stdio"</code>）给螺壳主窗口供内容：螺壳本体每个请求起一次 <code>-m luoke_mem --path {memory} mcp</code>（清单 <code>commands.mcp</code>，<code>capabilities</code> 写在发出去的清单 <code>packaging/accessory.json</code> 里，测试核对它和代码一致），agent 读 outbox、概览和各页，把用户的点按交回来。代码在 <code>luoke_mem/agent.py</code>；协议服务端 <code>mcp.py</code> 和拼卡片的 <code>cards.py</code> 拷自 luoke-agent（许可 Apache-2.0 OR MIT），只用标准库。工具名、参数和各页的参数见「参考 · 记忆」。</p>
 <ul>
-<li><b>还没接上</b>：<code>capabilities</code> 只在代码（<code>agent.capabilities()</code>）和场景样例的 <code>manifest.json</code> 里；发出去的清单 <code>packaging/accessory.json</code> 没有（测试核对它不在），螺壳的开发版、发布版打包时都原样带上这一份。螺壳本体现在只起扫描和搜索，还不照 <code>commands.mcp</code> 起记忆；agent 照旧经 <code>luoke_mem</code> 库读 <code>asks</code>（见「agent」）。</li>
 <li><b>outbox</b>：开着、没过期的想问的和建议（<code>asks(status=["open"])</code>），每件一张卡片；问不问、每天几个、「以后再说」之后何时再问仍由反刍定。卡片标题「记忆想问你」或「记忆有个建议」，下面是问题和理由；关于某条理解的附它最新的 3 条依据原文（「应用 · 日期：原文」，每条 120 字以内），没有就写 <code>evidence</code>。</li>
-<li><b>卡片上的按钮</b>：关于某条理解的问题有输入框「不太对的话，改成」和 对 / 不对 / 以前是，现在不是 / 按我改的 / 以后再说；处理习惯的建议是 好 / 不用 / 别再提，退订建议是 知道了 / 别再提；带 <code>about_note</code> 的多一个「在螺壳记忆里看」。点了交回 <code>mem_reply</code>，记忆照 <code>reply</code> 处理，卡片换成一句话的结果，这件从 outbox 撤下；改成的话里有密码、验证码、证件号码时不收，卡片留着让用户改。</li>
+<li><b>卡片上的按钮</b>：关于某条理解的问题有输入框「不太对的话，改成」和 对 / 不对 / 以前是，现在不是 / 按我改的 / 以后再说；处理习惯的建议是 好 / 不用 / 别再提，退订建议是 知道了 / 别再提；每张最后有「归档」。关于某条理解的多一个「在螺壳记忆里看」，跳到窗口里的「一条理解」。点了交回 <code>mem_reply</code>，记忆照 <code>reply</code> 处理，卡片换成一句话的结果，这件从 outbox 撤下；改成的话里有密码、验证码、证件号码时不收，卡片留着让用户改。</li>
 <li><b>概览</b>（<code>summary</code>）：一句「记下了 N 条，有 M 条猜测等你确认」；N 是生效的理解（不含精选口味），M（<code>count</code>）是等用户确认的猜测，不算从别人来信读到、还在攒证据的事实；记忆正在问的那几条照常算，也上猜测页。</li>
-<li><b>四页</b>：概览、猜测（对 / 不对）、记下的（不对 / 忘掉）、各应用写的（忘掉某个应用写的、清空整份记忆）。每页最多列 15 条，多的到整份记忆的页面看。「忘掉」要先勾「我知道删了找不回来」，清空要输入「清空」。页上的点按只答一句话，窗口重新读那一页。</li>
-<li><b>写入只来自用户的点按</b>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_forget_all</code> 没带 <code>ai.luoke/user-action</code> 的一律拒绝；<code>mem_open</code> 只打开记忆自己的页面，<code>outbox_ack</code> 只答一句、不记。</li>
+<li><b>七页</b>：概览、想问的、猜测、记下的、人、各应用写的，和只从按钮进、不画成标签的「一条理解」（清单里 <code>hidden</code>）。页上的点按只答一句话，窗口重新读那一页。
+  <ul>
+  <li><b>概览</b>：上次归纳的时间和结果（只有数和原因）；各类记下多少；最近 30 天没问就记下的最多 5 条；最近 14 天各应用记下的，每个应用可以去看每天记了什么；从别人来信读到、还在攒证据的有几条，可以去看。</li>
+  <li><b>想问的</b>：还在问的每件能「归档」，两件以上能「全部归档」；下面列出已归档的，每件能「放回」，放回的回到「今天」。</li>
+  <li><b>猜测</b>：对 / 不对；从别人来信读到的单独一页，同样能点。</li>
+  <li><b>记下的</b>：按类别看，或看「最近记下的」「以前的事」（「现在还是」「不对」，日期写「大约 N 年」，即最新依据是哪一年）「说过不对的」（只能忘掉）；能搜（几个词都要有）、能翻页。同一话题的事实排在一起，写「可能和上下 N 条是同一件」，由用户留对的，不自动合并。订阅精选的口味有自己的按钮「精选的口味 N」，不算在「全部」和概览的数里。</li>
+  <li><b>一条理解</b>：原话、类别、状态和理由；对 / 不对、现在还是；改写（旧的说法留着，标为已被取代）；「这一类都不要（N 条）」；忘掉；并进来的说法每条能「拆出来」；全部依据原文一页一页翻。改写框里写「不对」「那是以前的事了」这类短话，按否定、以前的事处理，答的话也照实写。</li>
+  <li><b>人</b>：能搜、能翻页；一个人的页上能改名、把某个叫法或邮箱地址拆出去（「不是这个人」）、选另一个人「并成一个」（一组 30 人，能翻、能按名字或邮箱找）、看关于他的理解、说「不是一个人」、忘掉。</li>
+  <li><b>各应用写的</b>：每个应用最近 14 天每天记了什么；「忘掉…写的」先到一页，试跑一遍（什么都不删）说会删掉几条记录、几条理解、留下什么，勾上再点；清空整份记忆要输入「清空」。</li>
+  </ul></li>
+<li><b>要先勾才做的</b>：忘掉一条、忘掉一个人、忘掉某个应用写的，要先勾「我知道删了找不回来」；「不是这个人」要先勾「确定不是同一个人」。没勾什么都不做。</li>
+<li><b>页上数过的和点的时候对不上就不做</b>：「这一类都不要（N 条）」的按钮带着画页时数的那几条，点的时候这一类多了或少了，一条都不否定，请用户再看一眼。</li>
+<li><b>看核心认什么</b>：核心在请求里说它认页带参数（<code>pageArgs</code>）时才有上面这些；说认大页（<code>bigPages</code>）时一页最多 30 条，否则 15 条。不认页带参数的旧核心照 0.34 的样子：每页最多 15 条、没有搜索和翻页，多的用「打开整份记忆」到记忆自己的网页看。搜索填的字超过 200 个时不按它搜，页上写一句说明、列出全部。</li>
+<li><b>写入只来自用户的点按</b>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_forget_all</code>、<code>mem_person</code>、<code>mem_archive</code> 没带 <code>ai.luoke/user-action</code> 的一律拒绝；<code>mem_open</code> 只打开记忆自己的网页（给旧核心用），<code>outbox_ack</code> 只答一句、不记。</li>
 <li><b>没有记忆或打不开时</b>：记忆文件不存在，读的都答空的，写的答 <code>not_ready</code>，不建文件；记忆比这份 <code>luoke_mem</code> 新、旁边有符号链接、正被别的应用写着或文件坏了时，概览、各页和写入的 <code>not_ready</code> 都带一句说明（请更新螺壳、为了安全没有打开、过一会儿再试、可能坏了）。</li>
-<li><b>场景样例</b>：<code>fixtures/agent/</code> 有四个场景（空的记忆、有猜测、有想问的和建议、几个应用写过），每个请求一个文件，给 agent 做样例和测试输入。<code>scripts/record_agent_fixtures.py</code> 在临时目录里经 <code>luoke_mem</code> 的接口造假记忆、时钟写死，起真的 <code>mcp --clock</code> 录下；<code>tests/test_fixtures.py</code> 重录比对，并用拷来的 agent 卡片校验核每张卡片和每一页。改了 agent 看得到的东西要重录、提交，在 PR 里说清 agent 那边要不要跟着改。</li>
+<li><b>场景样例</b>：<code>fixtures/agent/</code> 有七个场景（空的记忆、有猜测、有想问的和建议、归档、人、几个应用写过，和核心认页带参数时的 <code>window</code>），每个请求一个文件，给 agent 做样例和测试输入。<code>scripts/record_agent_fixtures.py</code> 在临时目录里经 <code>luoke_mem</code> 的接口造假记忆、时钟写死，起真的 <code>mcp --clock</code> 录下；<code>tests/test_fixtures.py</code> 重录比对，并用 agent 的卡片和页的规则核每张卡片和每一页。改了 agent 看得到的东西要重录、提交，在 PR 里说清 agent 那边要不要跟着改。</li>
 </ul>
 
 <h2>已知限制</h2>
 <ul>
-<li>界面没有"以后再说"和单独的"以前是"按钮（只能通过修改框的文字识别）。</li>
+<li>记忆自己的网页没有"以后再说"、"归档"和单独的"以前是"按钮（"以前是"只能通过修改框的文字识别）；归档在螺壳主窗口里做。</li>
+<li>同名的两个人会被认成一个，要用户在「人」的页上拆开。</li>
+<li><code>luoke://memory</code> 的入口（<code>app --view</code>）只认 <code>recent</code>，不能直接开到「人」。</li>
 <li>归纳中某条输入（打字或话题的一批）连续出错两次就跳过，游标前移；其他错误不打断整次归纳。</li>
 <li>重新定档、以前的事只在整份记忆被打开时运行（界面、命令行、归纳任务；工具协议的读写不运行）。</li>
-<li>工具协议还没接上：发出去的清单没有 <code>capabilities</code>，螺壳本体也还不起记忆（见「工具协议」）。</li>
 <li>没有向工具索取更多原文的通道；自由回答不参与学习。</li>
 <li>命令行 <code>forget-tool luoke-mem</code> 被拒绝（说明原因，退出码 1）：记忆自己的内容只能逐条删除或清空整份记忆。</li>
 <li>敏感词和凭证识别基于正则，存在漏判和误判。</li>

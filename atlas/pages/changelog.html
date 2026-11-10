@@ -3,6 +3,7 @@
 
 <h2>2026-11-10</h2>
 <ul>
+<li>记忆页、参考页的记忆部分按代码 8424207（0.36.0）复核：schema 8；新增「人」一节（从事实和每月的写信记录认人、并成一个的顺序、写信的档案和常谈的话题、关系 365 天退成以前的事、用户定过的照着来、热词按类分名额）；反刍加人名、英文专名和归档；常用说法的定档加 <code>sent-mail</code>、<code>mail-contact</code>；「工具协议」重写成现在的七页（想问的、人、一条理解是新的），页带参数、大页、试跑后再忘掉、「这一类都不要」对不上就不做；清单已带 <code>capabilities</code>，螺壳本体起记忆；参考页加归档和人的接口、<code>entities</code> 表、<code>mem_person</code>、<code>mem_archive</code>、各页的参数；已知限制去掉「工具协议还没接上」，加同名的人会并成一个等三条。agent 页里「记忆经库读、还没当应用连」的三处按 agent fb9b518 改成现在的样子（整页待复核）。</li>
 <li>邮件页按代码 aeb57b7（0.19.45）复核：建议的叫法改成「加星标」「删除」（交给模型的话不变）；新增「螺壳主窗口里的页面」（八页、<code>mail_view</code> / <code>mail_do</code>、大小和边界）；outbox 重写成可疑、要处理、可整理、已自动处理四类加「还没连邮箱」，可疑邮件默认「先不动」；资源加 <code>summary</code> 和八个页面；记忆记录加 <code>mail-contact</code>；<code>settle_risks</code> 只放行以前来过信的发件方，过期的高优先级按中显示（<code>priority_now</code>）；已知限制加四条。提示词页同步分拣的代码后处理。搜索页的兜底列表一条按现在的代码改（不列已不在的文件，<code>strong: false</code>）。</li>
 </ul>
 

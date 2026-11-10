@@ -40,7 +40,7 @@
   <li><code>run/lock</code> 上的文件锁保证一个数据目录只有一个核心，拿不到以 3 退出。</li>
   </ul></li>
 <li><b>轮询</b>：核心每 5 秒一个周期；应用的 outbox 每 60 秒读一次，记忆和主控各 300 秒；窗口报「开着」时马上把全部来源读一遍。一个来源出错不影响别的；暂时没在运行的来源，卡片先收起、状态不动，回来照旧。</li>
-<li><b>来源</b>：记忆经 <code>luoke_mem</code> 库读，不走工具协议；应用是主控 <code>GET /accessories</code> 列出的、<code>capabilities.protocol</code> 为 1 的。<code>luoke_mem</code> 用主控 <code>GET /tasks</code> 给的那份（螺壳.app 里的），每次启动取一次，取不到（最多试 3 次，每次隔 2 秒）用自带的兜底副本。</li>
+<li><b>来源</b>：记忆的事由记忆自己的 outbox 报：螺壳本体起的记忆（<code>luoke-mem</code>）连着核心、清单里有 <code>reports</code> 时，按工具协议读，经库读的那一路交出去（还开着的事换成新编号、说过看过的不再说一遍，旧卡片撤下，用户给记忆那几类定过的提醒方式搬过去）；连不到这样的记忆时仍经 <code>luoke_mem</code> 库读。应用是主控 <code>GET /accessories</code> 列出的、<code>capabilities.protocol</code> 为 1 的。<code>luoke_mem</code> 用主控 <code>GET /tasks</code> 给的那份（螺壳.app 里的），每次启动取一次，取不到（最多试 3 次，每次隔 2 秒）用自带的兜底副本。</li>
 <li><b>主控接口</b>：请求头 <code>X-Luoke-Accessory: luoke-agent/&lt;版本&gt;</code>，超时 5 秒，答复最多 1 MB。
   <ul>
   <li>主控没答：保留现有应用，提示「螺壳没在运行，暂时找不到工具。」</li>
@@ -142,7 +142,7 @@
 <li>螺壳扫描：stdio；基础页概览、清理记录，有概览一句话；权限有完全磁盘访问（螺壳名下）、自动清理（委托）、要管理员密码的一步（每次问）。</li>
 <li>邮件助手：socket <code>~/.luoke-mail/run/agent.sock</code>；能搜；三页，有完整界面；邮箱授权（账户）。</li>
 <li>螺壳搜索：socket <code>~/.luoke-search/run/agent.sock</code>；能搜；有概览页。</li>
-<li>记忆：工具一侧已实现（stdio），但清单里还没有 <code>capabilities</code>，agent 不把它当应用连，仍经库读。</li>
+<li>记忆：清单带 <code>capabilities</code>（stdio），由螺壳本体起；agent 把它当应用连，它的事、概览和各页都按工具协议读（见「记忆」页的「工具协议」）。</li>
 </ul>
 <h3>传输和超时</h3>
 <ul>
@@ -293,7 +293,7 @@
 <li>应用不核对调用方是谁：同一账户里别的程序能连应用的 socket；user-action 不是签名的凭据；agent.sock 按进程号认人，不核代码签名。</li>
 <li>写不写只看 <code>readOnlyHint</code>，不对照清单的 <code>actions</code>；<code>readOnlyHint</code> 缓存到名字找不到才刷新。</li>
 <li><code>deadline</code> 只影响排序，过期不会标记。</li>
-<li>记忆仍经库读，记忆的工具一侧不用；<code>luoke_mem</code> 的路径只在核心启动时取一次。</li>
+<li>连不到本体起的记忆时退回经库读；<code>luoke_mem</code> 的路径只在核心启动时取一次。</li>
 <li>窗口只认识邮件、扫描、记忆、搜索四个应用的页；本体通道只起螺壳扫描。</li>
 <li>点急事通知只回「今天」，不定位到那张卡片；没用时效性通知。</li>
 <li>免打扰在窗口里只能选两档或关；「每类事」只列出现过的和清单里写了的类别。</li>
