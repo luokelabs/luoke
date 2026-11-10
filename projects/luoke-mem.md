@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.33.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.34.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -19,7 +19,7 @@
   - 人（0.30）：`entities(kind="person")`、`entity(id)`（名字、别的叫法和地址、关系、写信的档案 `contact`、关于这个人的理解）；理解带 `entity`，说明是关于谁的，空就是关于用户本人。只认用户自己发出的邮件里写到的人和用户常写信给的人（0.31 起读邮件助手的 `mail-contact`）。用户改名、并成一个、拆开、说不是一个人、忘掉一个人在记忆页面上做（`WholeMemory` 的 `rename_person` 等）。
   - 合并和拆开：同一机构的事实是一条（话题「机构:<名>」）；`merged(nid)` 列出并进来的说法，`WholeMemory.split(nid)` 拆出来。
   - 删：`forget`（单条理解）、`forget_records`（本工具的一部分记录，可以留下被引用的）、`forget_tool()`（本工具写的全部）。删别的工具写的、`forget_all` 只在 `WholeMemory`（记忆自己的界面和命令行）里。
-  - 想问的和建议（给 agent 和工具页面）：`asks(tool=...)` 读，`reply(id, choice, text)` 交回（yes / no / past / revise / later / answer；建议是 useful / useless / never）。
+  - 想问的和建议（给 agent 和工具页面）：`asks(tool=...)` 读，`reply(id, choice, text)` 交回（yes / no / past / revise / later / answer；建议是 useful / useless / never；都可以 archive）。归档（0.34）：`archive(id)` 收起来、不算回答、不会自己再问，`unarchive(id)` 放回，换一个新编号；`asks(status=["archived"])` 读归档着的。
   - 凭证和敏感：`mask_secrets(text)`（别名 `mask`）、`find_secrets(text)`；`sensitive_kinds(text)` 标健康、法律纠纷、宗教政治，这三类推出来的要用户点头才算（`CONFIRM_KINDS`）。`allowed()`、`ask(类别)`、`withheld()`、`never_kept()`、`sensitive()` 留着给旧调用方，不再限制什么。
   - 给用户看的名字：`KIND_NAMES`、`TOOL_NAMES`、`CONFIDENCE_NAMES`、`CATEGORY_NAMES`、`action_name()`。
 - **理解的类别**：`fact` 关于你、`interest` 关注的话题、`dislike` 不感兴趣、`preference` 处理习惯、`term` 常用说法、`taste` 精选的口味（邮件助手挑精选用，不算关于你）。三档：猜测 / 比较确定 / 确定；会变的太久没有新依据是"以前的事"（`status='past'`）。
@@ -31,7 +31,7 @@
   - 空闲任务：`learn`（归纳、反刍：重新定档、以前的事、习惯、想问的、建议）。
   - 命令：`forget-tool <工具> [--dry-run]`。
 - **命令行**：`python3 -m luoke_mem [--path P] ui | sources | forget-tool <工具> [--dry-run] | learn [--force] [--again] [--hub S] | app [--note N] [--view recent] | record --tool <工具> | mcp [--clock T]`（`record` 给没有 Python 的工具写记录，标准输入一行一条 JSON；`mcp` 见下「工具协议」）。
-- **工具协议**（0.29，luoke-agent `docs/工具协议.md` 版本 1，`luoke_mem/agent.py`）：`python3 -m luoke_mem --path {memory} mcp`（清单 `commands.mcp`），由螺壳本体当子进程起，一个请求一个进程（§2a）。outbox `luoke://luoke-mem/outbox`：记忆想问的事和建议，卡片由记忆写，点按交回 `mem_reply`；`summary` 和四页（`overview`、`guesses`、`kept`、`sources`）；写入动作 `mem_reply`、`mem_note`、`mem_forget_tool`、`mem_forget_all` 只认用户的点按，`mem_open` 打开记忆自己的页面。场景样例在 `luoke-mem/fixtures/agent/`（`scripts/record_agent_fixtures.py --check` 守着）。**`capabilities` 还没写进发出去的清单**（代码里 `agent.capabilities()`、样例的 `manifest.json` 里有）：螺壳本体能起记忆以后再写，见「对别的项目的需求」。
+- **工具协议**（0.29，luoke-agent `docs/工具协议.md` 版本 1，`luoke_mem/agent.py`）：`python3 -m luoke_mem --path {memory} mcp`（清单 `commands.mcp`），由螺壳本体当子进程起，一个请求一个进程（§2a）。outbox `luoke://luoke-mem/outbox`：记忆想问的事和建议，卡片由记忆写，点按交回 `mem_reply`；`summary` 和六页（`overview`、`asks` 想问的（0.34）、`guesses`、`kept`、`people`、`sources`）；卡片上有「归档」；写入动作 `mem_reply`、`mem_note`、`mem_forget_tool`、`mem_forget_all`、`mem_person`、`mem_archive`（0.34）只认用户的点按，`mem_open` 打开记忆自己的页面。场景样例在 `luoke-mem/fixtures/agent/`（`scripts/record_agent_fixtures.py --check` 守着）。**`capabilities` 还没写进发出去的清单**（代码里 `agent.capabilities()`、样例的 `manifest.json` 里有）：螺壳本体能起记忆以后再写，见「对别的项目的需求」。
 - **多个进程同时读写**：WAL 模式加等待锁；忘掉的从文件里也抹掉（`secure_delete`，清空预写日志）。
 - **版本和兼容**：schema 只加不改，`user_version` 只升不降，旧的库容得下新的列、类别和状态（DESIGN「版本和兼容」）。
 
