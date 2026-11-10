@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.34.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.35.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -31,7 +31,7 @@
   - 空闲任务：`learn`（归纳、反刍：重新定档、以前的事、习惯、想问的、建议）。
   - 命令：`forget-tool <工具> [--dry-run]`。
 - **命令行**：`python3 -m luoke_mem [--path P] ui | sources | forget-tool <工具> [--dry-run] | learn [--force] [--again] [--hub S] | app [--note N] [--view recent] | record --tool <工具> | mcp [--clock T]`（`record` 给没有 Python 的工具写记录，标准输入一行一条 JSON；`mcp` 见下「工具协议」）。
-- **工具协议**（0.29，luoke-agent `docs/工具协议.md` 版本 1，`luoke_mem/agent.py`）：`python3 -m luoke_mem --path {memory} mcp`（清单 `commands.mcp`），由螺壳本体当子进程起，一个请求一个进程（§2a）。outbox `luoke://luoke-mem/outbox`：记忆想问的事和建议，卡片由记忆写，点按交回 `mem_reply`；`summary` 和六页（`overview`、`asks` 想问的（0.34）、`guesses`、`kept`、`people`、`sources`）；卡片上有「归档」；写入动作 `mem_reply`、`mem_note`、`mem_forget_tool`、`mem_forget_all`、`mem_person`、`mem_archive`（0.34）只认用户的点按，`mem_open` 打开记忆自己的页面。场景样例在 `luoke-mem/fixtures/agent/`（`scripts/record_agent_fixtures.py --check` 守着）。**`capabilities` 还没写进发出去的清单**（代码里 `agent.capabilities()`、样例的 `manifest.json` 里有）：螺壳本体能起记忆以后再写，见「对别的项目的需求」。
+- **工具协议**（0.29，luoke-agent `docs/工具协议.md` 版本 1，`luoke_mem/agent.py`）：`python3 -m luoke_mem --path {memory} mcp`（清单 `commands.mcp`），由螺壳本体当子进程起，一个请求一个进程（§2a）。outbox `luoke://luoke-mem/outbox`：记忆想问的事和建议，卡片由记忆写，点按交回 `mem_reply`；`summary` 和六页（`overview`、`asks` 想问的（0.34）、`guesses`、`kept`、`people`、`sources`）；卡片上有「归档」；写入动作 `mem_reply`、`mem_note`、`mem_forget_tool`、`mem_forget_all`、`mem_person`、`mem_archive`（0.34）只认用户的点按，`mem_open` 打开记忆自己的页面（只留给不认 `pageArgs` 的旧核心）。0.35 起记忆网页上的事大多搬进窗口：核心认 `pageArgs` 时页带参数（`page/<页>?<键>=<值>`）：`kept` 按类别、最近记下的、以前的事、说过不对的，能搜能翻页；新页 `item` 一条理解（`hidden`：全部依据、改写、拆出、这一类都不要、忘掉）；`people` 能改名、并成一个、拆开；`sources` 看每天记了什么；卡片上「在螺壳记忆里看」是 `agent.open_page` 到 `item`。新的写入：`mem_note` 的 `revise`、`split`、`reject_family`，`mem_person` 的 `rename`、`merge`、`split`。还只在记忆网页上的：忘掉某个应用写的之前的试跑、「可能和上下 N 条是同一件」、「大约 N 年」、口味（`taste`）。场景样例在 `luoke-mem/fixtures/agent/`（`scripts/record_agent_fixtures.py --check` 守着）。清单 `packaging/accessory.json` 0.35 起写上 `capabilities`（`transport: "stdio"`），螺壳本体照 `commands.mcp` 起记忆。
 - **多个进程同时读写**：WAL 模式加等待锁；忘掉的从文件里也抹掉（`secure_delete`，清空预写日志）。
 - **版本和兼容**：schema 只加不改，`user_version` 只升不降，旧的库容得下新的列、类别和状态（DESIGN「版本和兼容」）。
 
@@ -65,9 +65,7 @@
 
 ## 对别的项目的需求
 
-- **luoke-core**：螺壳本体照清单 `commands.mcp`（`-m luoke_mem --path {memory} mcp`，用主控自带的 Python）起记忆，作为本体起的工具（工具协议 §2a）；现在本体起的只有扫描和搜索。能起了告诉记忆，记忆再把 `capabilities`（`transport: "stdio"`）写进清单。
-- **luoke-agent**：记忆的清单里有 `capabilities.reports` 时改走记忆的 outbox，不再自己拼记忆的卡片；「设置 · 提醒」里记忆那一类换成清单的 `reports`；从 `luoke-mem/fixtures/agent/` 拷样例。
-- **luoke-mail**（给语音热词的人名，邮件助手已接，PR mail-private#78、0.19.41，记忆 0.31 起读）：记一条用户常写信给谁，比如话题 `mail-contact`（用户 / 活动），每个收件人每月一条，`data` 带显示名 `name`、`count`、`month`，`sender` 写收件地址；只记用户发出的信里的收件人和抄送，不记来信的人。字段由邮件助手定，定了告诉记忆。0.32 起记忆还读可选的 `data.subjects`（那个月写给这个人的信的标题，最多 5 个，过 mask），算「常谈的话题」，已向邮件助手提。
+- **luoke-mail**（给语音热词的人名，邮件助手已接，0.19.41 起，记忆 0.31 起读）：记一条用户常写信给谁，比如话题 `mail-contact`（用户 / 活动），每个收件人每月一条，`data` 带显示名 `name`、`count`、`month`，`sender` 写收件地址；只记用户发出的信里的收件人和抄送，不记来信的人。字段由邮件助手定，定了告诉记忆。0.32 起记忆还读可选的 `data.subjects`（那个月写给这个人的信的标题，最多 5 个，过 mask），算「常谈的话题」，已向邮件助手提。
 - **luoke-ime**（给语音热词的英文专名）：英文模式下上屏的词也写进 `ime-commit`（输入法提的，等它和主人商量），照中文模式一样不写密码框里的、带验证码和证件号码的；`data` 里标一下是英文模式，记忆只从里面取专名。
 - **luoke-search**（认人，负责人 2026-11-09 同意提，建议排在 ADR 0024 加密之后）：照片图库里用户起了名字的人脸组，每组每月一条记录（比如 `photo-person`，用户 / 活动，带名字、组编号、几张、最早和最近的日期；人脸特征只留在搜索自己的索引里，不写照片和地点）；以后再加用户文档里反复出现的人名、机构名（带出处，记忆当别人说的、只做猜测）。单独的开关，默认关；起了名字才算一个人，不判断亲疏。
 - **luoke-mail**：ADR 0015 说的"必要时向工具要更多原文"还没有通道；beta1 之后商定一个读取接口（比如按发件人取最近几封的正文）。
