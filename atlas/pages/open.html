@@ -9,7 +9,6 @@
 <li>agent 没有对话能力，不使用模型；不在 v1 首发中。</li>
 <li>配方不支持撤回已发布版本。</li>
 <li>螺壳扫描两轮之间不看新下载的文件：快速扫描（<code>luoke-scan scan --this-mac --quick</code>）的代码在，但扫描的配件清单里空闲任务只有 <code>update</code>、<code>scan</code>，螺壳本体的 <code>--run-tool</code> 也只放行这两条，没人起它。</li>
-<li>开启螺壳扫描后马上跑的第一轮（清单里 <code>scan</code> 标了 <code>first_use</code>）排在病毒库更新 <code>update</code> 前面，这一轮的病毒扫描记成"没扫描"（病毒库还没下载），要等之后的一轮。</li>
 <li>Gmail 转发过滤器的一键生成未完成；规则导出的过滤器未在真实 Gmail 上验证导入。</li>
 </ul>
 
