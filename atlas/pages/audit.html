@@ -287,7 +287,7 @@
 <li><b>清理规则</b>：<code>evals/cleanup/cases.json</code> 75 例（安装包 27、缓存 21、重复文件 17、临时文件夹 10），<code>luoke-scan eval-cleanup</code> 跑，挑错算硬门槛。</li>
 <li><b>skill 和说明文件的检查</b>：<code>evals/skills/cases.json</code> 66 个合成 skill（恶意、正常各 33），<code>evals/agentfiles/cases.json</code> 26 个说明文件（各 13）；<code>luoke-scan eval-skills</code>、<code>eval-agentfiles</code> 跑：恶意的全报且不低于写的轻重和类别，正常的一个都不报成高。</li>
 <li><b>性能</b>：<code>bench/perf.py</code> 在 12 万文件的假家目录上跑，CPU 时间或内存比基线差 25% 以上、且超过下限（CPU 1 秒、内存 20 MB）算不过；墙钟只报不比。基线 <code>bench/perf-baseline.json</code> 是 21 条规则时录的，现在 31 条，没有重录。</li>
-<li><b>测试</b>：<code>go test ./...</code>；规则清单另有 <code>go test ./internal/core -run Rules</code>；从外面测（<code>blackbox/</code>）三百来个场景，只经命令行在生成的假目录上跑 <code>luoke-scan</code>，和录好的结果逐字比；<code>fixtures/agent/</code> 的九个场景由 <code>scripts/record_agent_fixtures.py</code> 起真的 <code>luoke-scan mcp --fixture</code> 录下，<code>--check</code> 重录比对。PR 说明勾上「跑 CI」时，GitHub 上跑这些、三套规则评测和 <code>bench/test_checks.py</code>（在自托管的 runner 上）。</li>
+<li><b>测试</b>：<code>go test ./...</code>；规则清单另有 <code>go test ./internal/core -run Rules</code>；从外面测（<code>blackbox/</code>）324 个场景，只经命令行在生成的假目录上跑 <code>luoke-scan</code>，和录好的结果逐字比；<code>fixtures/agent/</code> 的九个场景由 <code>scripts/record_agent_fixtures.py</code> 起真的 <code>luoke-scan mcp --fixture</code> 录下，<code>--check</code> 重录比对。PR 说明勾上「跑 CI」时，GitHub 上跑这些、三套规则评测和 <code>bench/test_checks.py</code>（在自托管的 runner 上）。</li>
 </ul>
 
 <h2>已知限制</h2>
