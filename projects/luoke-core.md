@@ -48,7 +48,7 @@
 
 ## 使用方
 
-- luoke-mail：后台批量分拣和其他邮件任务、单次调用。
+- luoke-mail：后台批量分拣和其他邮件任务、单次调用。已接下它的需求「去掉邮件助手自己的网页」中对主控的那一条：没有主窗口时，`MailHelper.open()` 不再发 `{"op": "open"}` 让邮件助手开浏览器，改成打开主控自己的「应用」窗口。和邮件助手删网页同时合。
 - luoke-ime：重排打分、联想、续写；个人化组件借主控的 Python。
 - luoke-mem：归纳任务（typing、topics），空闲任务 learn。
 - luoke-agent：常驻配件，对话和简报任务，`GET /accessories`。
