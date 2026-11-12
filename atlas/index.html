@@ -66,7 +66,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 </style>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-11 17:04</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-12 11:53</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -547,7 +547,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.47，按代码 006ab0e 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.50，按代码 7cdb505 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -626,7 +626,7 @@ sequenceDiagram
 <tr><td>精选</td><td>最近 7 天约 20 条、更早每月约 10 条；收藏和"没兴趣"写入记忆</td></tr>
 <tr><td>订阅体检</td><td>按发件人统计（邮件助手分析后标的已读不算用户读过），建议退订、无法退订（没有退订方式）、可疑发件人（不退订）、常读或建议保留（模型看过最近的主题，判为账单交易、登录安全、个人往来或拿不准的）；只有广告、订阅、通知三类留退订建议，模型没答到的发件人照收信和阅读情况给建议，页面说明有几个；可退订、批量归档、清理历史、生成规则。网易只开放最近 30 天时，这里和清理页提示怎么改成收取全部邮件（每个邮箱在每个浏览器里说一次）</td></tr>
 <tr><td>规则</td><td>按发件人、域名、邮件列表的规则；导出 Gmail 过滤器前用过去一年邮件预演命中数和误伤；操作记录可撤销</td></tr>
-<tr><td>记忆</td><td>想问你的、全部类别的理解及依据、用户网站（每 30 天重读一次；feed 只读 http(s) 地址，不读本机和局域网地址，用户给的网址本身在那里的除外）、学习的暂停与继续、打开整份记忆</td></tr>
+<tr><td>记忆</td><td>想问你的、全部类别的理解及依据、用户网站（每 30 天重读一次；feed 只读 http(s) 地址，不读本机和局域网地址，用户给的网址本身在那里的除外）、学习的暂停与继续、打开整份记忆（由螺壳在窗口里打开记忆页 <code>luoke://memory</code>；只在邮件助手用的是用户自己的记忆文件时有这个入口，演示邮箱和用数据副本运行时没有；不再用记忆库自带的网页）</td></tr>
 <tr><td>设置</td><td>邮箱（含"螺壳自己的邮箱"；连接说明写明 QQ 要在收取选项里选全部并勾选「收取“我的文件夹”」，网易要选「收取全部邮件」）、本机模型（打包版显示"螺壳 · 模型名"和就绪标记，模型名取 <code>GET /tasks</code> 中分拣任务的 <code>model_name</code>，不解析 <code>combo</code>；换档在主控设置里）、处理模式、后台整理（含通知权限提示和"发送测试通知"）、自动标已读、往来邮件、功耗、分析范围</td></tr>
 </table></div>
 <p>浏览器页面在 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
@@ -635,12 +635,12 @@ sequenceDiagram
 <p>邮件助手把自己的页面画成 A2UI v0.9 的组件（目录 <code>ai.luoke/a2ui/agent/1</code>），由螺壳主窗口显示。每页是一个 MCP 资源 <code>luoke://luoke-mail/page/&lt;id&gt;</code>，共八页（清单 <code>service.pages</code>），代码在 <code>luoke_mail/window/</code>。</p>
 <div class="tbl"><table>
 <tr><th>id</th><th>页面</th><th>内容和动作</th></tr>
-<tr><td><code>today</code></td><td>今日处理</td><td>可看前 7 天；分「等你处理」「以前的未读」「已读，留在收件箱」「已自动处理」「你处理的」；每封可撤销、标为未读、改建议</td></tr>
+<tr><td><code>today</code></td><td>今日处理</td><td>可看前 7 天；分「等你处理」「以前的未读」「已读，留在收件箱」「已自动处理」「你处理的」；每封可撤销、标为未读、改建议；「等你处理」一节下有一行「收件箱里一共 N 封要你处理」和主按钮「到收件箱处理」（N 是这个邮箱里所有等着的，和螺壳首页那行、卡片上的数一致），这一节里的每封不再重复写「等你处理」</td></tr>
 <tr><td><code>inbox</code></td><td>收件箱</td><td>统计、同步新邮件、快到期（前 3 封）、「需要你处理」「可以直接处理」「判为可疑」「全部」四个列表；每封按建议给按钮（移到垃圾邮件、写草稿、加入日程（最多 3 个）、加星标、完成并归档、归档、删除）、查看原文、改建议（可同时记成发件人、域名、邮件列表的规则）、跳过、看草稿并存进草稿箱。带参数打开时（<code>page/inbox?id=…</code> 打开那一封；<code>?box=…&amp;list=needs|suspicious</code> 切到那个邮箱和列表）参数只用一次；那封已处理或不在收件箱时写「这封邮件已经处理过了，或者不在收件箱里。」并给「返回列表」</td></tr>
 <tr><td><code>clean</code></td><td>清理</td><td>收件箱中的旧邮件和已归档的邮件；分「建议删除」「待确认」「建议归档」「未分析」（已归档的是「建议删除」「建议保留」「未分析」）；读取邮件、继续分析或暂停、勾选和全选、处理、开启处理模式</td></tr>
 <tr><td><code>digest</code></td><td>精选</td><td>精选、收藏、已归档三栏和精选来源；打开、收藏、没兴趣、归档或移回、移出来源、暂停阅读</td></tr>
 <tr><td><code>subs</code></td><td>订阅体检</td><td>开始体检、退订等发件人操作、清理历史邮件；网页退订给 https 链接，要发信退订的写明寄到哪；可疑发件人不给退订</td></tr>
-<tr><td><code>rules</code></td><td>规则</td><td>添加、删除、预演 Gmail 过滤器，导出到 Gmail（过滤器文件交给螺壳窗口的保存对话框；本体不支持存文件时存进「下载」），打开 Gmail 过滤器设置；列出按习惯自动处理的那些习惯</td></tr>
+<tr><td><code>rules</code></td><td>规则</td><td>添加、删除、预演 Gmail 过滤器，导出到 Gmail（过滤器文件交给螺壳窗口的保存对话框；本体不支持存文件时存进「下载」），打开 Gmail 过滤器设置；列出按习惯自动处理的那些习惯；邮件列表的规则按发件人的名字显示（取这个列表最新一封的发件人名，没有名字用地址），不显示 List-Id</td></tr>
 <tr><td><code>activity</code></td><td>处理记录</td><td>操作记录逐条可撤销（退订除外）</td></tr>
 <tr><td><code>settings</code></td><td>设置</td><td>邮箱（设为螺壳自己的邮箱或改回、移除；添加邮箱、修改授权码在页里填，授权码用密码框，「保存并测试连接」；本体不支持密码框时要到浏览器页面填）、处理模式、后台自动整理、自动标已读、往来邮件、功耗、分析范围和署名、学习的开关、用户网站、全部清除</td></tr>
 </table></div>
@@ -1784,7 +1784,7 @@ sequenceDiagram
 <li><b>清理规则</b>：<code>evals/cleanup/cases.json</code> 75 例（安装包 27、缓存 21、重复文件 17、临时文件夹 10），<code>luoke-scan eval-cleanup</code> 跑，挑错算硬门槛。</li>
 <li><b>skill 和说明文件的检查</b>：<code>evals/skills/cases.json</code> 66 个合成 skill（恶意、正常各 33），<code>evals/agentfiles/cases.json</code> 26 个说明文件（各 13）；<code>luoke-scan eval-skills</code>、<code>eval-agentfiles</code> 跑：恶意的全报且不低于写的轻重和类别，正常的一个都不报成高。</li>
 <li><b>性能</b>：<code>bench/perf.py</code> 在 12 万文件的假家目录上跑，CPU 时间或内存比基线差 25% 以上、且超过下限（CPU 1 秒、内存 20 MB）算不过；墙钟只报不比。基线 <code>bench/perf-baseline.json</code> 是 21 条规则时录的，现在 31 条，没有重录。</li>
-<li><b>测试</b>：<code>go test ./...</code>；规则清单另有 <code>go test ./internal/core -run Rules</code>；从外面测（<code>blackbox/</code>）三百来个场景，只经命令行在生成的假目录上跑 <code>luoke-scan</code>，和录好的结果逐字比；<code>fixtures/agent/</code> 的九个场景由 <code>scripts/record_agent_fixtures.py</code> 起真的 <code>luoke-scan mcp --fixture</code> 录下，<code>--check</code> 重录比对。PR 说明勾上「跑 CI」时，GitHub 上跑这些、三套规则评测和 <code>bench/test_checks.py</code>（在自托管的 runner 上）。</li>
+<li><b>测试</b>：<code>go test ./...</code>；规则清单另有 <code>go test ./internal/core -run Rules</code>；从外面测（<code>blackbox/</code>）324 个场景，只经命令行在生成的假目录上跑 <code>luoke-scan</code>，和录好的结果逐字比；<code>fixtures/agent/</code> 的九个场景由 <code>scripts/record_agent_fixtures.py</code> 起真的 <code>luoke-scan mcp --fixture</code> 录下，<code>--check</code> 重录比对。PR 说明勾上「跑 CI」时，GitHub 上跑这些、三套规则评测和 <code>bench/test_checks.py</code>（在自托管的 runner 上）。</li>
 </ul>
 
 <h2>已知限制</h2>
@@ -2660,6 +2660,7 @@ sequenceDiagram
 <h2>2026-11-11</h2>
 <ul>
 <li>螺壳扫描页按代码 a983cdf（0.3.31）复核：规则从 26 条到 31 条（运行状况、应用的缓存和日志、本机模型的对话模板、安装脚本两条）；新增「规则清单」（五类清单成了 <code>rules/*.json</code>，怎么贡献、安全问题怎么报）和「螺壳窗口里的三页」（概览、状态、清理记录，几个数的口径）；装好的包只由螺壳起（退出码 77）；没有病毒库时一轮先下载；扫描调低优先级；方案多了「关闭自动运行」、「以后别提」能撤销；工具、outbox、数据表、评测的数字照现状更正。已知问题去掉「第一轮没有病毒库」。</li>
+<li>邮件页按代码 7cdb505（0.19.50）复核：今日处理的「等你处理」一节加到收件箱的主按钮和统一的封数；邮件列表的规则按发件人名字显示；「打开整份记忆」只走螺壳窗口的记忆页，不再用记忆库自带的网页；深色改成暖色（界面规范 v2）。</li>
 <li>邮件页按代码 006ab0e（0.19.47）复核：窗口页面用上本体后加的五样（400 个组件的大页、带参数打开、密码框、自动刷新、存文件），添加邮箱和导出 Gmail 过滤器可在窗口里做，收件箱加「判为可疑」列表；outbox 的 <code>tidy</code> 换成 <code>mailbox</code>（每个邮箱一张，分待处理、可以整理、判为可疑三块，<code>mail_apply_plan</code> 可带 <code>part</code>），<code>new-mail</code> 只放今天高优先级的；补卡片的新写法和打开窗口页面的按钮。</li>
 </ul>
 
