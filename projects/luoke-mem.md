@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.36.2（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支；beta 2 用 0.36.0，`release/beta2`）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.36.3（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支；beta 2 用 0.36.0，`release/beta2`）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -24,7 +24,7 @@
   - 给用户看的名字：`KIND_NAMES`、`TOOL_NAMES`、`CONFIDENCE_NAMES`、`CATEGORY_NAMES`、`action_name()`。
 - **理解的类别**：`fact` 关于你、`interest` 关注的话题、`dislike` 不感兴趣、`preference` 处理习惯、`term` 常用说法、`taste` 精选的口味（邮件助手挑精选用，不算关于你）。三档：猜测 / 比较确定 / 确定；会变的太久没有新依据是"以前的事"（`status='past'`）。
 - **处理习惯**：`data={account, sender, category, action, name}`（加标签带 `label`，filter 带 `filter`）；`auto` 只在"确定"、有类别、动作能撤回（`AUTO_ACTIONS`：archive、read、label、filter）时为真。删除、标垃圾、退订只做成建议（[ADR 0016](../docs/adr/0016-acting-for-the-user.md)）。
-- **整份记忆的界面**：本机网页，`luoke://memory`（`?note=N` 打开到一条，`?view=recent` 打开"最近记下的"，`?view=people` 打开"人"：入口 `app --view people` 0.36.1 起认，主控已接下，记忆 0.36.1 起才传）。概览、猜测、以前的事、各类理解、全部依据（含工具存的内容）、确认 / 不对 / 现在还是 / 修改 / 忘掉、按来源忘掉、清空。只监听 127.0.0.1，校验令牌、Host、Origin。`luoke_mem.ui.ensure(path) -> url` 给用数据副本开发时用。这个网页的深色 0.36.2 起照应用界面规范 v2 用暖色。
+- **整份记忆的界面**：本机网页，`luoke://memory`（`?note=N` 打开到一条，`?view=recent` 打开"最近记下的"，`?view=people` 打开"人"：入口 `app --view people` 0.36.1 起认，主控已接下，记忆 0.36.1 起才传）。概览、猜测、以前的事、各类理解、全部依据（含工具存的内容）、确认 / 不对 / 现在还是 / 修改 / 忘掉、按来源忘掉、清空。只监听 127.0.0.1，校验令牌、Host、Origin。`luoke_mem.ui.ensure(path) -> url` 给用数据副本开发时用。这个网页的颜色照应用界面规范 v2：深色 0.36.2 起用暖色，0.36.3 起状态色的字也照规范。
 - **配件清单**：`luoke-mem/packaging/accessory.json`，主控原样拷进自己的 .app，读 tasks、jobs、commands。
 - **提示词**（顶层 ADR 0019，0.28）：`luoke-mem/luoke_mem/prompts/`，放在包目录里，随包发出去：`typing.*`、`topics.*`（`.system.txt`、`.user.txt`、`.schema.json`）和记忆片段的标题 `labels.json`。评测结果带 `prompt_sha256`、`prompt_files`。
   - 任务：`luoke-mem.typing`（从打字归纳常用说法和话题）、`luoke-mem.topics`（从邮件助手的记录和原文归纳话题、口味、不感兴趣），都是后台生成任务；评测 `bench/run_typing.py`、`bench/run_topics.py`。
