@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-12 11:53</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-12 17:06</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -955,13 +955,13 @@ sequenceDiagram
 <section class="page" id="agent" data-title="agent luoke-agent">
 <h1>agent</h1>
 <p class="lede">螺壳的后台组件和主窗口，螺壳里唯一主动找用户的部分。核心和主窗口都打在螺壳.app 里，随螺壳装好、一起升级，不在「应用」列表里单独开关。它把记忆的提问和建议、各应用要报的事排进「今天」，挑时机发急事通知和简报；用户点按卡片时，代表用户调用应用声明的动作。当前版本不使用模型。</p>
-<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.15 · 兜底用的 <code>luoke_mem</code> 0.26.2 · 按代码 cf9b01e 核对（螺壳一侧按 luoke-core 64eb552） · 封闭测试，随螺壳 beta 2 第一次提供</p>
+<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.50 · 兜底用的 <code>luoke_mem</code> 0.26.2 · 按代码 4404be7 核对（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
 
 <h2>职责</h2>
 <ul>
 <li>从记忆读待问的问题和建议（<code>asks</code>），从各应用读待报事项（outbox），统一排序，放进主窗口的「今天」，按时机发急事通知和简报。</li>
 <li>把用户的回答交回来源：给记忆的经 <code>Memory.reply</code>，给应用的经工具协议调用对应的动作。</li>
-<li>主窗口里还有每个应用的基础页、权限页、设置和搜索框。</li>
+<li>主窗口里还有每个应用的页、权限页、设置和搜索框；螺壳本体的设置、添加应用、首次设置和升级也画在这个窗口里。</li>
 <li>只在用户点按时发出会改动东西的调用；不自己推断用户的信息，也不替应用执行动作。</li>
 </ul>
 
@@ -993,52 +993,81 @@ sequenceDiagram
   <li><code>LUOKE_AGENT_PYTHON</code> 指向的文件换了（设备号或 inode 变了），或不见了超过 30 秒，以 75 退出；</li>
   <li><code>run/lock</code> 上的文件锁保证一个数据目录只有一个核心，拿不到以 3 退出。</li>
   </ul></li>
-<li><b>轮询</b>：核心每 5 秒一个周期；应用的 outbox 每 60 秒读一次，记忆和主控各 300 秒；窗口报「开着」时马上把全部来源读一遍。一个来源出错不影响别的；暂时没在运行的来源，卡片先收起、状态不动，回来照旧。</li>
+<li><b>轮询</b>：核心每 5 秒一个周期；应用的 outbox 每 60 秒读一次，记忆 300 秒，主控的 <code>/accessories</code> 每 10 秒（问不到时从 2 秒起每次翻倍到 10 秒；主控给的 <code>retry_after</code> 最多信 300 秒；版本被拒时每 300 秒问一次）。窗口从关到开、或到了最前面时，马上把全部来源读一遍；只换页不读。一个来源出错不影响别的；暂时没在运行的来源，卡片先收起、状态不动，回来照旧。应用在运行、读它的 outbox 却出错时，卡片照旧留着，不算没在运行；连着 180 秒读不到，「今天」里写「X暂时读不到新的事，列着的可能不是最新的。」</li>
 <li><b>来源</b>：记忆的事由记忆自己的 outbox 报：螺壳本体起的记忆（<code>luoke-mem</code>）连着核心、清单里有 <code>reports</code> 时，按工具协议读，经库读的那一路交出去（还开着的事换成新编号、说过看过的不再说一遍，旧卡片撤下，用户给记忆那几类定过的提醒方式搬过去）；连不到这样的记忆时仍经 <code>luoke_mem</code> 库读。应用是主控 <code>GET /accessories</code> 列出的、<code>capabilities.protocol</code> 为 1 的。<code>luoke_mem</code> 用主控 <code>GET /tasks</code> 给的那份（螺壳.app 里的），每次启动取一次，取不到（最多试 3 次，每次隔 2 秒）用自带的兜底副本。</li>
 <li><b>主控接口</b>：请求头 <code>X-Luoke-Accessory: luoke-agent/&lt;版本&gt;</code>，超时 5 秒，答复最多 1 MB。
   <ul>
   <li>主控没答：保留现有应用，提示「螺壳没在运行，暂时找不到工具。」</li>
+  <li>答 503（主控还没准备好）：提示「螺壳还没准备好，工具过一会儿列出来。」</li>
   <li>答 403 <code>unknown_accessory</code>：提示这一版还没通过螺壳的验证。</li>
   <li>答了而清单里没有的应用算卸载，卡片撤下、事项记为撤回；在「应用」里关掉的应用主控不列，也算卸载。</li>
   <li>清单变了，<code>service</code>、<code>permissions</code>、<code>reports</code> 跟着换。</li>
   </ul></li>
 <li><b>怎么连应用</b>：
   <ul>
-  <li>用 socket 的：核心直接连清单里的 socket。</li>
+  <li>用 socket 的：核心直接连清单里的 socket。口令经本体通道要：核心写一行 <code>{id, token: "&lt;配件&gt;"}</code>，拿到后放在请求的 <code>ai.luoke/token</code> 里；应用答 -32001 时重要一次，再不行算没在运行。</li>
   <li>用标准输入输出的（<code>"transport": "stdio"</code>，现在只有螺壳扫描）：核心经本体通道要连接。本体通道是一对 socketpair，一端是核心的标准输入：核心写一行 <code>{id, open}</code>，本体回 <code>{id, ok: true}</code> 并用 SCM_RIGHTS 带上描述符，给不了回 <code>{id, error}</code>；核心等 10 秒，本体断了以后都算应用没在运行。</li>
   <li>本体只认写死的应用：螺壳扫描在「应用」里开着时，起 <code>Contents/Helpers/luoke-scan mcp --this-mac</code>，停着起、核过签名才放行，环境只有 <code>HOME</code>、<code>TMPDIR</code>、<code>PATH</code>、<code>LANG</code>、<code>LUOKE_HOST_FD=3</code> 和 <code>LUOKE_PERMISSIONS_OFF</code>；一个请求一个进程，同时最多 4 个，一个最长 300 秒。</li>
   </ul></li>
-<li><b>开发用</b>：独立的壳「螺壳 agent（开发）」（<code>ai.luoke.agent.dev</code>）只给开发，必须显式给位置；<code>serve --dev --tool 配件=socket</code> 或 <code>--tool 配件=exec:程序 参数…</code> 直接接应用（只在 <code>--dev</code> 时认）。另有窗口的演示、截图程序。以前的独立 <code>ai.luoke.agent</code> 没有发布过：螺壳看到它在跑就不起核心，在「今天」里请用户退出它，登录时也不再拉起它。</li>
+<li><b>开发用</b>：独立的壳「螺壳 agent（开发）」（<code>ai.luoke.agent.dev</code>）只给开发，必须显式给位置；<code>serve --dev --tool 配件=socket</code> 或 <code>--tool 配件=exec:程序 参数…</code> 直接接应用（只在 <code>--dev</code> 时认）。<code>serve</code> 另有开发用的 <code>--brief-minutes</code>。窗口的演示程序 <code>luoke-window-demo</code>（不带 <code>--agent</code> 全用示例数据，带了连那个核心；不发系统通知）和截图程序 <code>luoke-window-shots</code>（每个界面截浅色、深色两张）。示例数据不手写：<code>scripts/window_samples.py</code> 把各应用录的场景接上真核心，存成窗口资源里的 <code>samples/&lt;应用&gt;/&lt;场景&gt;.json</code>（邮件 5 个、记忆 5 个、扫描 9 个），<code>--check</code> 进测试；<code>scripts/window_this_mac.py</code> 只读地录本机一轮，输出不进仓库。以前的独立 <code>ai.luoke.agent</code> 没有发布过：螺壳看到它在跑就不起核心，在「今天」里请用户退出它，登录时也不再拉起它。</li>
 </ul>
 
 <h2>主窗口</h2>
 <ul>
-<li><b>外框</b>：默认 1004×760，最小 860×600；侧栏宽 220，收起后是 72 宽的一列图标；内容最宽 700。再次打开螺壳就是打开主窗口。这一版没有「活动」和问螺壳，底部只有搜索框。</li>
-<li><b>侧栏</b>：今天、应用、设置。「今天」旁的灰字是急事加要你决定的件数。「应用」下列出窗口认识的应用：邮件、扫描、记忆、搜索，别的应用没有页；版本和「升级」照螺壳报的。</li>
-<li><b>今天</b>，从上到下：
+<li><b>外框</b>：默认 1004×760，最小 860×600。再次打开螺壳就是打开主窗口。窗口里有哪些页由螺壳本体给的功能开关定：代码里有「活动」页、问螺壳和对话页，螺壳现在开的是精简的一组（只有底部的搜索框），所以用户看不到「活动」和问螺壳。</li>
+<li><b>侧栏</b>：宽 220，收起后是 72 宽的一列图标（⌃⌘S，或顶上的按钮）；收没收起、「应用」折没折记在 UserDefaults。
+  <ul>
+  <li>顶上一行高 52：展开时是带字的 logo（高 26），收起时是 32 的徽标。</li>
+  <li>各行：今天、（活动，开了才有）、可折叠的「应用」和它下面的应用列表、「添加应用」、设置。</li>
+  <li>「今天」旁：有急事画红点，否则写「要你决定」的件数。</li>
+  <li>「应用」下列出窗口认识的应用：邮件、扫描、记忆、搜索、输入法，别的应用没有页；没在运行的应用图标旁是空心灯。</li>
+  <li>左下角平时是空的，连不上螺壳或引擎没就绪时出一个按钮，点了去「设置 · 通用」。</li>
+  </ul></li>
+<li><b>宽窄</b>：窗口内容区不到 760 算窄，1200 以上算宽。主栏最宽 700；宽窗口多一栏（380，间隔 32）：「今天」的这一栏只放「已经替你做了」，应用页的这一栏放页上写了 <code>"placement": "aside"</code> 的段和「这个应用」。这一栏没有标签。</li>
+<li><b>配色</b>：两套。「今天」（没有本体的界面盖着时）用首页色，其余用工作台色。
+  <ul>
+  <li>工作台浅色：底 #FCFAF7、字 #2B1A12、卡片 #FFFFFF、侧栏 #F7F2EB、主色 #3A1F14、品牌色 #E8556B、成功 #2F7A4F、警告 #A86A12、危险 #B33A27；深色底 #1F1511。</li>
+  <li>首页浅色：底 #FFF8EE、侧栏 #FBEEDC、主色 #D23A52；深色底 #241713。</li>
+  <li>圆角：工作台卡片 12、控件 10，首页卡片 18、控件 12；小的 6，浮层 20，一件件处理 16。字号 26 / 15 / 14 / 13 / 12。</li>
+  </ul></li>
+<li><b>今天</b>：页头是「今天」、日期和「一件件处理 n」。从上到下：
   <ul>
   <li>核心和螺壳的提示；</li>
   <li>简报（点了简报通知才有）；</li>
-  <li>急事：横幅里画应用自己的卡片，最多先列 3 叠，多出来的是「还有 N 件急事」；</li>
-  <li>已经替你做了：每行是应用答的那句话和时间，点开是那张卡片，「撤销」「放回」直接画在行里。最多列 3 行，下面有「要你决定」时列 2 行，只多 1 行时全列；</li>
-  <li>要你决定：应用的卡片；</li>
+  <li>急事：和别的卡片一样白底，应用图标右下角一个红色角标；段标题「急事 N」，N 是件数；最多先列 3 叠，多出来的是「还有 N 件急事」；</li>
+  <li>已经替你做了：每行是应用答的那句话和时间，点开是那张卡片，「撤销」「放回」直接画在行里；应用标了同一组（<code>doneGroup</code>）的合成一行。最多列 3 行，下面有「要你决定」时列 2 行，只多 1 行时全列；</li>
+  <li>要你决定：应用的卡片；标题下有「按类处理」，不止一件的类各一块，点了只走这一类；</li>
   <li>顺便看看：不急的卡片。</li>
   </ul>
   同一个应用、同一类（没有类就看标题）满 3 张叠成一摞。连不上核心时顶上写「螺壳暂时没响应，下面是 HH:MM 的内容」。整页什么都没有时，第一份数据还没到写「正在准备…」，到了写「今天没什么要你操心的。」。通知授权还没问过时，写「通知还没打开，简报和急事到不了你。」并给「打开通知」按钮，由螺壳弹系统询问。</li>
 <li><b>顺序</b>：核心排好，窗口不改：先按急不急（urgent → normal → low），再按截止日（没有的在后），最后新的在上。时间用应用给的 <code>created</code>，没给就用第一次见到的时间；今天写 HH:mm，昨天写「昨天 HH:mm」，今年写「M月d日」，往年加年份。</li>
 <li><b>一件件处理</b>：只过「要你决定」的卡片。⏎ 答标了 primary 的按钮，↓ 跳过，Esc 回「今天」。进度最多 12 格，再多画成一条加「n / 总数」。应用换掉的卡片顶在原位，收走的从这一轮去掉，不算答了；卡片在处理时按钮灰掉、⏎ 不算。</li>
-<li><b>紧凑密度</b>：「设置 · 显示」里切换；每行最多两个小按钮，有输入项的卡片改成「展开」。</li>
+<li><b>紧凑密度</b>：「设置 · 显示」里切换；一张五列的表（图标、应用、事情、时间、操作），每行最多两个小按钮；有选项或输入项的卡片只给「选一下」，点了在这一行下面展开成标准卡片。</li>
 <li><b>简报</b>：点了简报通知，「今天」顶上出一段话，列出做了的、急事（红字）和要你决定的几件，能点，点了滚到那张卡片，答了的划掉。点别的通知只回「今天」，不定位到卡片。</li>
-<li><b>应用页</b>：顶上是在不在运行、概览一句话，应用有完整界面时有「打开完整界面」；需要用户允许时有一行「需要你允许：…」，点了进「设置 · 权限」。标签只用 <code>service.pages</code>，每页是应用的 A2UI，打开、换标签、应用有变化、页上点完按钮时重新取。第一页下面是「这个应用」：提醒、权限、版本和「升级」（升级交给螺壳）。</li>
+<li><b>应用页</b>：顶上是在不在运行、概览一句话；需要用户允许时有一行「需要你允许：…」，点了进「设置 · 权限」。没有「打开完整界面」：应用要用户做的事都在页里。
+  <ul>
+  <li>标签只用 <code>service.pages</code>；标了 <code>hidden</code> 的页不画标签（只能由按钮跳过去），只有一个标签时不画标签条。</li>
+  <li>每页是应用的 A2UI，打开、换标签、应用有变化、页上点完按钮时重新取；页写了 <code>refresh</code>（2–60 秒）的，这一页看得见时按这个间隔再读。</li>
+  <li>页可以带参数打开、分段画（一段一张卡片）、有密码框；按钮的答复可以让窗口跳到这个应用的另一页，或交回一个文件，由窗口弹存文件的框（见「卡片」）。</li>
+  <li>第一页下面是「这个应用」：提醒、权限、版本和「升级」（升级交给螺壳）。</li>
+  </ul></li>
 <li><b>设置</b>：
   <ul>
   <li>「提醒」：主动提醒开关；简报（每天早上 / 早晚各一次 / 只在我打开时）；免打扰（22:00–08:00 / 23:00–07:00 / 关）；每类事四档（当场说、放进简报、只放窗口、关）。</li>
   <li>「显示」：密度。</li>
   <li>「权限」：每行照能做的出按钮；螺壳名下的同一项合成一行，下面每个应用一个「允许」开关，要系统授权的交给螺壳去问。</li>
-  <li>「模型」「隐私」「添加应用」「升级」打开螺壳自己的窗口。</li>
+  <li>「通用」（模型等）、「隐私」的内容由螺壳本体给，画在这个窗口里；「添加应用」也是本体给的一页，「升级」先翻到「添加应用」。本体没给界面时才开它自己的窗口。</li>
   </ul></li>
-<li><b>搜索</b>：⌘K 叫出底部搜索框，回车才搜；结果是各应用给的卡片，浮在当前页上，Esc 收起；列出没答上来的应用，可以再试。</li>
-<li><b>菜单栏</b>：螺壳的菜单里有急事（同一应用同一类合成一行，最多 5 行，多的写「还有 N 件急事…」）、打开螺壳、「暂停提醒一小时」/「恢复提醒」；有急事时菜单栏图标带小点。顶部「前往」菜单：今天 ⌘1、搜索 ⌘K、各应用、添加应用…、权限、模型。</li>
+<li><b>搜索</b>：⌘K 叫出底部搜索框，回车才搜；结果浮在搜索框上方，Esc 收起；列出没答上来的应用，可以再试。
+  <ul>
+  <li>给了 <code>hits</code> 的应用：核心核过形状交给窗口，窗口按类型分组（不按应用）：PDF、表格、图片、视频画缩略图格子，文档、录音、邮件、记忆一行一条，邮件按收件邮箱分块；顶上一行类型筛选。</li>
+  <li>↑↓ 选一条，右边出预览和按钮；↩ 打开，⌘↩ 在访达中显示。按钮走 <code>POST /hit</code>，参数留在核心，不从窗口来。一条最多 4 个动作，一个应用最多 50 条。</li>
+  <li>缩略图走 <code>GET /thumb</code>：只认 JPEG、PNG，不超过 256 KB，长边不超过 2048，每个应用同时读 2 张，不落盘。</li>
+  <li>不给 <code>hits</code> 的应用照旧画它给的卡片。</li>
+  </ul></li>
+<li><b>本体的界面</b>：螺壳本体把自己的界面交给窗口画，三种放法：占内容区的一页、浮在整个窗口上的卡片（× 和 Esc 关）、占整个窗口（首次设置、升级）。用户要离开时窗口先问本体能不能走，走了告诉本体。这时窗口向核心报的页名是 <code>host</code>。</li>
+<li><b>螺壳名下权限的询问</b>：卡片或页的答复带 <code>host_ask</code> 时，窗口先出一张确认（「先不用」「继续」），再由本体去问系统，给了才把这件事转给应用。</li>
+<li><b>菜单栏</b>：螺壳的菜单里有急事（同一应用同一类合成一行，最多 5 行，多的写「还有 N 件急事…」）、打开螺壳、「暂停提醒一小时」/「恢复提醒」；有急事时菜单栏图标带小点。在菜单里点一行急事，窗口回「今天」，展开并滚到那一叠。顶部「前往」菜单：今天 ⌘1、（活动 ⌘2，开了才有）、搜索 ⌘K、各应用、添加应用…、权限、通用；「螺壳」菜单有「设置… ⌘,」，「显示」菜单有收起 / 展开侧栏 ⌃⌘S。</li>
 </ul>
 
 <h2>界面接口（核心 ↔ 螺壳.app）</h2>
@@ -1046,25 +1075,27 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>方法</th><th>请求</th><th>答复</th></tr>
 <tr><td><code>GET /feed</code></td><td>Server-Sent Events：先推全部卡片，再推一个 <code>feed</code>，之后推变化；每 15 秒一行心跳</td><td>事件见下</td></tr>
-<tr><td><code>POST /action</code></td><td><code>{surfaceId, sourceComponentId, context}</code>，卡片、应用页、搜索结果的按钮都走这里</td><td><code>{text, error}</code>；缺字段 400</td></tr>
+<tr><td><code>POST /action</code></td><td><code>{surfaceId, sourceComponentId, context}</code>，卡片、应用页、搜索结果的按钮都走这里</td><td><code>{text, error}</code>，可带 <code>page {app, page, args?}</code>（让窗口跳到这一页）和 <code>file</code>（让窗口存成文件）；缺字段 400</td></tr>
 <tr><td><code>GET</code> / <code>POST /settings</code></td><td>POST 只带要改的几项</td><td>改完的全部设置，并推 <code>settings</code> 事件；认不得或值不对答 400，什么都不改</td></tr>
-<tr><td><code>GET /apps</code></td><td>—</td><td><code>{apps:[{id, running, summary, pages, ui, needs}]}</code></td></tr>
-<tr><td><code>GET /apps/&lt;id&gt;/pages/&lt;页&gt;</code></td><td>—</td><td>这一页的 A2UI 消息；没有这个应用或这一页 404，应用没在运行 503，画不了答一页纯文本</td></tr>
-<tr><td><code>POST /open</code></td><td><code>{app, page?}</code></td><td><code>{text, error}</code>：打开应用的完整界面</td></tr>
+<tr><td><code>GET /apps</code></td><td>—</td><td><code>{apps:[{id, running, summary, pages, ui, needs}]}</code>，页带 <code>hidden</code></td></tr>
+<tr><td><code>GET /apps/&lt;id&gt;/pages/&lt;页&gt;</code></td><td>可带 <code>?键=值</code>：最多 4 个键，键名 <code>^[a-z][a-z0-9_]{0,15}$</code>，值不超过 200 字，不对答 400</td><td>这一页的 A2UI 消息；没有这个应用或这一页 404，应用没在运行 503，画不了答一页纯文本</td></tr>
+<tr><td><code>POST /open</code></td><td><code>{app, page?}</code></td><td><code>{text, error}</code>：打开应用的完整界面；接口留着，窗口不再调</td></tr>
 <tr><td><code>GET</code> / <code>POST /permissions</code></td><td>POST 是 <code>{app, id, op}</code></td><td><code>{rows}</code>；POST 答 <code>{text, error}</code>，<code>op</code> 为 <code>settings</code> 时另带系统设置的地址</td></tr>
 <tr><td><code>POST /host</code></td><td><code>{permissions:{id: granted|denied|ask|null}, confirmed?:{应用:{id: 时间}}}</code>：螺壳报自己名下的权限和用户确认过哪些</td><td><code>{}</code>；格式不对 400</td></tr>
-<tr><td><code>POST /search</code></td><td><code>{query}</code>（≤ 200 字），<code>limit</code> 1–50，默认 10</td><td><code>{results:[{app, name, messages}], failed, asked}</code>；没有能搜的应用时 <code>results</code> 为空并带一句说明</td></tr>
+<tr><td><code>POST /search</code></td><td><code>{query}</code>（≤ 200 字），<code>limit</code> 1–50，默认 10</td><td><code>{search: 序号, results:[{app, name, messages, hits?}], failed, asked}</code>；没有能搜的应用时 <code>results</code> 为空并带一句说明</td></tr>
+<tr><td><code>POST /hit</code></td><td>搜索结果里某一条的某个动作（哪次搜索、哪一条、哪个动作）</td><td><code>{text, error}</code>；参数用核心存着的，不用窗口送来的</td></tr>
+<tr><td><code>GET /thumb</code></td><td>搜索结果里某一条的缩略图</td><td>JPEG 或 PNG，限制见「主窗口 · 搜索」</td></tr>
 <tr><td><code>POST /presence</code></td><td><code>{idle, locked, asleep}</code></td><td><code>{}</code></td></tr>
-<tr><td><code>POST /window</code></td><td><code>{open, front}</code>；<code>front</code> 没报就按 <code>open</code></td><td><code>{}</code>；开着时触发一次全量读取</td></tr>
+<tr><td><code>POST /window</code></td><td><code>{open, front, page?}</code>；<code>front</code> 没报就按 <code>open</code>；<code>page</code> 是窗口停在哪一页（不超过 100 字，否则 400），没报当「今天」</td><td><code>{}</code>；<code>open</code> 或 <code>front</code> 变了时触发一次全量读取</td></tr>
 <tr><td><code>POST /notifications</code></td><td><code>{status, alerts}</code></td><td><code>{}</code>；<code>status</code> 缺失或超过 40 字符答 400</td></tr>
-<tr><td><code>GET /status</code></td><td>—</td><td>只有元数据：<code>api</code>（2）、<code>items</code>、<code>surfaces</code>、<code>notices</code>、<code>sources</code>（记忆为 missing / ok / too_new，应用为 running / down）、<code>brief_due</code>、<code>window_open</code>、<code>window_front</code>、<code>notifications</code>、<code>present</code></td></tr>
+<tr><td><code>GET /status</code></td><td>—</td><td>只有元数据：<code>api</code>（2）、<code>items</code>、<code>surfaces</code>、<code>notices</code>、<code>sources</code>（记忆为 missing / ok / too_new，应用为 running / down）、<code>brief_due</code>、<code>window_open</code>、<code>window_front</code>、<code>window_page</code>、<code>notifications</code>、<code>present</code></td></tr>
 <tr><td><code>POST /say</code></td><td>—</td><td>501，「还不能打字问螺壳。」</td></tr>
 </table></div>
 <ul>
 <li><b>事件</b>：
   <ul>
   <li><code>a2ui</code>：卡片；surfaceId 带来源前缀。</li>
-  <li><code>feed</code>：<code>{order, open, notices, cards, brief:{next}, paused_until}</code>。<code>cards</code> 每张有 <code>id</code>、<code>app</code>、<code>kind</code>、<code>section</code>（urgent / decide / done / later）、<code>title</code>（答完的卡片是应用答的那句话，最多 200 字）、<code>time</code>。</li>
+  <li><code>feed</code>：<code>{order, open, notices, cards, brief:{next}, paused_until, dot}</code>；<code>dot</code> 是菜单栏图标要不要带小点。卡片可带 <code>host_ask {permission, button}</code>。<code>cards</code> 每张有 <code>id</code>、<code>app</code>、<code>kind</code>、<code>section</code>（urgent / decide / done / later）、<code>title</code>（答完的卡片是应用答的那句话，最多 200 字）、<code>time</code>。</li>
   <li><code>notify</code>：<code>{id, title, body, urgent, silent, surfaceId}</code>，同一 <code>id</code> 的通知换掉上一条。</li>
   <li><code>busy</code>：<code>{surfaceId}</code>。</li>
   <li><code>result</code>：<code>{surfaceId, text, error, replaced}</code>。</li>
@@ -1094,14 +1125,14 @@ sequenceDiagram
 <p>应用在配件清单的 <code>capabilities</code> 中声明协议版本（1）、传输（socket 路径，或 <code>"transport": "stdio"</code>）、可报的事（<code>reports[]</code>：kind、title、默认 urgency）、动作（<code>actions[]</code>），以及基础页、权限、搜索（<code>service</code>、<code>permissions</code>）。完整规格见 <code>luoke-agent/docs/工具协议.md</code>。现在声明了协议的：</p>
 <ul>
 <li>螺壳扫描：stdio；基础页概览、清理记录，有概览一句话；权限有完全磁盘访问（螺壳名下）、自动清理（委托）、要管理员密码的一步（每次问）。</li>
-<li>邮件助手：socket <code>~/.luoke-mail/run/agent.sock</code>；能搜；三页，有完整界面；邮箱授权（账户）。</li>
+<li>邮件助手：socket <code>~/.luoke-mail/run/agent.sock</code>；能搜；页见「邮件」页；邮箱授权（账户）。</li>
 <li>螺壳搜索：socket <code>~/.luoke-search/run/agent.sock</code>；能搜；有概览页。</li>
 <li>记忆：清单带 <code>capabilities</code>（stdio），由螺壳本体起；agent 把它当应用连，它的事、概览和各页都按工具协议读（见「记忆」页的「工具协议」）。</li>
 </ul>
 <h3>传输和超时</h3>
 <ul>
 <li>socket：每个请求一条连接，<code>POST /mcp</code>，一条 JSON-RPC 2.0，最多 1 MB。stdio：在本体给的连接上写一行请求，读回一行，中途的通知跳过。</li>
-<li>MCP 协议版本 <code>2026-07-28</code>，在 <code>params._meta</code> 里，另带 <code>clientInfo</code>（<code>luoke-agent</code> 和版本）。</li>
+<li>MCP 协议版本 <code>2026-07-28</code>，在 <code>params._meta</code> 里，另带 <code>clientInfo</code>（<code>luoke-agent</code> 和版本）和 <code>clientCapabilities.experimental["ai.luoke/a2ui"].features</code>：这个核心认的后加写法（23 项，如 <code>pageArgs</code>、<code>bigPages</code>、<code>secureField</code>、<code>pageRefresh</code>、<code>saveFile</code>、<code>pageSections</code>、<code>lucide</code>、<code>badge</code>），应用据此决定用不用。</li>
 <li>超时：连接 10 秒；读资源、列工具 10 秒；只读调用 30 秒；写调用 300 秒；搜索每个应用 10 秒；向本体要连接 10 秒。</li>
 <li>socket 不在、连不上、读的时候超时都算「没在运行」，不算错误。写调用超时算「结果不明」，提示「还没答复，结果不明；稍后在 X 里看看。」</li>
 </ul>
@@ -1141,12 +1172,14 @@ sequenceDiagram
   <ul>
   <li>ProgressBar 的值在 0 到 1 之间。</li>
   <li>Button 写 <code>"variant": "switch"</code> 加布尔的 <code>on</code> 时画成开关。</li>
-  <li>Icon 只能用 19 个名字之一；Text 的 variant 只能是 h1–h5、body、caption。</li>
+  <li>Icon 只能用 51 个名字之一：44 个 Lucide 图标名，加 7 个以前的名字（照旧认，画成对应的 Lucide 图标）。</li>
+  <li>Text 的 variant 只能是 h1–h5、body、caption、strong、badge；badge 不写色调是浅蓝，另有 danger、warning、neutral。Text 可写 <code>maxLines</code>（1–20）。</li>
+  <li>Column 可写 <code>collapsed</code>；Button 可写 <code>tooltip</code>、<code>count</code>；TextField 的 <code>variant: obscured</code> 是密码框，只能用在应用页上。</li>
   <li>目录里没有 Image。</li>
   </ul></li>
 <li><b>校验</b>：
   <ul>
-  <li>要有根组件；从根走得到的组件 ≤ 200，累计 ≤ 1000；</li>
+  <li>要有根组件；卡片从根走得到的组件 ≤ 200，累计 ≤ 1000；应用页是 400 和 2000；</li>
   <li>没有环，每个组件只有一个父组件，根不能当子组件；</li>
   <li>引用的组件和绑定的路径要存在；</li>
   <li>文字 ≤ 2000 字；</li>
@@ -1162,10 +1195,12 @@ sequenceDiagram
 <li><b>agent 自己处理的动作</b>：
   <ul>
   <li><code>agent.open_url</code>；</li>
+  <li><code>agent.open_page</code>：跳到出这张卡片的应用自己的另一页，可带参数；</li>
   <li><code>agent.dismiss</code>：放下，卡片马上撤下，给应用回 <code>dismissed</code>；</li>
   <li><code>agent.remind</code>：只用于 agent 自己的「少说」卡片，应用的卡片用了答「不认识这个按钮」。</li>
   </ul>
-  应用页和搜索结果上只认 <code>agent.open_url</code>。</li>
+  应用页和搜索结果上只认 <code>agent.open_url</code> 和 <code>agent.open_page</code>。</li>
+<li><b>应用页另有的写法</b>：根 Column 写 <code>"layout": "sections"</code> 时下面一层一段一张卡片；一段写 <code>"placement": "aside"</code> 时宽窗口里放到第二栏；页可写 <code>refresh</code>（2–60 秒）；动作的结果可带一个文件交给用户存：不超过 512 KB，只认 .txt、.csv、.json、.md、.xml。</li>
 <li><b>搜索结果</b>：应用只给命中（<code>hits</code>）不给卡片时，核心画一张纯文本卡，最多 15 条，每条有标题、位置和日期、摘要，最多 2 个按钮。</li>
 <li><b>渲染器</b>：Swift 包 <code>LuokeA2UI</code>（macOS 14、iOS 17）。<code>LuokeA2UICore</code> 只依赖 Foundation，校验规则和核心的 <code>a2ui.py</code> 用同一批例子核对；<code>LuokeA2UI</code> 是 SwiftUI 画法，另给宿主改样式的接口。另有输入法用的目录 <code>ai.luoke/a2ui/ime/1</code>。<code>DateTimeInput</code> 目前画成文本框。</li>
 </ul>
@@ -1189,7 +1224,7 @@ sequenceDiagram
 <tr><td>关于某条理解的问题（带「不太对的话，改成」输入框）</td><td>对（主）→ <code>yes</code> · 不对 → <code>no</code> · 以前是，现在不是 → <code>past</code> · 按我改的 → <code>revise</code> · 以后再说 → <code>later</code></td></tr>
 <tr><td>单选、是非、文字问题</td><td>交回或 是 / 不是（主）→ <code>answer</code> · 以后再说 → <code>later</code></td></tr>
 </table></div>
-<p>带 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」：正式版打开 <code>luoke://memory?note=N</code>，打不开时按 bundle id 打开记忆；开发版不打开。</p>
+<p>带 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」：本体起的记忆连着、有这一条的页时，在窗口里翻到记忆的那一页；否则正式版打开 <code>luoke://memory?note=N</code>，打不开时按 bundle id 打开记忆，开发版不打开。<code>luoke_mem</code> 有归档时，记忆的卡片多一个「归档」按钮。</p>
 
 <h2>何时说</h2>
 <ul>
@@ -1197,6 +1232,7 @@ sequenceDiagram
 <li><b>每类的方式</b>（<code>modes</code>）：<code>now</code>、<code>brief</code>、<code>window</code>、<code>off</code>；没设时 urgent 为 <code>now</code>，其余为 <code>brief</code>。<code>window</code> 和 <code>off</code> 一样：只在窗口里，不通知、不进简报。</li>
 <li><b>能不能说</b>：主动提醒开着、没在暂停（暂停最长 7 天，菜单栏一次暂停一小时），而且系统通知到得了，才发急事通知和简报。</li>
 <li><b>在 Mac 前</b>：120 秒内有上报、没锁屏、屏幕没睡、空闲少于 180 秒。</li>
+<li><b>菜单栏的小点</b>：主动提醒开着、有急事、而且这件急事的类是「当场说」时才有；暂停提醒时照旧有。</li>
 <li><b>急事</b>：用户在 Mac 前就当场发，不看免打扰。一轮只有一件时，标题是事项标题，正文是 <code>why_now</code>（没有用 <code>summary</code>）；有几件时合成一条，标题「N 件急事」，正文是前 3 个标题，多的加「还有 N 件」。通知以「螺壳」的名义由螺壳发，是普通通知。</li>
 <li><b>简报</b>：
   <ul>
@@ -1206,11 +1242,11 @@ sequenceDiagram
   <li>标题「N 件事」，正文照模板拼一句：还有几件等你（列前三个）、急事、替你做了几件。</li>
   <li>上一份还没打开，新的一份静音。</li>
   </ul></li>
-<li><b>正看着窗口</b>：窗口在最前面而且用户在，现有和新来的事项都算看过，不再通知，也清掉「简报还没打开」。窗口开着但最小化、在别的应用后面、人走开了，都不算。</li>
+<li><b>正看着窗口</b>：窗口在最前面、停在「今天」而且用户在，现有和新来的事项都算看过，不再通知，也清掉「简报还没打开」。窗口开着但最小化、在别的应用后面、停在别的页上、人走开了，都不算。</li>
 <li><b>通知到不了</b>：系统授权被拒或还没答、横幅关着时，不发、也不算说过，事项排着等，打开后补发；螺壳还没报过授权时照常发。被拒或横幅关着时「今天」里有一句提示。</li>
 <li><b>少说</b>：同一类连着 3 次没理，而且这一类现在是 <code>brief</code>，改成 <code>window</code>，并给一张卡片「「X」你最近都没看，以后只放在这里，不再提醒。」，按钮「还是提醒我」「好」，核心重启后画回来。
   <ul>
-  <li>算一次没理：通知过、到下一份简报时还没看过的（同一次通知的同类只算一次）；通知过以后过期的；用户点「放下」也加一次。</li>
+  <li>算一次没理：通知过、到下一份简报时还没看过的（同一次通知的同类只算一次）；通知过以后过期的；用户点「放下」也加一次，凑满时当场判。</li>
   <li>计数清零：用户答复、点「还是提醒我」、在设置里自己改了这一类。</li>
   </ul></li>
 <li><b>清理</b>：过期的事项撤下；窗口关着时，完成的卡片 30 分钟后撤下，完成或撤回超过 30 天的记录连同 <code>contents</code> 一起删除。</li>
@@ -1220,7 +1256,7 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>位置</th><th>内容</th></tr>
 <tr><td><code>~/.luoke/agent/</code>（700）</td><td>数据目录（设了 <code>LUOKE_HOME</code> 时在它下面；开发版、实验室构建用自己环境目录下的 <code>agent</code>）</td></tr>
-<tr><td><code>state.db</code>（600）</td><td>表 <code>items</code>（状态 queued / notified / seen / done / gone，结果 answered / dismissed / withdrawn / expired）、<code>contents</code>（事项和卡片现在的样子，重启后恢复、撤销用）、<code>settings</code>、<code>meta</code>（简报时刻、上一份简报、少说的提示等）、<code>reactions</code>（每类展示、回应、没理的次数和连着没理的计数）</td></tr>
+<tr><td><code>state.db</code>（600）</td><td>表 <code>items</code>（状态 queued / notified / seen / done / gone，结果 answered / dismissed / withdrawn / expired）、<code>contents</code>（事项和卡片现在的样子，重启后恢复、撤销用）、<code>settings</code>、<code>meta</code>（简报时刻、上一份简报、少说的提示等）、<code>reactions</code>（每类展示、回应、没理的次数和连着没理的计数）；另有一张不再用的 <code>put_off</code></td></tr>
 <tr><td><code>run/agent.sock</code>、<code>run/lock</code>（600，目录 700）</td><td>界面 socket；单实例锁</td></tr>
 <tr><td>主控目录的 <code>logs/agent.log</code>（600）</td><td>核心的标准错误，只记元数据（版本、socket、不认的进程号、类别、错误类型、通知授权的变化），不轮转</td></tr>
 </table></div>
@@ -1232,7 +1268,7 @@ sequenceDiagram
 <li><b>写调用</b>：只在 <code>POST /action</code>（用户点按）时发，带 user-action。方案编号、网址这类写死的值只认核心存着的卡片声明，绑定的值才用界面送来的。同一张卡片在处理时，窗口不再发第二次。</li>
 <li><b>认应用</b>：
   <ul>
-  <li>编号要合法，保留编号（<code>memory</code>、<code>agent</code>、<code>luoke</code>、<code>hub</code> 等）不接，主控列出两个同样编号的都不接。</li>
+  <li>编号要合法，保留编号（<code>memory</code>、<code>agent</code>、<code>luoke-agent</code>、<code>luoke</code>、<code>hub</code>、<code>notifications</code>，和 <code>luoke-core</code> 开头的）不接，主控列出两个同样编号的都不接。</li>
   <li>socket 必须在清单的 <code>data</code> 里声明，而且在和编号绑定的目录下（<code>~/.&lt;id&gt;</code>、<code>~/.luoke/&lt;名&gt;</code>、<code>~/Library/Application Support/&lt;id&gt;</code>）。</li>
   <li>每次连之前再查一次：是 socket、只有一个硬链接、真实路径还在那个目录里。</li>
   <li>每件事的急不急以清单为上限。用标准输入输出的应用只走本体通道，本体核过签名才起。</li>
@@ -1243,19 +1279,15 @@ sequenceDiagram
 
 <h2>已知限制</h2>
 <ul>
-<li>没有对话（<code>/say</code> 答 501），不使用模型；outbox 靠轮询，没做订阅。没有「活动」页和问螺壳；搜索一次答完，不边搜边画。</li>
+<li>没有对话（<code>/say</code> 答 501），不使用模型；outbox 靠轮询，没做订阅。「活动」页和问螺壳在代码里有，螺壳没开；搜索一次答完，不边搜边画。</li>
 <li>应用不核对调用方是谁：同一账户里别的程序能连应用的 socket；user-action 不是签名的凭据；agent.sock 按进程号认人，不核代码签名。</li>
 <li>写不写只看 <code>readOnlyHint</code>，不对照清单的 <code>actions</code>；<code>readOnlyHint</code> 缓存到名字找不到才刷新。</li>
 <li><code>deadline</code> 只影响排序，过期不会标记。</li>
 <li>连不到本体起的记忆时退回经库读；<code>luoke_mem</code> 的路径只在核心启动时取一次。</li>
-<li>窗口只认识邮件、扫描、记忆、搜索四个应用的页；本体通道只起螺壳扫描。</li>
+<li>窗口只认识邮件、扫描、记忆、搜索、输入法五个应用的页。</li>
 <li>点急事通知只回「今天」，不定位到那张卡片；没用时效性通知。</li>
 <li>免打扰在窗口里只能选两档或关；「每类事」只列出现过的和清单里写了的类别。</li>
 <li>卡片上用户改过的选项只存在窗口里，重连或核心重启后丢失；核心日志不轮转；简报和急事通知的正文里有事项标题。</li>
-<li>通知被关时「今天」里的提示还写「找到『螺壳 agent』」，通知其实以「螺壳」的名义发。</li>
-<li>菜单栏的小点只看有没有急事，不看主动提醒开没开、这一类是不是「当场说」。</li>
-<li>只要窗口在最前面，不管停在哪一页，事项都算看过。</li>
-<li>只靠「放下」凑满 3 次不会马上少说，要等下一次没理或过期才判。</li>
 <li><code>DateTimeInput</code> 画成文本框。</li>
 </ul>
 </section>
@@ -2663,6 +2695,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-12</h2>
+<ul>
+<li>agent 页按代码 4404be7（核心 0.0.50）复核：主控的应用清单改成每 10 秒问一次，加 503 的提示、读不到新事的提醒、socket 应用的口令；「主窗口」重写侧栏（logo、红点、五个应用、左下角的按钮）、宽窗口两栏、两套配色、急事的画法、按类处理、紧凑表格、应用页（去掉「打开完整界面」，隐藏页、定时再读、带参数、分段、存文件）、搜索结果按类型分组和缩略图、本体的界面画进主窗口、螺壳名下权限的询问、菜单；界面接口加 <code>/hit</code>、<code>/thumb</code> 和几处新字段；卡片的图标到 51 个，加 <code>strong</code>、<code>badge</code>、<code>agent.open_page</code> 和应用页 400 个组件的上限；「看过」要窗口停在「今天」；已知限制去掉修好的四条。</li>
+</ul>
 
 <h2>2026-11-11</h2>
 <ul>
