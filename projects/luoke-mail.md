@@ -126,6 +126,16 @@
 3. 打开类工具带 `ai.luoke/where: mac`：等 luoke-agent 的帮手支持 `_meta`。
 4. ~~随 agent 上线的版本把接口改成默认开、清单声明能力~~：0.19.26 已进 main（11-05），连同 agent.sock 的调用方核对（安全审查 S2 邮件这一半）。
 
+### 需求：去掉邮件助手自己的网页（主人 11-12 定，ops `docs/owner-decisions.md`「2026-11-12」）
+
+邮件助手的八个页 0.19.45 起都在螺壳窗口里，网页只剩开发调试和几处退路。主人定删，等下面两件有了再删；在那之前网页的界面不再改。
+
+- **对 luoke-agent**：
+  1. 一个能在假数据上看窗口页的办法，给开发和 PR 截图用：接上邮件助手 `tests/ui_harness.py` 的 `agent.sock`，画出 `page/<id>`，能点按钮，能截浅色、深色。
+  2. 搜索结果（§1b hits）的 `actions` 能不能放 `agent.open_page`。现在非 Gmail 的信点「打开」会开邮件助手的网页。
+  3. 核心那边还会不会直接调 `mail_open_page`、`mail_open_settings`、`mail_disconnect`、`mail_open`。这几个都开网页；我们自己卡片上的按钮，核心有 openPage 时已经不调它们。
+- **对 luoke-core**：没有主窗口时，`MailHelper.open()` 不再叫邮件助手开浏览器（`{"op": "open"}`），改成打开主窗口或「应用」窗口。删掉网页以后，邮件助手不再答这一条。
+
 ### 对齐「先宽后紧」（ARCHITECTURE §4，2026-11-01 核对）
 
 要改的：
