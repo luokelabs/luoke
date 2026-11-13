@@ -121,7 +121,8 @@
 
 还没做：
 
-1. ~~`service.summary`、`service.pages`~~：已做。0.19.45 起邮件助手整体在螺壳窗口里（ops#123，主人 11-09 定一次搬完）：`service.pages` 是今日处理 `today`、收件箱 `inbox`、清理 `clean`、精选 `digest`、订阅体检 `subs`、规则 `rules`、处理记录 `activity`、设置 `settings`，数据和动作跟网页同一套。页上的按钮走两个工具：`mail_view`（只读，换显示的内容）和 `mail_do`（写入，要用户点按）；按钮只带页 id 和按钮 id，邮件助手按自己画过的按钮查出做什么。0.19.46 起用上工具协议 §4 在 11-10 补的五样（看核心报的 `features`，旧的核心照旧开浏览器、放「刷新」）：一页 400 个组件、卡片上的「在邮件助手里看」跳到收件箱的那一封（`page/inbox?id=…`）、设置里用密码框添加邮箱、有任务在跑时页自己重读、导出 Gmail 过滤器弹存文件的框。`service.ask.suggest` 还没做。
+1. ~~`service.summary`、`service.pages`~~：已做。0.19.45 起邮件助手整体在螺壳窗口里（ops#123，主人 11-09 定一次搬完）：`service.pages` 是今日处理 `today`、收件箱 `inbox`、清理 `clean`、精选 `digest`、订阅体检 `subs`、规则 `rules`、处理记录 `activity`、设置 `settings`，数据和动作跟网页同一套。页上的按钮走两个工具：`mail_view`（只读，换显示的内容）和 `mail_do`（写入，要用户点按）；按钮只带页 id 和按钮 id，邮件助手按自己画过的按钮查出做什么。0.19.46 起用上工具协议 §4 在 11-10 补的五样（看核心报的 `features`，旧的核心照旧开浏览器、放「刷新」）：一页 400 个组件、卡片上的「在邮件助手里看」跳到收件箱的那一封（`page/inbox?id=…`）、设置里用密码框添加邮箱、有任务在跑时页自己重读、导出 Gmail 过滤器弹存文件的框。0.19.52 照设计规范 §18.2 重排（luoke-agent 转来逐页写法，PR #91）：标签页今日、收件箱、精选、清理，其余是 hidden 页（设置、处理记录带图标；规则、订阅体检、清理旧邮件 `sweep`、精选内容 `piece`）。`service.ask.suggest` 还没做。
+   **11-13 起（顶层 ADR 0028）页面层归 luoke-agent**：邮件助手只给原始数据和动作，不再改 `window/pages` 的页面内容、顺序、按钮和措辞；现有页面层由 luoke-agent 牵头商定怎么搬、先搬哪页，搬完删掉这边的。界面要改的事转给 luoke-agent；它缺数据或动作向这边提。
 2. `daily-review`：跟着从螺壳自己的邮箱外发走，进不进 beta 2 等主人定。
 3. 打开类工具带 `ai.luoke/where: mac`：等 luoke-agent 的帮手支持 `_meta`。
 4. ~~随 agent 上线的版本把接口改成默认开、清单声明能力~~：0.19.26 已进 main（11-05），连同 agent.sock 的调用方核对（安全审查 S2 邮件这一半）。
