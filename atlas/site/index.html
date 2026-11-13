@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-12 17:06</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-13 16:56</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -387,7 +387,7 @@ sequenceDiagram
 <section class="page" id="mem" data-title="记忆 luoke-mem">
 <h1>记忆</h1>
 <p class="lede">螺壳各组件共用的本机记忆：一个 SQLite 文件。工具写入"发生了什么"（记录）；记忆是唯一形成结论的地方，从记录归纳出带依据、分三档把握程度的理解，并在空闲时整理，产出想问用户的问题和建议。</p>
-<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.36.0，按代码 8424207 核对 · 许可 Apache-2.0 · schema 8 · 接口和表结构见「参考 · 记忆」</p>
+<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.42.0，按代码 d1cb709 核对 · 许可 Apache-2.0 · schema 9 · 接口和表结构见「参考 · 记忆」</p>
 
 <h2>职责</h2>
 <ul>
@@ -395,7 +395,8 @@ sequenceDiagram
 <li>归纳关于用户的理解：事实、关注的话题、不感兴趣、处理习惯、常用说法，以及只供精选使用的口味。</li>
 <li>写入时遮去凭证；提供整份记忆的查看和管理界面。</li>
 <li>认人：从用户发出的邮件和写信的记录里认出反复出现的人，同一个人的事并在一起；人名和用户常打的英文专名成为常用说法，给语音输入当热词（见「人」）。</li>
-<li>按 luoke-agent 的工具协议给螺壳主窗口供内容：想问的和建议做成卡片放进 outbox，另有概览和七页，用户的点按交回记忆；记忆自己网页上的事在窗口里都能做（见「工具协议」）。</li>
+<li>按 luoke-agent 的工具协议给螺壳主窗口两样东西：<b>原始数据</b>（<code>data/*</code>，十样只读的 JSON）和<b>动作</b>（七个写入工具）。主窗口的记忆页由 luoke-agent 照效果图拼，页上放什么、怎么排、按钮叫什么不由记忆定；想问的和建议另做成卡片放进 outbox（见「工具协议」）。</li>
+<li>每个应用一个开关：关了，记忆不再从这个应用学（见「读写关系」）。</li>
 </ul>
 
 <h2>运行形态</h2>
@@ -479,16 +480,17 @@ sequenceDiagram
 <p>两个任务的提示词是包里的文件 <code>luoke_mem/prompts/</code>：每个任务 <code>.system.txt</code>（固定说明）、<code>.user.txt</code>（输入的措辞和顺序：<code>{{名字}}</code> 由代码填，<code>{{#名字}}…{{/名字}}</code> 是可选段，名字为空时整段不出）、<code>.schema.json</code>（输出格式）；文件末尾的换行不算。<code>prompt_files</code> 加载时核对占位符：代码填的和文件里的对不上（没填、多填、认不出的 <code>{{…}}</code>），或固定说明里出现占位符，导入时就报错。两个任务都不重问，没有 <code>.retry.txt</code>，也没有 <code>_shared.txt</code>。每段打字、每个来源怎么拼成一行（编号、截短、「讲的是：」）在代码里。评测结果带 <code>prompt_sha256</code>（这个任务全部提示词文件的指纹）和 <code>prompt_files</code>。<code>tests/test_prompts.py</code> 把评测拼出的每条请求和快照逐字节比对：改提示词要在同一提交里更新快照、升版本号、三档重评；改 <code>luoke_mem/prompts/</code> 走 PR，要作者以外的一位成员 Approve，附三档评测改动前后的逐题对比。话题线的问法变了时 <code>topics.VERSION</code> 加一，已有话题从头归纳。</p>
 
 <h2>反刍</h2>
-<p>不使用模型，每次归纳任务开头和结尾各执行一次；依次是整理、降档、处理习惯、撤销过的习惯、人、英文专名、想问的、建议，结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
+<p>不使用模型，每次归纳任务开头和结尾各执行一次；做的是整理、降档、处理习惯、撤销过的习惯、人、英文专名、是不是同一个人、想问的、建议，结果计数写入 <code>learning</code> 表 <code>rumination.last</code>。</p>
 <ul>
 <li><b>降档</b>：记忆自己归纳的兴趣（打字和邮件两条线）和常用说法，最新依据超过 90 天且用户未表态，回到猜测。</li>
-<li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、靠长词里的字母才够门槛的常用说法（拉丁字母按整词数，「hub」不算进「github」；已生效的退回猜测，用户表过态的不动）、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
+<li><b>整理</b>：用户未表态的推断（猜测和已生效的）每次反刍按现行规则重查：日常词的常用说法、靠长词里的字母才够门槛的常用说法（拉丁字母按整词数，「hub」不算进「github」；已生效的退回猜测，用户表过态的不动）、设备和日常的技术词（iPad、wifi、USB、pdf 这类）和两到四个大写字母的缩写（UI、API）、只有一段打字依据的话题、只有品牌或来源名或以"动态""通知"等结尾的兴趣和口味（口味在生成时就跳过这类名字）、只靠自建标签或整批清理撑起的兴趣和不感兴趣，收起不删；重复的事实并进先有的。</li>
 <li><b>处理习惯</b>：同一（邮箱, 发件人, 邮件类别, 动作）出现 ≥ 2 次形成一条习惯；来源是 <code>mail-override</code> 的新建议和 <code>mail-acted</code> 的动作，只认 <code>ACTION_NAMES</code> 里的动作（archive、read、trash、spam、flag、keep、label、filter）。来自改建议的按定档规则判定，仅来自亲手处理的为猜测。用户撤销一次自动执行即回到猜测。改建议后当场处理只算一次（<code>mail-acted</code> 的 <code>after_override</code> 覆盖整批，或 10 分钟内同一发件人、同一动作）。</li>
 <li><b>人</b>：从头重新认一遍人（见「人」），再看关系有没有退成以前的事；每个生效的人、最新依据在 90 天内的，名字记成常用说法（<code>data.sort</code> 为 <code>person</code>，带上是哪个人）。人名不受「打得不够次数就收起」的整理。</li>
 <li><b>英文专名</b>：上次之后新打的字里，大写开头的英文词串（如产品名、公司名；两端去掉句子里的普通词，最长 30 字）记成常用说法（<code>data.sort</code> 为 <code>name</code>），门槛和别的常用说法一样。</li>
-<li><b>想问的</b>（都不问敏感的）：兴趣和处理习惯里依据无法自行撑到比较确定、180 天内有依据的猜测；打字线再多一天就会生效的话题（天数只算最近 90 天；这一类门槛升档后不提前问）；同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实，和用户确认过、邮件里说法变了的机构事实（问"现在还是这样吗"）。前两类在前，机构事实在后，各按最新依据和依据条数排序；每天最多 2 个，14 天过期；不再值得问的撤回。</li>
+<li><b>想问的</b>（都不问敏感的）：只问只有用户知道的。同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实；用户确认过、邮件里说法变了的机构事实（问「现在还是这样吗」）；两个人拿不准是不是同一个（见「人」），排在关于理解的问题后面。只等用户确认的猜测（只靠标签的兴趣、只靠亲手处理的习惯）和再多一天就会生效的打字话题不问：前者在「全部记忆」里标「待确认」，后者够了自己生效。14 天过期；不再值得问的撤回。</li>
 <li><b>常用说法不问用户</b>：只影响候选排序，错了几乎没代价，够门槛自己记下，不要的在记忆页删。</li>
-<li><b>建议</b>：每天最多 3 条。"以后都这样？"（有发件人和类别、动作可自动执行的处理习惯，用户点"好"即成为确定并可自动执行）；"退订？"（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
+<li><b>建议</b>：「以后都这样？」（有发件人和类别、动作可自动执行的处理习惯，用户点「好」即成为确定并可自动执行）；「退订？」（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
+<li><b>每天最多三件</b>：问题和建议合起来算（<code>ASKS_PER_DAY</code> = 3），问题在前。</li>
 <li><b>归档</b>：用户可以把想问的事和建议先收起来（状态 <code>archived</code>）。不算回答：记忆不从它学什么，按反馈调门槛也不算它；归档着的不过期，同一件事归档着时不另问。已经过期、还没撤下的不能归档。用户在页上定了那条理解，归档着的问题跟着关掉；理解被并掉、让位或成了以前的事，归档着的问题跟着撤回，不算过期没答。放回后重新开着，归档时还剩几天就还剩几天，换一个新编号。</li>
 <li><b>去重</b>：同一件事已有未答的问题时不再生成；"以后再说"或过期未答 7 天后、已答或"不用"60 天后才可能再问；"别再提"永不再问。</li>
 </ul>
@@ -497,11 +499,12 @@ sequenceDiagram
 <p>记忆认得用户身边反复出现的人，记在 <code>entities</code> 表里（种类只有 <code>person</code>），关于某个人的理解带上是哪个人（<code>notes.entity</code>）。认人不用模型，每次反刍从头认一遍（<code>link_people</code>）；合并、拆开之后也当场重认。</p>
 <ul>
 <li><b>从哪里认</b>：一是关于人的事实，话题写作「关系:谁」，关系是上级、同事、下属、客户、合作方、家人、朋友，要是用户自己写的或依据里有用户说的话；二是邮件助手每月记一条的「写信给谁」（<code>mail-contact</code>：地址、月份、几封、是收件人还是抄送、最多 5 个标题、名字）。</li>
-<li><b>只凭写信算不算一个人</b>：写给对方（收件人，只抄送不算）合计 ≥ 2 封、分在 ≥ 2 个月；地址或名字像邮件列表、客服、通知的（all、team、support、info 这类）不算。</li>
+<li><b>只凭写信算不算一个人</b>：写给对方（收件人，只抄送不算）合计 ≥ 2 封、分在 ≥ 2 个月；地址或名字像邮件列表、客服、通知的（all、team、support、info 这类）不算；只为办事写去的地址（claims@、unsubscribe@、no-reply@、orders@、help@ 这类）也不算，以前算成人的在下次反刍去掉，用户改过名、并过、拆过的留着。</li>
 <li><b>并成一个</b>：依次看用户定过的、理解已经挂着的那个人、同一个邮箱地址、同一个名字（不分大小写），都对不上才新建。显示的名字先用用户起的，否则取依据最多的叫法，再否则用地址。</li>
 <li><b>状态</b>：有生效的事实或够格的写信记录的是 <code>active</code>，其余 <code>proposed</code>（猜测）；什么依据都不剩、用户也没定过的删掉。忘掉一条理解时，它带来的叫法和地址当场从人身上去掉。</li>
 <li><b>写信的档案</b>：从哪个月起、最近一次、几个月、几封、其中抄送几封、近 12 个月每月几封、最近的 3 个标题；最近一次早于 180 天的标「很久没联系」。<b>常谈的话题</b>：用户已有的话题和常用说法（至少 2 字）里，出现在写给这个人的信的标题里最多的前 3 个；拉丁字母按整词比。</li>
 <li><b>用户定过的照着来</b>：改名（同时记一条用户说的常用说法）、把两个人并成一个、把某个叫法或地址拆成另一个人、说「不是一个人」（这个人和它名字的常用说法都作废）、忘掉一个人（删关于他的理解、他地址的写信记录和这个人）。这样定过的，之后的反刍不改回去。</li>
+<li><b>是不是同一个人</b>：反刍时找出分开记着、看着可能是一个人的两个人：一个中文称呼里带着另一个、最多多三个字；英文名一个的词都在另一个里；两个邮箱地址 @ 前面一样（至少四个字）、后面不一样。记忆问一句，答 是 / 不是 / 以后再说。答「是」并成一个，依据多的留着；答「不是」这一对以后不再问；用户已经在人物页并了、或者其中一个不在了，问题撤回。</li>
 <li><b>热词</b>（<code>hotwords(limit=50)</code>）：从常用说法里取，不取敏感的、超过 24 字的。人名最多占 40%，英文专名最多占 20%，其余给用户自己打的说法；哪一类没用完，名额让给别的类。把握大的在前，人名里近半年写信多的在前。</li>
 </ul>
 
@@ -510,40 +513,40 @@ sequenceDiagram
 <tr><th>组件</th><th>写入的记录</th><th>读取</th></tr>
 <tr><td>邮件助手</td><td><code>mail-read</code>、<code>mail-acted</code>、<code>mail-override</code>、<code>mail-auto</code>、<code>mail-undo-auto</code>、<code>mail-cleared</code>、<code>sent-mail</code>、<code>received-mail</code>、<code>digest-open</code>、<code>digest-feedback</code>、<code>own-label</code>、<code>own-site</code>、<code>mail-contact</code>（每月写信给谁）</td><td>事实和习惯（分拣、起草）、可自动执行的习惯、口味、给它的 asks</td></tr>
 <tr><td>输入法</td><td><code>ime-commit</code>、<code>ime-correction</code>、<code>ime-forget</code></td><td>自己写的 <code>ime-commit</code>；语音的热词经 <code>hotwords()</code> 取常用说法（旧的 <code>luoke_mem</code> 没有这个接口时自己从常用说法里挑）</td></tr>
-<tr><td>agent 和螺壳主窗口</td><td>不写记录；用户在卡片和页上的点按经工具协议交回</td><td>outbox、概览和各页</td></tr>
+<tr><td>agent 和螺壳主窗口</td><td>不写记录；用户在卡片和页上的点按经工具协议交回</td><td>outbox、原始数据 <code>data/*</code>；还没照数据拼的页读 <code>page/*</code></td></tr>
 <tr><td>螺壳扫描</td><td>经命令行 <code>record --tool luoke-scan</code>：<code>scan-cleaned</code>、<code>scan-ignored</code>、<code>scan-auto-cleaned</code>、<code>scan-malware</code>、<code>scan-autoclean</code></td><td>—</td></tr>
 </table></div>
-<p>任何组件都能读取全部记录和依据；删除其他工具写入的内容只能经记忆自己：它的界面、命令行 <code>forget-tool</code> 和工具协议里的页面。</p>
+<p>任何组件都能读取全部记录和依据；删除其他工具写入的内容只能经记忆自己：它的界面、命令行 <code>forget-tool</code> 和工具协议里的动作。</p>
+<p><b>停学</b>：用户可以让记忆不再从某个应用学。关着的应用写来的不收（<code>record()</code> 返回 0、什么都不写，<code>propose()</code>、<code>conclude()</code> 返回 None），应用照常跑、不报错；已经记下的留着；用户在这个应用里亲口说的（<code>state</code>、确认、否定、回答）照收。名单在表 <code>stopped</code> 里，只能由记忆自己改，哪个应用都能读；忘掉一个应用写的、清空整份记忆都不动这份名单。带着自己一份 <code>luoke_mem</code> 的应用要用 0.38 以上的库，名单才管得到它。</p>
 
 <h2>工具协议</h2>
-<p>记忆照 luoke-agent 的工具协议（版本 1，<code>transport: "stdio"</code>）给螺壳主窗口供内容：螺壳本体每个请求起一次 <code>-m luoke_mem --path {memory} mcp</code>（清单 <code>commands.mcp</code>，<code>capabilities</code> 写在发出去的清单 <code>packaging/accessory.json</code> 里，测试核对它和代码一致），agent 读 outbox、概览和各页，把用户的点按交回来。代码在 <code>luoke_mem/agent.py</code>；协议服务端 <code>mcp.py</code> 和拼卡片的 <code>cards.py</code> 拷自 luoke-agent（许可 Apache-2.0 OR MIT），只用标准库。工具名、参数和各页的参数见「参考 · 记忆」。</p>
+<p>记忆照 luoke-agent 的工具协议（版本 1，<code>transport: "stdio"</code>）给螺壳主窗口供内容：螺壳本体每个请求起一次 <code>-m luoke_mem --path {memory} mcp</code>（清单 <code>commands.mcp</code>，<code>capabilities</code> 写在发出去的清单 <code>packaging/accessory.json</code> 里，测试核对它和代码一致）。代码在 <code>luoke_mem/agent.py</code>；协议服务端 <code>mcp.py</code> 和拼卡片的 <code>cards.py</code> 拷自 luoke-agent（许可 Apache-2.0 OR MIT），只用标准库。字段、工具和参数见「参考 · 记忆」。</p>
 <ul>
+<li><b>分工</b>：主窗口的记忆页由 luoke-agent 照效果图拼。记忆给原始数据和动作，不决定页上的内容、顺序和措辞；清单 <code>capabilities.data</code> 列出它给哪几样数据，核心见到就照 <code>data/*</code> 拼，没列的照旧读 <code>page/*</code>。记忆自己拼的页（<code>page/*</code>）在 luoke-agent 搬完之前照旧答。</li>
+<li><b>原始数据</b>（<code>data/*</code>）：十样只读资源，JSON，不带卡片、不带页上的句子：最近了解到的（<code>recent</code>）、要确认的（<code>asks</code>，最多 3 件）和其中一件（<code>ask</code>）、全部记忆（<code>notes</code>：筛选、搜索、翻页、各筛选的条数）、一条理解和全部依据（<code>note</code>）、人物（<code>people</code>）和一个人（<code>person</code>）、各应用学不学和写过哪几类记录（<code>sources</code>）、整理的时间和两种条数（<code>data</code>），以及 <code>helped</code>（记忆不记谁读了什么，没有数可报）。哪些算最近、待确认、可以列，和记忆自己的页是同一套规则。</li>
+<li><b>一件要问的事带什么</b>（<code>data/ask</code>）：类型（是不是同一个人、关于一条理解、记忆自己的问题、退订、处理习惯、别的建议）、「为什么」凭的事实、答了改动哪个应用的哪件事、依据的记录、能怎么答（照原样交给 <code>mem_reply</code>）。</li>
 <li><b>outbox</b>：开着、没过期的想问的和建议（<code>asks(status=["open"])</code>），每件一张卡片；问不问、每天几个、「以后再说」之后何时再问仍由反刍定。卡片标题「记忆想问你」或「记忆有个建议」，下面是问题和理由；关于某条理解的附它最新的 3 条依据原文（「应用 · 日期：原文」，每条 120 字以内），没有就写 <code>evidence</code>。</li>
-<li><b>卡片上的按钮</b>：关于某条理解的问题有输入框「不太对的话，改成」和 对 / 不对 / 以前是，现在不是 / 按我改的 / 以后再说；处理习惯的建议是 好 / 不用 / 别再提，退订建议是 知道了 / 别再提；每张最后有「归档」。关于某条理解的多一个「在螺壳记忆里看」，跳到窗口里的「一条理解」。点了交回 <code>mem_reply</code>，记忆照 <code>reply</code> 处理，卡片换成一句话的结果，这件从 outbox 撤下；改成的话里有密码、验证码、证件号码时不收，卡片留着让用户改。</li>
-<li><b>概览</b>（<code>summary</code>）：一句「记下了 N 条，有 M 条猜测等你确认」；N 是生效的理解（不含精选口味），M（<code>count</code>）是等用户确认的猜测，不算从别人来信读到、还在攒证据的事实；记忆正在问的那几条照常算，也上猜测页。</li>
-<li><b>七页</b>：概览、想问的、猜测、记下的、人、各应用写的，和只从按钮进、不画成标签的「一条理解」（清单里 <code>hidden</code>）。页上的点按只答一句话，窗口重新读那一页。
+<li><b>卡片上的按钮</b>：关于某条理解的问题有输入框「不太对的话，改成」和 对 / 不对 / 以前是，现在不是 / 按我改的 / 以后再说；「是不是同一个人」是 是 / 不是 / 以后再说；处理习惯的建议是 好 / 不用 / 别再提，退订建议是 知道了 / 别再提；每张最后有「归档」。点了交回 <code>mem_reply</code>，记忆照 <code>reply</code> 处理，卡片换成一句话的结果，这件从 outbox 撤下；改成的话里有密码、验证码、证件号码时不收，卡片留着让用户改。「以后再说」哪种问题都是 <code>choice: "later"</code>，过 7 天再问。</li>
+<li><b>概览那句话</b>（<code>summary</code>）：<code>text</code> 是最近了解到的一件，<code>count</code> 是概览上要确认的几件；不报总条数。</li>
+<li><b>记忆自己拼的页</b>：标签三个：概览、全部记忆、人物；设置在清单里写 <code>hidden</code> 和 <code>"icon": "settings"</code>，窗口画成右上角的齿轮；「一条理解」「归档的问题」只从按钮进。0.37 以前的页名（想问的、猜测、记下的、各应用写的）照旧答，写 <code>hidden</code>。
   <ul>
-  <li><b>概览</b>：上次归纳的时间和结果（只有数和原因）；各类记下多少；最近 30 天没问就记下的最多 5 条；最近 14 天各应用记下的，每个应用可以去看每天记了什么；从别人来信读到、还在攒证据的有几条，可以去看。</li>
-  <li><b>想问的</b>：还在问的每件能「归档」，两件以上能「全部归档」；下面列出已归档的，每件能「放回」，放回的回到「今天」。</li>
-  <li><b>猜测</b>：对 / 不对；从别人来信读到的单独一页，同样能点。</li>
-  <li><b>记下的</b>：按类别看，或看「最近记下的」「以前的事」（「现在还是」「不对」，日期写「大约 N 年」，即最新依据是哪一年）「说过不对的」（只能忘掉）；能搜（几个词都要有）、能翻页。同一话题的事实排在一起，写「可能和上下 N 条是同一件」，由用户留对的，不自动合并。订阅精选的口味有自己的按钮「精选的口味 N」，不算在「全部」和概览的数里。</li>
-  <li><b>一条理解</b>：原话、类别、状态和理由；对 / 不对、现在还是；改写（旧的说法留着，标为已被取代）；「这一类都不要（N 条）」；忘掉；并进来的说法每条能「拆出来」；全部依据原文一页一页翻。改写框里写「不对」「那是以前的事了」这类短话，按否定、以前的事处理，答的话也照实写。</li>
-  <li><b>人</b>：能搜、能翻页；一个人的页上能改名、把某个叫法或邮箱地址拆出去（「不是这个人」）、选另一个人「并成一个」（一组 30 人，能翻、能按名字或邮箱找）、看关于他的理解、说「不是一个人」、忘掉。</li>
-  <li><b>各应用写的</b>：每个应用最近 14 天每天记了什么；「忘掉…写的」先到一页，试跑一遍（什么都不删）说会删掉几条记录、几条理解、留下什么，勾上再点；清空整份记忆要输入「清空」。</li>
+  <li><b>概览</b>：最近了解到的几件事（常用说法不列），每件能说「不对」；想跟你确认的最多三件，按钮和卡片上一样。没有总条数。</li>
+  <li><b>全部记忆</b>：生效的和待确认的一个列表，猜测写「待确认」；只凭一条记录的猜测先不列，攒够了再出现。每条 对（猜测）、不对、看依据、忘掉，都是图标按钮；能按类筛选、能搜；常用说法和精选的口味各有自己的筛选。一页 8 条（大页 18 条）。</li>
+  <li><b>人物</b>：只列有话可说的人，每人一句话（关系加最有依据的一条），点一行进去；一个人的页上能改名、把某个叫法或邮箱地址拆出去、选另一个人并成一个、看关于他的理解、说「不是一个人」、忘掉。</li>
+  <li><b>设置</b>：每个应用一行，带学不学的开关（<code>mem_learn</code>），能看它每天记了什么、忘掉它写的；上次整理的时间；「数据」里分开写记住的事和输入法词条的条数；清空整份记忆。</li>
   </ul></li>
-<li><b>要先勾才做的</b>：忘掉一条、忘掉一个人、忘掉某个应用写的，要先勾「我知道删了找不回来」；「不是这个人」要先勾「确定不是同一个人」。没勾什么都不做。</li>
+<li><b>删之前先确认</b>：忘掉一条、忘掉一个人、忘掉某个应用写的要 <code>sure: true</code>，清空整份记忆要 <code>confirm: "清空"</code>。窗口说它会先弹确认（features 里有 <code>confirm</code>）时，按钮直接带这些参数和要弹的话（清空的写清会清掉多少）；不会弹的窗口上是勾选框「我知道删了找不回来」和要输入「清空」的输入框。停学的开关不用确认：关了不删东西，能再打开。</li>
 <li><b>页上数过的和点的时候对不上就不做</b>：「这一类都不要（N 条）」的按钮带着画页时数的那几条，点的时候这一类多了或少了，一条都不否定，请用户再看一眼。</li>
-<li><b>看核心认什么</b>：核心在请求里说它认页带参数（<code>pageArgs</code>）时才有上面这些；说认大页（<code>bigPages</code>）时一页最多 30 条，否则 15 条。不认页带参数的旧核心照 0.34 的样子：每页最多 15 条、没有搜索和翻页，多的用「打开整份记忆」到记忆自己的网页看。搜索填的字超过 200 个时不按它搜，页上写一句说明、列出全部。</li>
-<li><b>写入只来自用户的点按</b>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_forget_all</code>、<code>mem_person</code>、<code>mem_archive</code> 没带 <code>ai.luoke/user-action</code> 的一律拒绝；<code>mem_open</code> 只打开记忆自己的网页（给旧核心用），<code>outbox_ack</code> 只答一句、不记。</li>
-<li><b>没有记忆或打不开时</b>：记忆文件不存在，读的都答空的，写的答 <code>not_ready</code>，不建文件；记忆比这份 <code>luoke_mem</code> 新、旁边有符号链接、正被别的应用写着或文件坏了时，概览、各页和写入的 <code>not_ready</code> 都带一句说明（请更新螺壳、为了安全没有打开、过一会儿再试、可能坏了）。</li>
-<li><b>场景样例</b>：<code>fixtures/agent/</code> 有七个场景（空的记忆、有猜测、有想问的和建议、归档、人、几个应用写过，和核心认页带参数时的 <code>window</code>），每个请求一个文件，给 agent 做样例和测试输入。<code>scripts/record_agent_fixtures.py</code> 在临时目录里经 <code>luoke_mem</code> 的接口造假记忆、时钟写死，起真的 <code>mcp --clock</code> 录下；<code>tests/test_fixtures.py</code> 重录比对，并用 agent 的卡片和页的规则核每张卡片和每一页。改了 agent 看得到的东西要重录、提交，在 PR 里说清 agent 那边要不要跟着改。</li>
+<li><b>看核心认什么</b>：核心在请求里列了 <code>pageArgs</code> 时页才带参数（搜索、翻页、按类）；列了 <code>bigPages</code> 的一页放得更多；<code>rowOpen</code> 时人物的一行点哪里都是打开这个人，<code>fieldSubmit</code> 时搜索框按回车就搜。不认页带参数的旧核心每页最多 15 条，多的用「打开整份记忆」到记忆自己的网页看。</li>
+<li><b>写入只来自用户的点按</b>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_learn</code>、<code>mem_forget_all</code>、<code>mem_person</code>、<code>mem_archive</code> 没带 <code>ai.luoke/user-action</code> 的一律拒绝；<code>mem_open</code> 只打开记忆自己的网页（给旧核心用），<code>outbox_ack</code> 只答一句、不记。</li>
+<li><b>没有记忆或打不开时</b>：记忆文件不存在，读的都答空的（<code>data/*</code> 答 <code>ready: false</code> 和原因），写的答 <code>not_ready</code>，不建文件；记忆比这份 <code>luoke_mem</code> 新、旁边有符号链接、正被别的应用写着或文件坏了时，概览、各页和写入的 <code>not_ready</code> 都带一句说明（请更新螺壳、为了安全没有打开、过一会儿再试、可能坏了）。</li>
+<li><b>场景样例</b>：<code>fixtures/agent/</code> 有七个场景（空的记忆、有猜测、有想问的和建议、归档、人、几个应用写过，和核心认页带参数时的 <code>window</code>），每个请求一个文件，每个场景都录了 <code>data/*</code>，给 agent 做样例和测试输入。<code>scripts/record_agent_fixtures.py</code> 在临时目录里经 <code>luoke_mem</code> 的接口造假记忆、时钟写死，起真的 <code>mcp --clock</code> 录下；<code>tests/test_fixtures.py</code> 重录比对，并用 agent 的卡片和页的规则核每张卡片和每一页。改了 agent 看得到的东西要重录、提交，在 PR 里说清 agent 那边要不要跟着改。</li>
 </ul>
 
 <h2>已知限制</h2>
 <ul>
-<li>记忆自己的网页没有"以后再说"、"归档"和单独的"以前是"按钮（"以前是"只能通过修改框的文字识别）；归档在螺壳主窗口里做。</li>
+<li>记忆自己的网页没有"以后再说"、"归档"和单独的"以前是"按钮（"以前是"只能通过修改框的文字识别）；归档在螺壳主窗口里做。记忆自己的网页上也没有停学的开关。</li>
 <li>同名的两个人会被认成一个，要用户在「人」的页上拆开。</li>
-<li><code>luoke://memory</code> 的入口（<code>app --view</code>）只认 <code>recent</code>，不能直接开到「人」。</li>
 <li>归纳中某条输入（打字或话题的一批）连续出错两次就跳过，游标前移；其他错误不打断整次归纳。</li>
 <li>重新定档、以前的事只在整份记忆被打开时运行（界面、命令行、归纳任务；工具协议的读写不运行）。</li>
 <li>没有向工具索取更多原文的通道；自由回答不参与学习。</li>
@@ -2036,7 +2039,7 @@ sequenceDiagram
 <h3>记录</h3>
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
-<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY、YYYY-MM、YYYY-MM-DD 或带时间，位数要全（不填为当前时间；以前收下的读不了的时间按没有日期处理），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证</td></tr>
+<tr><td><code>record(speaker, kind, text, *, topic, data, ref, happened_at, sensitive)</code></td><td>写一条记录；<code>happened_at</code> 须是 YYYY、YYYY-MM、YYYY-MM-DD 或带时间，位数要全（不填为当前时间；以前收下的读不了的时间按没有日期处理），<code>topic</code>、<code>ref</code> 须是文字，否则抛 <code>ValueError</code>；正文和 <code>data</code> 中的字符串先遮去凭证；本工具被用户停学时返回 0、什么都不写</td></tr>
 <tr><td><code>redate(rid, happened_at)</code></td><td>修正本工具一条记录的发生时间（时间格式同 <code>record</code>）</td></tr>
 <tr><td><code>records(*, tool="", topic, kind, speaker, ref, since, limit)</code></td><td><code>tool=""</code> 为本工具，传工具名读该工具，<code>None</code> 读全部</td></tr>
 <tr><td><code>forget_records(*, topics, since, until, match, keep_cited)</code></td><td>删除本工具的部分记录，只依赖这些记录的理解一并删除</td></tr>
@@ -2046,7 +2049,7 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
 <tr><td><code>state(kind, text, …)</code></td><td>用户亲口说的，直接为"确定"</td></tr>
-<tr><td><code>propose(kind, text, cites, …)</code></td><td>推测，为猜测；事实的依据里有来信够多（同一来源 ≥ 6 封、跨 ≥ 3 个月、打开 ≥ 2 封、6 个月内仍有，<code>EVIDENCE</code>）且不涉健康、法律、宗教政治时直接生效</td></tr>
+<tr><td><code>propose(kind, text, cites, …)</code></td><td>推测，为猜测（本工具被停学时返回 None，<code>conclude</code> 同）；事实的依据里有来信够多（同一来源 ≥ 6 封、跨 ≥ 3 个月、打开 ≥ 2 封、6 个月内仍有，<code>EVIDENCE</code>）且不涉健康、法律、宗教政治时直接生效</td></tr>
 <tr><td><code>conclude(kind, text, cites, …)</code></td><td>由用户自己的记录得出；依据须全部来自用户，按定档规则为比较确定或猜测</td></tr>
 <tr><td><code>confirm(nid)</code> / <code>reject(nid)</code> / <code>was(nid)</code> / <code>later(nid)</code> / <code>revise(nid, text)</code></td><td>用户的决定：确认、否定、以前是、以后再说、改写</td></tr>
 <tr><td><code>reject_family(nid)</code></td><td>「这一类都不要」：把这条所在一类里用户还没表态的（待确认和观察中）都标为否定，返回条数</td></tr>
@@ -2064,6 +2067,12 @@ sequenceDiagram
 <tr><td><code>archive(aid)</code></td><td>归档：状态改为 <code>archived</code>，不算回答、不过期；这件不开着或已经过期时抛 <code>ValueError</code></td></tr>
 <tr><td><code>unarchive(aid)</code></td><td>放回：重新开着，归档时还剩几天就还剩几天；返回<b>新编号</b>，旧编号不再有效；不是归档着的抛 <code>ValueError</code></td></tr>
 </table></div>
+<h3>停学</h3>
+<div class="tbl"><table>
+<tr><th>方法</th><th>说明</th></tr>
+<tr><td><code>stopped()</code></td><td>用户关了、记忆不再从它学的应用，每个 <code>tool</code> 和关的时间；哪个应用都能读</td></tr>
+<tr><td><code>WholeMemory.stop_learning(tool)</code> / <code>resume_learning(tool)</code></td><td>关、再打开；只给记忆自己的界面和工具协议用。忘掉一个应用写的、清空整份记忆都不动这份名单</td></tr>
+</table></div>
 <h3>人（<code>WholeMemory</code>）</h3>
 <div class="tbl"><table>
 <tr><th>方法</th><th>说明</th></tr>
@@ -2080,7 +2089,7 @@ sequenceDiagram
 <h3>工具函数</h3>
 <p><code>mask_secrets(text)</code>（遮去密码、验证码、密钥、通过 Luhn 校验的卡号、证件号）、<code>find_secrets</code>、<code>sensitive_kinds(text)</code>（健康、法律、宗教政治）、<code>confidence(note)</code>、<code>default_path()</code>。</p>
 
-<h2>表结构（schema 8）</h2>
+<h2>表结构（schema 9）</h2>
 <div class="tbl"><table>
 <tr><th>表</th><th>列</th></tr>
 <tr><td><code>records</code></td><td>id、tool、speaker、kind、topic、text、data_json、ref、happened_at、recorded_at、sensitive</td></tr>
@@ -2090,6 +2099,7 @@ sequenceDiagram
 <tr><td><code>asks</code></td><td>id、tool、kind（question / suggestion）、text、why、about_note、about_kind、urgency、answer（JSON）、status、created_at、expires_at、decided_at、answer_record、sensitive、evidence、rank、action（JSON）、key</td></tr>
 <tr><td><code>candidates</code></td><td>id、kind、text、record_ids、first_seen、last_seen（归纳中积累的候选；kind：打字线 <code>term</code>、<code>interest</code>，话题线 <code>mail-interest</code>、<code>mail-dislike</code>）</td></tr>
 <tr><td><code>learning</code></td><td>name、value：<code>fit.deleted</code>（用户删掉的理解，按类只记条数）；归纳进度（<code>typing.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>last_attempt</code>、<code>topics.last_id</code> / <code>last_at</code> / <code>last_run</code> / <code>pending</code> / <code>version</code>、英文专名读到哪 <code>names.last_id</code> / <code>last_at</code>）、被截断后减半的标记（<code>typing.small</code>、<code>topics.small</code>）、同一批连续出错的次数（<code>typing.failed</code>、<code>topics.failed</code>）、每次结果（<code>typing.last_outcome</code>、<code>topics.last_outcome</code>、<code>rumination.last</code>）、以前的事唤回次数（<code>past.revived.&lt;kind&gt;</code>，关系是 <code>past.revived.relation</code>）、第一次定档降下来的理解和备份名（<code>regrade.0.18</code>）、一次性修复标记（<code>repair.*</code>）</td></tr>
+<tr><td><code>stopped</code></td><td>tool（主键）、at：用户关了停学的应用和关的时间（schema 9）</td></tr>
 <tr><td><code>grants</code></td><td>遗留，不再使用</td></tr>
 </table></div>
 <p>升级只加不改：新表、可空的新列、新索引。版本存于 <code>PRAGMA user_version</code>。</p>
@@ -2122,7 +2132,7 @@ sequenceDiagram
 <tr><td><code>python -m luoke_mem [--path P] sources</code></td><td>各工具写入的条数</td></tr>
 <tr><td><code>forget-tool &lt;tool&gt; [--dry-run]</code></td><td>忘掉某工具写入的内容；<code>luoke-mem</code> 被拒绝（说明原因，退出码 1）</td></tr>
 <tr><td><code>ui [--open] [--note N] [--view recent|people]</code></td><td>打印界面地址</td></tr>
-<tr><td><code>app [--note N] [--view recent]</code></td><td>在浏览器中打开界面（<code>luoke://memory</code> 的入口）</td></tr>
+<tr><td><code>app [--note N] [--view recent|people]</code></td><td>在浏览器中打开界面（<code>luoke://memory</code> 的入口）</td></tr>
 <tr><td><code>learn [--force] [--again] [--hub SOCK]</code></td><td>运行一次归纳；<code>--force</code> 有新记录就跑；<code>--again</code> 从头重新归纳（打字记下的不重复；话题线从头读，用户没表态的话题只在有 topics 任务的 Mac 上换成新归纳的，没有这个任务的 Mac 保留原有的）；已有一个在跑时直接返回</td></tr>
 <tr><td><code>record --tool &lt;工具&gt;</code></td><td>替没有 Python 的工具写记录（螺壳扫描用）：标准输入一行一条 JSON，字段同 <code>record()</code>，没给 <code>sensitive</code> 时按文字标；标准输出一行对一行回 <code>{"id"}</code> 或 <code>{"error"}</code>，一行出错不影响其他行；有失败的行退出 1，工具名不对或记忆打不开退出 2；不能以 <code>luoke-mem</code> 的名义写</td></tr>
 <tr><td><code>mcp [--clock T]</code></td><td>工具协议的一个请求（清单 <code>commands.mcp</code>，见下「工具协议」）：标准输入读到结尾、取第一条非空行，标准输出答一行，退出码 0；<code>--clock</code> 写成 <code>YYYY-MM-DDTHH:MM:SS</code>，把时钟定在这个本机时间（录场景样例用）</td></tr>
@@ -2131,15 +2141,33 @@ sequenceDiagram
 <h2>工具协议（<code>luoke_mem.agent</code>）</h2>
 <p>luoke-agent 工具协议版本 1 的工具一侧，<code>mcp</code> 命令每次答一个请求。消息最多 1 MB（超过答 -32600）；MCP 协议版本 <code>2026-07-28</code>，<code>params._meta</code> 里带了别的版本答 -32602 并附 <code>supportedVersions</code>。方法：<code>server/discover</code>（服务名 <code>luoke-mem</code>，版本同包）、<code>resources/list</code>、<code>resources/read</code>、<code>tools/list</code>、<code>tools/call</code>；没有 <code>id</code> 的通知不答。读不懂答 -32700，未知方法 -32601，没有的资源、给不收参数的资源带了参数 -32002；工具自己出错答 -32603「工具内部出错」，标准错误只记方法、登记过的工具名或资源、异常类型和出错位置。整份记忆以 <code>regrade=False</code> 打开。</p>
 <h3>清单 <code>capabilities</code></h3>
-<p>由 <code>agent.capabilities()</code> 给出，同一份写在 <code>packaging/accessory.json</code> 里：<code>protocol</code> 1、<code>transport</code> <code>"stdio"</code>；<code>reports</code>：<code>question</code>「记忆想问的事」、<code>suggestion</code>「记忆的建议」，默认都是 <code>normal</code>；<code>actions</code>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_forget_all</code>、<code>mem_person</code>、<code>mem_archive</code>（都 <code>writes: true</code>）；<code>service</code>：<code>summary: true</code>、<code>pages</code>（<code>overview</code> 概览、<code>asks</code> 想问的、<code>guesses</code> 猜测、<code>kept</code> 记下的、<code>people</code> 人、<code>sources</code> 各应用写的、<code>item</code> 一条理解，<code>item</code> 带 <code>hidden: true</code>）、<code>ui.open: "mem_open"</code>（只给不认 <code>pageArgs</code> 的核心）。</p>
+<p>由 <code>agent.capabilities()</code> 给出，同一份写在 <code>packaging/accessory.json</code> 里：<code>protocol</code> 1、<code>transport</code> <code>"stdio"</code>；<code>reports</code>：<code>question</code>「记忆想问的事」、<code>suggestion</code>「记忆的建议」，默认都是 <code>normal</code>；<code>actions</code>：<code>mem_reply</code>、<code>mem_note</code>、<code>mem_forget_tool</code>、<code>mem_learn</code>、<code>mem_forget_all</code>、<code>mem_person</code>、<code>mem_archive</code>（都 <code>writes: true</code>）；<code>data</code>（和 <code>actions</code> 同一层）：<code>recent</code>、<code>helped</code>、<code>asks</code>、<code>ask</code>、<code>notes</code>、<code>people</code>、<code>person</code>、<code>note</code>、<code>sources</code>、<code>data</code>；<code>service</code>：<code>summary: true</code>、<code>pages</code>（<code>overview</code> 概览、<code>all</code> 全部记忆、<code>people</code> 人物三个是标签；<code>settings</code> 设置带 <code>hidden</code> 和 <code>icon: "settings"</code>；<code>item</code> 一条理解、<code>asks</code> 归档的问题，和 0.37 以前的 <code>guesses</code>、<code>kept</code>、<code>sources</code> 都带 <code>hidden</code>）、<code>ui.open: "mem_open"</code>（只给不认 <code>pageArgs</code> 的核心）。</p>
 <h3>资源</h3>
 <div class="tbl"><table>
 <tr><th>URI</th><th>内容</th></tr>
 <tr><td><code>luoke://luoke-mem/outbox</code>（<code>outbox</code> 也认）</td><td><code>{items}</code>：开着、没过期的想问的和建议，按 <code>asks()</code> 的顺序，一件一项</td></tr>
-<tr><td><code>summary</code></td><td><code>{count, text}</code>：<code>count</code> 是等用户确认的猜测条数（同猜测页）；什么都没记下时为 0、「还没有记下什么。」，没有记忆或打不开时为 0 和那句说明</td></tr>
-<tr><td><code>page/&lt;页&gt;</code>（七页），可带 <code>?&lt;键&gt;=&lt;值&gt;</code></td><td>一张 A2UI 卡片（<code>surfaceId</code> 是页 id），见下「各页」</td></tr>
+<tr><td><code>summary</code></td><td><code>{count, text}</code>：<code>text</code> 是最近了解到的一件，<code>count</code> 是概览上要确认的几件（最多 3）；什么都没记下时为 0、「还没有记下什么。」，没有记忆或打不开时为 0 和那句说明</td></tr>
+<tr><td><code>data/&lt;名&gt;</code>（十样），可带 <code>?&lt;键&gt;=&lt;值&gt;</code></td><td>原始数据，JSON，不带卡片和页上的句子，见下「原始数据」</td></tr>
+<tr><td><code>page/&lt;页&gt;</code>，可带 <code>?&lt;键&gt;=&lt;值&gt;</code></td><td>一张 A2UI 卡片（<code>surfaceId</code> 是页 id），见下「各页」</td></tr>
 </table></div>
 <p>都是 <code>application/json</code>，<code>contents[0].text</code> 是一段 JSON 文字。卡片用目录 <code>ai.luoke/a2ui/agent/1</code>。</p>
+<h3>原始数据 <code>data/*</code></h3>
+<p>主窗口的记忆页由 luoke-agent 的核心拼，读这几样。每个答复都有 <code>v</code>（形状的版本，现在是 1，只加字段不升）和 <code>ready</code>；<code>ready: false</code> 时只有 <code>problem</code>：<code>empty</code>（还没有记忆）、<code>too_new</code>、<code>links</code>、<code>locked</code>、<code>broken</code>。时间是本机时间 <code>YYYY-MM-DD HH:MM:SS</code>。参数用默认值时不写。</p>
+<p><b>一条理解</b>（下面的 <code>items</code>、<code>note</code>、<code>about</code>）：<code>id</code>、<code>text</code>、<code>kind</code>、<code>status</code>、<code>pending</code>（待确认）、<code>confidence</code>（<code>guess</code>、<code>likely</code>、<code>sure</code>）、<code>origin</code>、<code>topic</code>、<code>entity</code>、<code>formed_at</code>、<code>decided_at</code>、<code>fresh</code>（最新依据的时间）、<code>cites</code>（依据几条）、<code>sources</code>（依据来自哪些应用，<code>luoke-mem</code> 是用户自己说的）、<code>alike</code>（同一话题挨着的还有几条，只在 <code>data/notes</code> 里）。</p>
+<div class="tbl"><table>
+<tr><th>资源</th><th>参数</th><th>内容</th></tr>
+<tr><td><code>data/recent</code></td><td>—</td><td>最近 30 天没问就记下的，新的在前，最多 20 条，不含常用说法：<code>since</code>、<code>items</code></td></tr>
+<tr><td><code>data/helped</code></td><td>—</td><td>记忆不记谁读了什么：<code>recorded: false</code>、<code>items: []</code></td></tr>
+<tr><td><code>data/asks</code></td><td>—</td><td>概览上要确认的，最多 3 件。每件 <code>id</code>、<code>kind</code>（<code>question</code> / <code>suggestion</code>）、<code>type</code>、<code>rank</code>、<code>created_at</code>、<code>expires_at</code>、<code>answer</code>。<code>type</code>：<code>same_person</code>（<code>basis</code> 为 <code>name_inside</code> 或 <code>same_local</code>，<code>people</code> 两个，各 <code>by</code>、<code>entity</code>、<code>name</code>、<code>relations</code>、<code>addresses</code>）；<code>note</code>（<code>basis</code> 为 <code>quiet</code> 机构的信停了、<code>reworded</code> 来信说法变了并带 <code>newer</code>、<code>guess</code> 别的猜测；<code>note</code> 是那条理解）；<code>own</code>（记忆自己的问题，<code>text</code>）；<code>unsubscribe</code>、<code>habit</code>、<code>suggestion</code>（<code>about_note</code>、<code>action</code>、<code>evidence</code>、<code>text</code>）</td></tr>
+<tr><td><code>data/ask</code></td><td><code>id</code></td><td>一件，哪个单子上的都行（outbox 里的 <code>ask/&lt;id&gt;</code> 也是）。字段同 <code>data/asks</code>，再加 <code>status</code>、<code>text</code>、<code>why</code>；<code>facts</code>（「为什么」凭的事实：<code>same_local</code> 的 <code>local</code>；<code>quiet</code> 的 <code>letters</code>、<code>last</code>；<code>reworded</code> 的 <code>newer</code>；<code>habit</code> 的 <code>account</code>、<code>sender</code>、<code>name</code>、<code>category</code>、<code>action</code>；<code>unsubscribe</code> 的 <code>sender</code>、<code>times</code>、<code>count</code>、<code>days</code>；别的是 <code>{}</code>）；<code>affects</code>（答了改动哪个应用的哪件事，<code>[{tool, use}]</code>）；<code>cites</code>（依据的记录，新的在前，最多 50 条，<code>cites_total</code> 是一共几条）；<code>replies</code>（能怎么答，每个是 <code>mem_reply</code> 除 <code>ask</code> 以外的参数，<code>archive</code> 每件都有）；<code>write</code>（要带用户写的字的 choice）。不在了答 <code>found: false</code></td></tr>
+<tr><td><code>data/notes</code></td><td><code>filter</code>（<code>all</code> 默认、<code>pending</code>、<code>past</code>、<code>rejected</code> 或一个 <code>kind</code>）、<code>q</code>、<code>p</code>、<code>n</code>（默认 20，最多 100）</td><td>全部记忆。<code>all</code> 是生效的和攒够依据的猜测，不含常用说法和精选的口味。答 <code>filter</code>、<code>q</code>、<code>page</code>、<code>pages</code>、<code>total</code>、<code>waiting</code>（还在攒依据、不列的猜测几条）、<code>counts</code>（每个筛选各几条，不受 <code>q</code> 影响）、<code>items</code></td></tr>
+<tr><td><code>data/people</code></td><td><code>q</code>、<code>p</code>、<code>n</code></td><td>有理解或写信记录的人，写得多的在前。每人 <code>id</code>、<code>name</code>、<code>status</code>、<code>notes</code>、<code>relations</code>、<code>top</code>（关系以外最有依据的一条）、<code>contact</code>（<code>first</code>、<code>last</code>、<code>months</code>、<code>count</code>、<code>lapsed</code>、<code>together</code>）</td></tr>
+<tr><td><code>data/person</code></td><td><code>id</code></td><td>一个人，同上，再加 <code>aliases</code>、<code>profile</code>（完整的写信档案）、<code>about</code>（关于他的全部理解）。不在了答 <code>found: false</code></td></tr>
+<tr><td><code>data/note</code></td><td><code>id</code>、<code>p</code>、<code>n</code>（默认 50）</td><td>一条理解（加 <code>why</code>、<code>superseded_by</code>、<code>valid_from</code>、<code>valid_to</code>）和全部依据 <code>cites</code>（<code>id</code>、<code>tool</code>、<code>speaker</code>、<code>kind</code>、<code>topic</code>、<code>text</code>、<code>happened_at</code>、<code>recorded_at</code>、<code>sensitive</code>）；<code>merged</code> 是并进来的说法</td></tr>
+<tr><td><code>data/sources</code></td><td>—</td><td>每个写过记忆、或关了停学的应用：<code>tool</code>、<code>on</code>（学不学）、<code>stopped_at</code>、<code>records</code>、<code>notes</code>、<code>topics</code>（写过哪几类记录、各几条）、<code>last</code></td></tr>
+<tr><td><code>data/data</code></td><td>—</td><td><code>tidied</code>（上次整理 <code>at</code> 和 <code>counts</code>）、<code>next: "idle"</code>、<code>typing</code>（上次归纳打的字 <code>at</code>、<code>outcome</code>）、<code>kept</code>（记住的事几条）、<code>terms</code>（输入法词条几条）、<code>archived_asks</code></td></tr>
+</table></div>
+<p><code>affects</code> 按理解的种类：<code>fact</code> 是 <code>*</code>（每个工具都当作关于用户的事实）；<code>interest</code> 邮件助手 <code>digest_prefer</code>；<code>dislike</code> <code>digest_avoid</code>；<code>preference</code> <code>habit</code>；<code>term</code> 输入法 <code>candidates_first</code>；<code>taste</code> <code>digest_taste</code>；建议照它的 <code>action</code>；<code>same_person</code> 是 <code>luoke-mem</code> 的 <code>merge_people</code>。「是不是同一个人」交 <code>mem_reply</code> 的 <code>choice: "answer"</code>、<code>text</code> 为「是」或「不是」。</p>
 <h3>outbox 事项</h3>
 <div class="tbl"><table>
 <tr><th>字段</th><th>取值</th></tr>
@@ -2165,31 +2193,31 @@ sequenceDiagram
 </table></div>
 <p>每张卡片最后有「归档」→ <code>archive</code>。有 <code>about_note</code> 的卡片多一个「在螺壳记忆里看」：核心认 <code>pageArgs</code> 时是 <code>agent.open_page</code>（<code>{page: "item", args: {id}}</code>），否则 → <code>mem_open</code>（<code>{note}</code>）。</p>
 <h3>工具</h3>
-<p>六个写入工具没带 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code> 都是非空字符串）答 <code>needs_user_action</code>；缺必填参数答 <code>invalid</code>；记忆文件不存在、比这份 <code>luoke_mem</code> 新、旁边有符号链接、正被锁着或读不了时答 <code>not_ready</code>，带一句说明。失败都是 <code>isError: true</code>，原因码在 <code>structuredContent.code</code>。</p>
+<p>七个写入工具没带 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code> 都是非空字符串）答 <code>needs_user_action</code>；缺必填参数答 <code>invalid</code>；记忆文件不存在、比这份 <code>luoke_mem</code> 新、旁边有符号链接、正被锁着或读不了时答 <code>not_ready</code>，带一句说明。失败都是 <code>isError: true</code>，原因码在 <code>structuredContent.code</code>。</p>
 <div class="tbl"><table>
 <tr><th>工具</th><th>参数</th><th>说明</th></tr>
 <tr><td><code>mem_reply</code>（写）</td><td><code>ask</code>、<code>choice</code>，可带 <code>text</code></td><td>照 <code>reply()</code> 交回。<code>choice</code> 要合这件的种类（建议 <code>useful</code> / <code>useless</code> / <code>never</code>；关于理解的问题 <code>yes</code> / <code>no</code> / <code>past</code> / <code>revise</code> / <code>later</code>；其他问题 <code>answer</code> / <code>later</code>；都可以 <code>archive</code>），<code>revise</code>、<code>answer</code> 要有 <code>text</code>，<code>text</code> 里有凭证不收，都答 <code>invalid</code>（卡片留着）。这件已不开着，或它问的那条理解已经定了、被取代或忘掉时，答「这条已经变了……」。成功答一句话，<code>structuredContent</code> 带 <code>card</code>（换掉原卡片，不带 <code>createSurface</code>）和 <code>done: true</code>；「这条已经变了」也一样</td></tr>
 <tr><td><code>mem_note</code>（写）</td><td><code>note</code>、<code>op</code>（<code>confirm</code> / <code>reject</code> / <code>forget</code> / <code>revise</code> / <code>split</code> / <code>reject_family</code>）、<code>sure</code>、<code>text</code>、<code>family</code></td><td>理解的状态不合这个动作时答 <code>stale</code>（说过不对的只能 <code>forget</code>）；<code>forget</code> 要 <code>sure: true</code>；<code>revise</code> 的 <code>text</code> 最多 200 字、不收凭证，写的是「不对」「那是以前的事了」这类短话时按否定、以前的事处理，答的话照实写；<code>split</code> 只对并进来的（<code>superseded</code>）说法，拆出来成一条单独的猜测；<code>reject_family</code> 的 <code>family</code> 是页上数的那几条编号（2 到 5000 个），和现在这一类对不上答 <code>stale</code>、一条都不否定。只答一句话</td></tr>
 <tr><td><code>mem_forget_tool</code>（写）</td><td><code>tool</code>、<code>sure</code></td><td>即 <code>WholeMemory.forget_tool</code>；<code>tool</code> 须写过东西、不是 <code>luoke-mem</code>，否则 <code>stale</code>；要 <code>sure: true</code>。答删掉的记录和理解条数</td></tr>
+<tr><td><code>mem_learn</code>（写）</td><td><code>tool</code>、<code>on</code></td><td>设置里每个应用的开关：<code>on</code> 是点了以后学不学；即 <code>stop_learning</code> / <code>resume_learning</code>。不用确认</td></tr>
 <tr><td><code>mem_forget_all</code>（写）</td><td><code>confirm</code></td><td><code>confirm</code> 是「清空」才清空整份记忆，否则 <code>invalid</code></td></tr>
 <tr><td><code>mem_person</code>（写）</td><td><code>person</code>、<code>op</code>（<code>reject</code> / <code>forget</code> / <code>rename</code> / <code>merge</code> / <code>split</code>）、<code>sure</code>、<code>name</code>、<code>other</code>、<code>alias</code></td><td><code>forget</code>、<code>split</code> 要 <code>sure: true</code>，没勾答 <code>invalid</code>；<code>rename</code> 带 <code>name</code>，<code>merge</code> 带 <code>other</code>（页上选的那个人），<code>split</code> 带 <code>alias</code>（叫法或邮箱地址）。只答一句话</td></tr>
 <tr><td><code>mem_archive</code>（写）</td><td><code>op</code>（<code>archive</code> / <code>back</code>）、<code>asks</code>（1 到 500 个编号）</td><td>归档或放回页上列出的几件；一件都没做成答 <code>stale</code></td></tr>
 <tr><td><code>mem_open</code>（只读，<code>_meta</code> 带 <code>ai.luoke/where: mac</code>）</td><td><code>note</code>，或 <code>page: "recent"</code> / <code>"people"</code></td><td>只给不认 <code>pageArgs</code> 的核心。起或找到整份记忆的页面，在浏览器里打开到这一条、「最近记下的」或「人」；没有记忆答 <code>not_ready</code>，打不开答 <code>failed</code></td></tr>
 <tr><td><code>outbox_ack</code>（只读）</td><td><code>id</code>、<code>state</code></td><td>只答「好。」，不记：答了的由 <code>mem_reply</code> 关掉，用户放下的在记忆里照旧开着</td></tr>
 </table></div>
-<h3>各页</h3>
-<p>核心在请求的 <code>clientCapabilities.experimental["ai.luoke/a2ui"].features</code> 里列了 <code>pageArgs</code> 时，读页可以带参数：最多 4 个，键是小写字母开头、最多 16 个字符的短名字，值最多 200 字（超过的丢掉，对应的搜索框下写一句说明），同一个键写几次取第一个。同时列了 <code>bigPages</code> 的一页最多 30 条（最多 400 个组件），否则 15 条（最多 200 个组件）；一段文字最多 2000 字。</p>
+<h3>记忆自己拼的页 <code>page/*</code></h3>
+<p>luoke-agent 照 <code>data/*</code> 拼完之前，这些页照旧答。核心在请求的 <code>clientCapabilities.experimental["ai.luoke/a2ui"].features</code> 里列了 <code>pageArgs</code> 时，读页可以带参数：最多 4 个，键是小写字母开头、最多 16 个字符的短名字，值最多 200 字，同一个键写几次取第一个；参数不对（不认识的类、没有的编号、超出的页）照没带或最近的那一页画，不报错。其他认的 features：<code>bigPages</code>（一页放得更多）、<code>confirm</code>（删之前由窗口弹确认，按钮带 <code>sure: true</code> 和 <code>confirm: {title, text, label}</code>）、<code>rowOpen</code>、<code>fieldSubmit</code>、<code>openPage</code>。一段文字最多 2000 字。</p>
 <div class="tbl"><table>
 <tr><th>页</th><th>参数</th><th>内容</th></tr>
-<tr><td><code>overview</code> 概览</td><td>—</td><td>概览那句话；上次归纳的时间和结果（还没归纳过时写「还没有归纳过，会在你不用电脑时进行。」）；各类生效理解的条数（不含精选口味）；「去确认 N 条猜测」；最近 30 天没问就记下的，最多 5 条；最近 14 天各应用写入的记录条数，每个应用有「看每天记了什么」；还在攒证据的别人来信事实有几条和「看这 N 条」</td></tr>
-<tr><td><code>asks</code> 想问的</td><td><code>p</code></td><td>还在问的每件一个「归档」，两件以上有「全部归档（N 件）」；「已归档 N 件」每件一个「放回」→ <code>mem_archive</code></td></tr>
-<tr><td><code>guesses</code> 猜测</td><td><code>from=others</code>、<code>p</code></td><td>状态 <code>proposed</code>、<code>observed</code> 的理解，不含引用了别人来信、记忆也没在问的事实（这些在 <code>from=others</code>）；对 → <code>mem_note</code> <code>confirm</code>、不对 → <code>reject</code>；每条有「看依据」；同话题的事实排在一起</td></tr>
-<tr><td><code>kept</code> 记下的</td><td><code>kind</code>、<code>view</code>（<code>recent</code> / <code>past</code> / <code>rejected</code>）、<code>q</code>、<code>p</code></td><td>生效的理解；带 <code>view</code> 时不看 <code>kind</code>；<code>q</code> 的几个词都要有；精选口味只在 <code>kind=taste</code>（按钮「精选的口味 N」）和以前的事、说过不对的里。每条有「看依据」、不对、忘掉（<code>sure</code> 取勾选框）；以前的事是「现在还是」「不对」，日期写「大约 N 年」；说过不对的只有「忘掉」。同话题的事实排在一起，写「可能和上下 N 条是同一件」（同一机构的算一组，N 是组里其余的条数）</td></tr>
-<tr><td><code>item</code> 一条理解</td><td><code>id</code>、<code>p</code></td><td>原话、类别和状态、理由；对 / 不对、现在还是、改写、「这一类都不要（N 条）」、忘掉、并进来的说法各一个「拆出来」→ <code>mem_note</code>；全部依据原文（谁说的、哪个应用、什么时候、带的数据）按 <code>p</code> 翻页；被改写过的写「已经改成了「…」」和「看改好的」。没带 <code>id</code> 时只有一句说明和回到「记下的」</td></tr>
-<tr><td><code>people</code> 人</td><td><code>q</code>、<code>p</code>；一个人：<code>id</code>、<code>who</code>、<code>wp</code></td><td>列表每人一个「详细」。一个人的页：改名、叫法和地址（最多显示 12 个）各一个「不是这个人」、选另一个人「并成一个」（一组 30 人，<code>wp</code> 翻组、<code>who</code> 按名字或邮箱找）、关于这个人的理解（最多 15 条）、不是一个人、忘掉 → <code>mem_person</code></td></tr>
-<tr><td><code>sources</code> 各应用写的</td><td><code>tool</code>、<code>day</code>、<code>p</code>、<code>forget=1</code></td><td>每个应用（不含 <code>luoke-mem</code>）的记录、理解条数；<code>tool</code>：最近 14 天里记下东西的日子，<code>day</code> 那天记下的原话（新的在前，一页是理解条数上限的 2 倍）；<code>forget=1</code>：先 <code>forget_tool(dry_run=True)</code> 试跑，写会删掉几条记录、几条理解、留下什么，勾上才有「忘掉…写的」→ <code>mem_forget_tool</code>；输入框和「清空整份记忆」→ <code>mem_forget_all</code></td></tr>
+<tr><td><code>overview</code> 概览</td><td>—</td><td>最近了解到的（最多 5 条，不含常用说法），每条「不对」；想跟你确认的最多 3 件，按钮同卡片。没有总条数</td></tr>
+<tr><td><code>all</code> 全部记忆（<code>kept</code> 同）</td><td><code>kind</code> 或 <code>view</code>（<code>pending</code> / <code>past</code> / <code>rejected</code>）、<code>q</code>、<code>p</code></td><td>生效的和待确认的一个列表；只凭一条记录的猜测不列。每条 对（猜测）、不对、看依据、忘掉 → <code>mem_note</code>；以前的事是「现在还是」「不对」；说过不对的只有「忘掉」。一页 8 条，大页 18 条。<code>guesses</code> 是它的待确认</td></tr>
+<tr><td><code>item</code> 一条理解</td><td><code>id</code>、<code>p</code></td><td>原话、类别和状态、理由；对 / 不对、现在还是、改写、「这一类都不要（N 条）」、忘掉、并进来的说法各一个「拆出来」→ <code>mem_note</code>；全部依据原文按 <code>p</code> 翻页。没带 <code>id</code> 时只有一句说明</td></tr>
+<tr><td><code>people</code> 人物</td><td><code>p</code>；一个人：<code>id</code>、<code>who</code>、<code>wp</code></td><td>列表只列有话可说的人，每人一句话，行上写 <code>open</code>。一个人的页：改名、叫法和地址各一个「不是这个人」、选另一个人「并成一个」（<code>wp</code> 翻组、<code>who</code> 按名字或邮箱找）、关于这个人的理解、不是一个人、忘掉 → <code>mem_person</code></td></tr>
+<tr><td><code>settings</code> 设置（<code>sources</code> 同）</td><td><code>tool</code>、<code>day</code>、<code>p</code>、<code>forget=1</code></td><td>每个应用一行：学不学的开关（<code>variant: "switch"</code>）→ <code>mem_learn</code>，看每天记了什么，忘掉它写的（<code>forget=1</code> 先试跑、说会删多少）→ <code>mem_forget_tool</code>；上次整理；「数据」里记住的事和输入法词条的条数；清空整份记忆 → <code>mem_forget_all</code></td></tr>
+<tr><td><code>asks</code> 归档的问题</td><td><code>p</code></td><td>已归档的每件一个「放回」→ <code>mem_archive</code></td></tr>
 </table></div>
-<p>核心没列 <code>pageArgs</code> 时带了参数也不管：每页最多列 15 条，多的写「还有 N 条，在整份记忆里看」，页上有「打开整份记忆」；「人」页每人只有「不是一个人」「忘掉」，「各应用写的」在列表上勾选后直接忘掉。没有记忆时每页只有标题和一句说明。</p>
+<p>核心没列 <code>pageArgs</code> 时带了参数也不管：每页最多列 15 条，多的写「还有 N 条，在整份记忆里看」，页上有「打开整份记忆」；删除用勾选框「我知道删了找不回来」，清空要在输入框里写「清空」。没有记忆时每页只有标题和一句说明。</p>
 
 <h2>界面</h2>
 <p>独立进程，监听 127.0.0.1 随机端口；页面令牌在 <code>?t=</code>，接口令牌在 <code>X-Luoke-Token</code>；校验 Host 和 Origin；600 秒无请求退出。路由：<code>/api/ping</code>、<code>/api/summary</code>、<code>/api/overview</code>、<code>/api/records</code>、<code>/api/notes</code>、<code>/api/note</code>、<code>/api/recent</code>、<code>/api/people</code>（<code>/api/summary</code> 里带人数 <code>people</code>）；修改用 <code>POST /api/change</code>（confirm、reject、reject-family、forget、revise、split（把并进来的一条拆出来）；修改文字截到 200 字，拒绝凭证）、<code>/api/person</code>（rename、merge、split、reject、forget）、<code>/api/forget-tool</code>（拒绝 <code>luoke-mem</code>）、<code>/api/forget-all</code>（需输入「清空」）。<code>/api/grants</code>、<code>/api/grant</code> 为遗留接口，不再影响读取。页面有「人」一页（地址带 <code>view=people</code> 时直接开到这里）：每人的名字、关系、别的叫法、写信的档案和常谈的话题，能改名、并成一个、拆出某个叫法、说不是一个人、忘掉。网页上没有归档。界面状态（pid、端口、令牌）存于 <code>mem.db-ui.json</code>（0600）。</p>
@@ -2695,6 +2723,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-13</h2>
+<ul>
+<li>记忆页、参考页的记忆部分按代码 d1cb709（0.42.0）复核：schema 9；主窗口的记忆页改由 luoke-agent 拼，记忆给原始数据 <code>data/*</code>（十样，字段进参考页）和七个动作；新增每个应用的停学开关（表 <code>stopped</code>、<code>mem_learn</code>）和「是不是同一个人」的提问；问题和建议合起来每天最多三件，只等确认的猜测不再问；记忆自己拼的页改成概览、全部记忆、人物三个标签加齿轮里的设置，删除改成窗口先弹确认；办事用的地址不算人，设备词和大写缩写不当常用说法；已知限制去掉「入口不能直接开到人」。</li>
+</ul>
 
 <h2>2026-11-12</h2>
 <ul>
