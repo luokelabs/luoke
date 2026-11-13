@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0013](../docs/adr/0013-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.41.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支；beta 2 用 0.36.0，`release/beta2`）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.42.0（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支；beta 2 用 0.36.0，`release/beta2`）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -58,7 +58,7 @@
   - 语音热词（0.33）：`hotwords(limit)` 按类分名额（人名最多 40%、英文专名最多 20%、其余给用户自己的说法），请输入法有这个接口时改用它（已提）。
   - 语音热词里的人名和英文专名（输入法 2026-11-09 提，0.30.0 起有）：仍放在 `term` 里，输入法照现在的办法读，不用改；`data.sort` 写 `person`（人名）或 `name`（英文专名），给页面区分用。人名只取用户自己写信给的人，不问用户（常用说法从来不问：错了代价小，页上能点「不对」，候选上 Shift+⌫ 也会否掉）；只给用户写信、用户没回过的人不算。人名来自用户发出的邮件里谈到的人（话题「同事:某人」这类），照表定档（发出的邮件 2 封、相隔 7 天），依据都在 90 天以前的不给；英文专名来自用户打的字（含英文模式），连着的大写开头的词，门槛和别的常用说法一样（3 天、5 次）。
 - **luoke-agent**：想问的、建议从 `asks()` 读，依据从 `note(about_note)["cites"]` 读，回答一律 `reply`；习惯建议（`action.capability == "habit"`）给"好 / 不用 / 别再提"。
-  - **主窗口的记忆页归 luoke-agent**（顶层 ADR 0028，2026-11-13）：页上放什么、什么顺序、按钮、措辞都在 luoke-agent 定；记忆只给原始数据（理解、依据、人、想问的和建议、各应用写了什么、停学名单、整理的时间）和动作（确认、否定、改写、忘掉、并人拆人、停学、回答、归档、清空）。`luoke_mem/agent.py` 里现有的页面层（`page/*`、outbox 卡片的排法和字）由 luoke-agent 牵头商定怎么搬；搬完之前照旧答，记忆这边不再改它的页面内容，界面上的事转给 luoke-agent。0.40 起给原始数据 `data/*`（`recent`、`helped`、`asks`、`notes`、`people`、`person`、`note`、`sources`、`data`，只读，JSON，不带 A2UI 和句子，`v` 是形状版本），形状写在 `luoke-mem/fixtures/agent/README.md`「原始数据」。0.41 起清单 `capabilities.data` 列出这九样，核心见到才照它拼，没列的照旧读 `page/*`；「以后再说」哪种问题都是 `mem_reply` 交 `choice: "later"`，过 7 天再问。
+  - **主窗口的记忆页归 luoke-agent**（顶层 ADR 0028，2026-11-13）：页上放什么、什么顺序、按钮、措辞都在 luoke-agent 定；记忆只给原始数据（理解、依据、人、想问的和建议、各应用写了什么、停学名单、整理的时间）和动作（确认、否定、改写、忘掉、并人拆人、停学、回答、归档、清空）。`luoke_mem/agent.py` 里现有的页面层（`page/*`、outbox 卡片的排法和字）由 luoke-agent 牵头商定怎么搬；搬完之前照旧答，记忆这边不再改它的页面内容，界面上的事转给 luoke-agent。0.40 起给原始数据 `data/*`（`recent`、`helped`、`asks`、`notes`、`people`、`person`、`note`、`sources`、`data`，只读，JSON，不带 A2UI 和句子，`v` 是形状版本），形状写在 `luoke-mem/fixtures/agent/README.md`「原始数据」。0.42 加 `data/ask?id=`（一件要问的事，今天的卡片也能读，带凭的事实、影响到哪个应用、依据和能怎么答）。0.41 起清单 `capabilities.data` 列出这几样，核心见到才照它拼，没列的照旧读 `page/*`；「以后再说」哪种问题都是 `mem_reply` 交 `choice: "later"`，过 7 天再问。
 - **luoke-scan**（原名 luoke-audit，luoke-mem#7 商定，0.26.0 起有，0.27.1 改名，话题 0.27.3 起是 `scan-*`）：扫描是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-scan`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`scan-cleaned`（user / receipt）、`scan-ignored`（user / statement）、`scan-auto-cleaned`（system / activity，`by=rule`）、`scan-malware`（user / receipt）、`scan-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康（旧名，留着）。
 - **luoke-peek**（螺壳探头，和探头商定，beta1 之后做，还没开工）：记录 `web-event-*`（不记 `web-event-seen`），网页上抽的字段放 `data.event`、标 `event_from: "page"`；来源 `sender = "site:<主机名>"`、`category = page_type`；链接只留主机名和路径，路径里像令牌的一段由记忆遮掉；agent 上线前由探头自己显示 `asks(tool="luoke-peek")`。
 - **用户对理解说的话归记忆**：`state`、`confirm`、`reject`、`revise`、`later`、`was`、`reply` 记在 luoke-mem 名下，`data` 是 `{"via": 调用的工具}`；卸载某个工具时，用户确认过、否定过、亲口写的留着。
