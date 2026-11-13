@@ -143,7 +143,6 @@ agent、扫描（原名体检 luoke-audit）和螺壳窗口进同一个 v1.x，�
 - 工具不注册自己的登录项（由系统拉起的配件，例如输入法，是例外），不点名模型，不提供选模型的界面；安装路径由配件类型决定，发布后不变（DESIGN §11）。
 - 后台请求按硬件档限制输入长度、配件分段提交；被 `busy` / `paused` 挡回时按 `retry_after`（有 `retry_after_ms` 就按它）重试，主控不排队（DESIGN §6）。
 - 配件的代码改了、要换装的，同时升清单里的版本号：主控按版本号判断要不要升级。
-- **开发实例里放行 agent 核心（提给 luoke-mail，2026-11-13）**：本机开发实例（`tools/dev_app.sh`，bundle id `ai.luoke.core.<名字>.lab`，ad-hoc 签名）里的 agent 核心连不上邮件助手的 `agent.sock`：邮件助手的开发构建只认 `ai.luoke.core.dev`。希望开发实例也照开发构建放行（照旧核进程路径和父进程，不核签名）。这是安全审查 S2 的那道检查，怎么改由 luoke-mail 定。
 - **主控改名「螺壳」（主人 10-23 定，PR luoke-core#26 的提案）**：internal-1024 起更新程序和安装器认「螺壳.app」和「螺壳主控.app」两个名字，internal-1024-2 起主控叫 `螺壳.app`，internal-1025-3 起装在 `/Applications`（`~/Applications` 里的也认，luoke-core ADR 0012）。bundle id `ai.luoke.core`、数据目录 `~/Library/Application Support/luoke-core`、socket、命令 `luoke` 都不变。配件里写死了主控位置的，要在 internal-1026 之前改成两个名字都认：最好按 bundle id 找（Swift：`NSWorkspace.shared.urlForApplication(withBundleIdentifier: "ai.luoke.core")`），Python 先试 `螺壳.app` 再试 `螺壳主控.app`。已接：luoke-mail 0.17.17（c5a4379）、luoke-ime 0.1.14（9dcbc8b），都是两个名字都认。给用户看的文字里的「螺壳主控」随各自的版本改成「螺壳」。
 
 ## 完全磁盘访问（2026-11-02 定）
