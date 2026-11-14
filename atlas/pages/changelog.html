@@ -3,6 +3,7 @@
 
 <h2>2026-11-14</h2>
 <ul>
+<li>主控页、接口、配件清单、本机文件、术语、出版页按代码 62f5427（主控 0.2.0）复核：主控不再核配件版本，只认配件名；配件清单新增可选的 <code>min_core</code>，主控比它旧时答 <code>core_too_old</code>（403）；留有上一版的都能换回；去掉本机放行、<code>local-verified.json</code>、<code>verified-history.json</code>。</li>
 <li>邮件页按代码 06a251f（0.19.65）复核：窗口页面从八页到十页（今日、收件箱、精选、清理四个标签页，其余六页收起；新增「清理旧邮件」「精选内容」，今日、收件箱、精选、清理四页重写）；新增「给主窗口的原始数据和动作」（九个 <code>data/*</code> 资源、34 个动作，含 <code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code>）和「数据快照」（开发实例里只看不连邮箱）；新增「往外连的地址」（一键退订和读用户网站不连本机和局域网地址）；已知限制加两条。</li>
 <li>邮件页按代码 21a0ccc（0.19.66）复核：数据快照下 <code>mail_remove</code>、<code>mail_forget</code> 也回 <code>invalid</code>；写明各样原始数据怎么翻页、退订网址为什么不判公网地址。</li>
 </ul>

@@ -7,6 +7,7 @@
 <tr><th>字段</th><th>说明</th></tr>
 <tr><td><code>contract</code>、<code>accessory</code>、<code>bundle_id</code></td><td>必填</td></tr>
 <tr><td><code>name</code>、<code>version</code></td><td>显示名和版本；升级只换比清单旧的版本（按数字比较，不降级）</td></tr>
+<tr><td><code>min_core</code></td><td>可选：这个配件要的最低主控版本；本机主控比它旧时，它的请求一律答 <code>core_too_old</code></td></tr>
 <tr><td><code>type</code></td><td><code>app</code>（单独成包时装在 <code>~/Applications</code>）、<code>input-method</code>（装在 <code>~/Library/Input Methods</code>）、<code>component</code>；单独成包的 app 才由本体按常驻拉起。螺壳里的应用不按这个字段当 .app 去打开、升级、回滚、拉起，由本体自己起</td></tr>
 <tr><td><code>entry</code></td><td>交给自带 Python 的入口参数</td></tr>
 <tr><td><code>resident</code></td><td>是否常驻（配件也可经 <code>PUT /accessory/resident</code> 声明）</td></tr>
@@ -46,7 +47,7 @@
 
 <h3>校验</h3>
 <ul>
-<li><b>调用时</b>：版本在配方 <code>verified</code> 中，或在内部版、本机版主控上被本机放行（<code>tools/local_allow.py</code>，只放行配方中已有配件的新版本）；或是本机 <code>verified-history.json</code> 中记录过的已安装版本（只限记录中的任务）。</li>
+<li><b>调用时</b>：主控只看身份头里的配件名，不核版本：配方里有它（<code>verified</code> 里有，或有任务归它）、或装着的配件，哪一版都接；任务能不能用只看这一档开没开。清单写了 <code>min_core</code> 而主控比它旧的，答 <code>core_too_old</code>，要先更新螺壳。配件的质量底线由配件发版的 CI 把。</li>
 <li><b>安装时</b>：代码签名、Team ID <code>NJQ5W3T9K5</code>、bundle id 与清单一致、公证票据有效。</li>
 <li><b>回滚时</b>：旧版同样核签名、Team ID、bundle id、公证票据，不运行它，版本从其清单读取。</li>
 <li><b>起螺壳里的程序时</b>：只核螺壳扫描：停着起，核正在跑的进程是 Developer ID 签的、团队和螺壳自己的一样、标识是写死的那个、签名里的版本等于螺壳 <code>Info.plist</code> 的 <code>LuokeScanVersion</code>，核完才放行（临时签名的开发版、实验室构建不核）。邮件助手、螺壳搜索、agent 核心起之前不核。</li>
@@ -60,7 +61,7 @@
 <tr><td><code>assignment.&lt;档&gt;</code></td><td><code>{base, special: {&lt;任务&gt;: &lt;模型&gt;}}</code></td></tr>
 <tr><td><code>engine</code></td><td>引擎版本和位置</td></tr>
 <tr><td><code>tasks.&lt;名&gt;</code></td><td><code>accessory</code>、<code>kind</code>（generate / score / predict / embed）、<code>params</code>（<code>"*"</code> 加按档覆盖）、<code>base_params</code>（采样）、<code>latency_ms</code>、<code>tiers</code>（开启的档）</td></tr>
-<tr><td><code>verified.&lt;配件&gt;</code></td><td><code>versions</code>（允许接入的版本）和各任务的评测证据</td></tr>
+<tr><td><code>verified.&lt;配件&gt;</code></td><td><code>versions</code>（发布时评测过的版本）和各任务的评测证据；出版时写入，主控只用它认配件名，不按它核版本</td></tr>
 <tr><td><code>evidence</code></td><td>评测记录：配件、版本、任务、模型、档、结论、评测集和证据的 sha256</td></tr>
 <tr><td><code>expectations</code></td><td>首次运行预检页照实说明的体验：<code>tiers</code> 按档（如 16 GB 档：邮件后台整理平均每封约 50 秒，点「同步新邮件」每封约 22 秒），<code>ime</code> 按芯片类别（<code>m1</code>、<code>base</code>、<code>pro</code>），<code>typing_unsupported</code> 用在不支持打字归纳的档</td></tr>
 </table></div>

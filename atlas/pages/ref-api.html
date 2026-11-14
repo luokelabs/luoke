@@ -5,7 +5,7 @@
 <h2>连接</h2>
 <ul>
 <li><b>socket</b>：<code>~/Library/Application Support/luoke-core/run/hub.sock</code>（目录 0700，文件 0600）。配件依次查找：显式路径 → 环境变量 <code>LUOKE_HUB_SOCKET</code> → 默认位置；给了显式路径而它不存在时报错，不退回。</li>
-<li><b>身份</b>：请求头 <code>X-Luoke-Accessory: &lt;配件&gt;/&lt;版本&gt;</code>。版本须在配方 <code>verified</code> 中，或本机放行（只在内部版、本机版），或是本机 <code>verified-history.json</code> 中有记录的已安装版本（换回的上一版，只能用记录中的任务）；带任务名的请求还要求任务存在且属于该配件。</li>
+<li><b>身份</b>：请求头 <code>X-Luoke-Accessory: &lt;配件&gt;/&lt;版本&gt;</code>。主控只认配件名（配方里有它、或装着），不核版本；配件清单的 <code>min_core</code> 比主控版本新时答 <code>core_too_old</code>；带任务名的请求还要求任务存在且属于该配件。</li>
 <li><b>响应头</b>：<code>X-Luoke-Contract: 1</code>、<code>X-Luoke-Tasks-Version</code>（配方、档、模型分配、引擎版本、任务参数的摘要，有嵌入任务时还含向量空间；变化即应重读 <code>/tasks</code>）。</li>
 <li><b>请求体</b>为 JSON，上限 32 MB，超过答 <code>invalid_request</code>。</li>
 <li><b>启动和退出</b>：主控启动期间只答 <code>/tasks</code>、<code>/status</code>、<code>/downloads</code>，别的答 <code>busy</code>（retry_after 5）；退出期间答 <code>engine_failed</code>。</li>
@@ -16,7 +16,8 @@
 <div class="tbl"><table>
 <tr><th>HTTP</th><th>code</th><th>含义</th></tr>
 <tr><td>400</td><td><code>invalid_request</code></td><td>请求格式或参数不合法；没有这个路由</td></tr>
-<tr><td>403</td><td><code>unknown_accessory</code></td><td>缺身份头，配件或版本未通过验证，或任务不属于该配件</td></tr>
+<tr><td>403</td><td><code>unknown_accessory</code></td><td>缺身份头，主控不认得这个配件，或任务不属于该配件</td></tr>
+<tr><td>403</td><td><code>core_too_old</code></td><td>配件清单的 <code>min_core</code> 比本机主控的版本新：先更新螺壳</td></tr>
 <tr><td>403</td><td><code>forbidden</code></td><td>主控本体专用的路由，对端不是本体（或允许的命令行）</td></tr>
 <tr><td rowspan="2">404</td><td><code>task_unavailable</code></td><td>任务不存在，或现在用不了（模型要下载、正在下载、暂停，原因同 <code>/tasks</code> 的 <code>reason</code>）；换回的上一版调用其记录外的任务</td></tr>
 <tr><td><code>unsupported</code></td><td>本档不支持该任务，或配件还没在这一版螺壳里验证过；这一构建或这个配件不支持该操作</td></tr>
@@ -77,7 +78,7 @@
 <tr><td><code>POST /accessories/reregister</code></td><td><code>{accessory}</code> → <code>{accessory, app, unregistered_others, killed}</code>：重新登记单独装的配件（结束进程，注销同 bundle id 的其他副本，复制一份换回原位）；没装答 <code>unsupported</code></td></tr>
 <tr><td><code>POST /accessories/restart</code></td><td><code>{accessory}</code> → <code>{accessory, app, killed}</code>：重新启动输入法（结束进程再拉起）；没装或不是输入法答 <code>unsupported</code></td></tr>
 <tr><td><code>POST /uninstall</code></td><td><code>{accessory, data?, forget?, dry_run?}</code>；<code>dry_run</code> 只答计划（要删的 .app、旧版、数据路径，能从记忆里忘掉多少），真卸载答复另列 <code>removed</code>、<code>errors</code>。先停它的空闲任务；也删除 <code>previous.noindex</code> 里该配件的旧版（答复 <code>previous</code>、<code>previous_copies</code>）；螺壳里带的应用没有 .app 可删，只记停用；螺壳记忆不能单独卸载（<code>invalid_request</code>）；没装答 <code>unsupported</code></td></tr>
-<tr><td><code>GET /accessories/previous</code></td><td>留有旧版的配件：<code>{accessories: [{accessory, name, type, bundle_id, current, previous, verified, release}]}</code>；<code>verified</code> 为假的不能换回</td></tr>
+<tr><td><code>GET /accessories/previous</code></td><td>留有旧版的配件：<code>{accessories: [{accessory, name, type, bundle_id, current, previous, verified, release}]}</code>；留有旧版的都能换回，<code>verified</code> 恒为真、<code>release</code> 恒为空（留给旧界面读）</td></tr>
 <tr><td><code>POST /accessories/rollback</code></td><td><code>{accessory}</code> → <code>{accessory, from, to, type, bundle_id}</code>；无旧版或无验证记录 <code>unsupported</code>，签名不过 <code>invalid_request</code>，对调失败 <code>engine_failed</code></td></tr>
 <tr><td><code>POST /jobs/run</code></td><td>（不要求身份）<code>{job}</code>（<code>&lt;配件&gt;.&lt;任务名&gt;</code>）→ <code>{job, queued}</code>：让某个空闲任务在下一个安静时刻运行，不等最小间隔，其余条件照旧；只在内部版、本机版和实验室版可用，其他答 <code>unsupported</code></td></tr>
 </table></div>
