@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-14 12:00</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-14 12:18</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -557,7 +557,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.65，按代码 06a251f 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.66，按代码 21a0ccc 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -681,8 +681,8 @@ sequenceDiagram
 <tr><td><code>data/providers</code></td><td>无</td><td>五种邮箱（<code>gmail</code>、<code>qq</code>、<code>163</code>、<code>126</code>、<code>custom</code>）怎么连：<code>key</code>、<code>name</code>、<code>host</code>、<code>port</code>、<code>secret_label</code>、<code>secret_hint</code>、<code>steps</code>、<code>links</code>、<code>notes</code>、<code>trouble</code></td></tr>
 </table></div>
 <ul>
-<li><b>大小</b>：一个列表最多 200 条（<code>LIST_MOST</code>）；只有 <code>data/inbox</code> 和 <code>data/activity</code> 用 <code>cursor</code> 翻页，其余的超出就截掉。</li>
-<li><b>遮凭证</b>：来自邮件的文字（主题、摘要、正文、发件人名字、收件人和抄送的名字、附件名、精选的标题和理由）先过 <code>memory.mask</code>。发件人地址、规则里的地址和值、<code>data/accounts</code> 的 <code>error</code>、草稿的说明不遮。网址只给 https。</li>
+<li><b>大小</b>：一个列表最多 200 条（<code>LIST_MOST</code>）；只有 <code>data/inbox</code> 和 <code>data/activity</code> 用 <code>cursor</code> 翻页；<code>data/digest</code> 给前 200 条，<code>data/today</code>、<code>data/clean</code> 给全部。</li>
+<li><b>遮凭证</b>：来自邮件的文字（主题、摘要、正文、发件人名字、收件人和抄送的名字、附件名、精选的标题和理由）先过 <code>memory.mask</code>。发件人地址、规则里的地址和值、<code>data/accounts</code> 的 <code>error</code>、草稿的说明不遮。网址只给 https；<code>data/clean</code> 里的退订网址是给用户在浏览器里打开的，邮件助手自己不去请求，所以不判是不是公网地址。</li>
 <li><b>动作</b>是 34 个会改东西的工具，都要 <code>ai.luoke/user-action</code>，没有就回 <code>needs_user_action</code>：
 <ul>
 <li>处理邮件：<code>mail_act</code>（归档、删除、移到垃圾邮件、加星标、标已读或未读）、<code>mail_undo_step</code>、<code>mail_calendar</code>、<code>mail_draft</code>、<code>mail_draft_save</code>、<code>mail_change</code>（改建议，可同时建规则）、<code>mail_sync</code>、<code>mail_job_stop</code>；</li>
@@ -697,7 +697,7 @@ sequenceDiagram
 </ul>
 
 <h3>数据快照</h3>
-<p>在开发实例里（螺壳.app 的 bundle id 是 <code>ai.luoke.core.dev</code> 或 <code>ai.luoke.core.&lt;名&gt;.lab</code>），数据目录里配了邮箱、但钥匙串里一个授权码也没有时，邮件助手把这份数据当成快照：只看，不连邮箱。<code>data/accounts</code> 的 <code>status</code> 报 <code>snapshot</code>；要连邮箱的动作回 <code>failed</code>（「这是数据的快照，只看不连邮箱。」）；<code>mail_connect</code> 回 <code>invalid</code>；后台不同步。</p>
+<p>在开发实例里（螺壳.app 的 bundle id 是 <code>ai.luoke.core.dev</code> 或 <code>ai.luoke.core.&lt;名&gt;.lab</code>），数据目录里配了邮箱、但钥匙串里一个授权码也没有时，邮件助手把这份数据当成快照：只看，不连邮箱。<code>data/accounts</code> 的 <code>status</code> 报 <code>snapshot</code>；要连邮箱的动作回 <code>failed</code>（「这是数据的快照，只看不连邮箱。」）；<code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code> 回 <code>invalid</code>（「这是数据的快照，只看不改邮箱。」）；后台不同步。</p>
 
 <h2>主控任务</h2>
 <p>提示词是包里的文件 <code>luoke_mail/prompts/</code>（随包打进螺壳.app）：每个任务一组 <code>.system.txt</code>、<code>.user.txt</code>、<code>.schema.json</code>，要重问的另有 <code>.retry.txt</code>，几个任务共用的句子在 <code>_shared.txt</code>；分拣自己的说明和 schema 还在 <code>triage.py</code>。每个任务的要点见<a href="#ref-prompts">提示词</a>页。</p>
@@ -800,9 +800,8 @@ sequenceDiagram
 <li>正文只有图片的邮件，模型看不到图里的字。一封邮件最多识别 4 个日程。</li>
 <li>网易默认只开放最近 30 天的邮件给 IMAP。</li>
 <li>agent.sock 的对端核对挡不住本账户里有意冒充螺壳 agent 的程序（见「agent 接口」）。</li>
-<li>给主窗口的原始数据：一个列表最多 200 条，只有收件箱和处理记录能翻页，精选、今日、清理超出的看不到；<code>data/clean</code> 给的退订网址只看是不是 https，没看是不是公网地址（执行退订时会再看）。</li>
-<li>窗口里自己画的收件箱页不认 <code>plan</code> 和 <code>part</code>：卡片上的「看是哪几封」在这一页打开的是默认列表。</li>
-<li>数据快照下 <code>mail_remove</code>、<code>mail_forget</code> 没有拦，照样删这份快照里的数据。</li>
+<li>给主窗口的原始数据：一个列表最多 200 条，只有收件箱和处理记录能翻页，精选只给前 200 条。</li>
+<li>窗口里自己画的收件箱页不认 <code>plan</code> 和 <code>part</code>：卡片上的「看是哪几封」在这一页打开的是默认列表；主窗口自己拼的收件箱读 <code>data/inbox</code>，认这两个参数。</li>
 <li>螺壳窗口里的页面：一页最多 400 个组件、列表一屏一般 20 封，要翻页；页上有填过的输入时不会自己更新进度，要点「刷新」；没有「记忆」页、选模型服务和外观设置；大页、带参数打开、密码框、自动刷新、存文件和后加的图标都要本体列出对应写法才用，没列的退回原来的做法（200 个组件、点「刷新」、到浏览器页面添加邮箱、过滤器存进「下载」、卡片上的按钮打开浏览器页面）。</li>
 <li>模型给的「高」优先级偏多：代码只把已过期的按「中」显示，没过期的照旧。</li>
 <li><code>settle_risks</code> 只放行以前来过信的发件方：新连的邮箱、或某个官方域名第一次来信时，被模型当成冒充的正常邮件仍标可疑。</li>
@@ -2771,7 +2770,8 @@ sequenceDiagram
 
 <h2>2026-11-14</h2>
 <ul>
-<li>邮件页按代码 06a251f（0.19.65）复核：窗口页面从八页到十页（今日、收件箱、精选、清理四个标签页，其余六页收起；新增「清理旧邮件」「精选内容」，今日、收件箱、精选、清理四页重写）；新增「给主窗口的原始数据和动作」（九个 <code>data/*</code> 资源、34 个动作，含 <code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code>）和「数据快照」（开发实例里只看不连邮箱）；新增「往外连的地址」（一键退订和读用户网站不连本机和局域网地址）；已知限制加三条。</li>
+<li>邮件页按代码 06a251f（0.19.65）复核：窗口页面从八页到十页（今日、收件箱、精选、清理四个标签页，其余六页收起；新增「清理旧邮件」「精选内容」，今日、收件箱、精选、清理四页重写）；新增「给主窗口的原始数据和动作」（九个 <code>data/*</code> 资源、34 个动作，含 <code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code>）和「数据快照」（开发实例里只看不连邮箱）；新增「往外连的地址」（一键退订和读用户网站不连本机和局域网地址）；已知限制加两条。</li>
+<li>邮件页按代码 21a0ccc（0.19.66）复核：数据快照下 <code>mail_remove</code>、<code>mail_forget</code> 也回 <code>invalid</code>；写明各样原始数据怎么翻页、退订网址为什么不判公网地址。</li>
 </ul>
 
 <h2>2026-11-13</h2>
