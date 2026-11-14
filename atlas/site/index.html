@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-13 16:56</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-14 12:00</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -557,7 +557,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.50，按代码 7cdb505 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.65，按代码 06a251f 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -642,27 +642,62 @@ sequenceDiagram
 <p>浏览器页面在 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
 
 <h3>螺壳主窗口里的页面</h3>
-<p>邮件助手把自己的页面画成 A2UI v0.9 的组件（目录 <code>ai.luoke/a2ui/agent/1</code>），由螺壳主窗口显示。每页是一个 MCP 资源 <code>luoke://luoke-mail/page/&lt;id&gt;</code>，共八页（清单 <code>service.pages</code>），代码在 <code>luoke_mail/window/</code>。</p>
+<p>邮件助手把自己的页面画成 A2UI v0.9 的组件（目录 <code>ai.luoke/a2ui/agent/1</code>），由螺壳主窗口显示。每页是一个 MCP 资源 <code>luoke://luoke-mail/page/&lt;id&gt;</code>，共十页（清单 <code>service.pages</code>），代码在 <code>luoke_mail/window/</code>。前四页是标签页；后六页在清单里标 <code>hidden</code>，不出现在标签上，从别的页的按钮进（处理记录另有一个 <code>history</code> 图标）。</p>
 <div class="tbl"><table>
 <tr><th>id</th><th>页面</th><th>内容和动作</th></tr>
-<tr><td><code>today</code></td><td>今日处理</td><td>可看前 7 天；分「等你处理」「以前的未读」「已读，留在收件箱」「已自动处理」「你处理的」；每封可撤销、标为未读、改建议；「等你处理」一节下有一行「收件箱里一共 N 封要你处理」和主按钮「到收件箱处理」（N 是这个邮箱里所有等着的，和螺壳首页那行、卡片上的数一致），这一节里的每封不再重复写「等你处理」</td></tr>
-<tr><td><code>inbox</code></td><td>收件箱</td><td>统计、同步新邮件、快到期（前 3 封）、「需要你处理」「可以直接处理」「判为可疑」「全部」四个列表；每封按建议给按钮（移到垃圾邮件、写草稿、加入日程（最多 3 个）、加星标、完成并归档、归档、删除）、查看原文、改建议（可同时记成发件人、域名、邮件列表的规则）、跳过、看草稿并存进草稿箱。带参数打开时（<code>page/inbox?id=…</code> 打开那一封；<code>?box=…&amp;list=needs|suspicious</code> 切到那个邮箱和列表）参数只用一次；那封已处理或不在收件箱时写「这封邮件已经处理过了，或者不在收件箱里。」并给「返回列表」</td></tr>
-<tr><td><code>clean</code></td><td>清理</td><td>收件箱中的旧邮件和已归档的邮件；分「建议删除」「待确认」「建议归档」「未分析」（已归档的是「建议删除」「建议保留」「未分析」）；读取邮件、继续分析或暂停、勾选和全选、处理、开启处理模式</td></tr>
-<tr><td><code>digest</code></td><td>精选</td><td>精选、收藏、已归档三栏和精选来源；打开、收藏、没兴趣、归档或移回、移出来源、暂停阅读</td></tr>
+<tr><td><code>today</code></td><td>今日</td><td>三块：「今天替你处理了 N 封」，每次处理一行，行上可撤销；「要你定的」最多 3 封，每封预选好建议的做法，一个按钮「按选择处理」；一行「还有 N 封等你回复」，点开到收件箱</td></tr>
+<tr><td><code>inbox</code></td><td>收件箱</td><td>五个列表：「等你回复」（默认）、「要你处理」、「可以直接处理」、「可疑」、「全部」，每封一行；同步新邮件；点开一封后按建议给按钮（移到垃圾邮件、写草稿、加入日程、加星标、归档、删除）、查看原文、改建议（可同时记成规则）、看草稿并存进草稿箱。没有「快到期」一节。带参数打开：<code>?id=…</code> 打开那一封；<code>?box=…&amp;list=…</code> 切到那个邮箱和列表；参数只用一次；那封已处理或不在收件箱时写「这封邮件已经处理过了，或者不在收件箱里。」并给「返回列表」</td></tr>
+<tr><td><code>digest</code></td><td>精选</td><td>每条是标题加一句摘要，点开进「精选内容」页；不显示话题行和各栏的条数，空的栏不列</td></tr>
+<tr><td><code>clean</code></td><td>清理</td><td>两组：「可以退订」「可以归档」，各列 8 个发件人，每个给「退订」（或归档）和「留着别再问」；「全部退订（N 个）」「全部归档（N 封）」先确认；另有按钮进「订阅体检」和「清理旧邮件」</td></tr>
+<tr><td><code>legacy-settings</code></td><td>邮箱和设置</td><td>「账号」（设为螺壳自己的邮箱或改回、移除、给邮箱起名字；添加邮箱、修改授权码在页里填，授权码用密码框，「保存并测试连接」）、「规则」（「管理规则」进规则页）、「提醒」；其余（处理模式、后台自动整理、自动标已读、往来邮件、功耗、分析范围和署名、学习的开关、用户网站、全部清除）收在「更多设置」下</td></tr>
+<tr><td><code>activity</code></td><td>处理记录</td><td>操作记录逐条一行，右边是撤销（退订除外）</td></tr>
+<tr><td><code>rules</code></td><td>规则</td><td>添加、删除、预演 Gmail 过滤器，导出到 Gmail（过滤器文件交给螺壳窗口的保存对话框；本体不支持存文件时存进「下载」），打开 Gmail 过滤器设置；列出按习惯自动处理的那些习惯；邮件列表的规则按发件人的名字显示，不显示 List-Id</td></tr>
 <tr><td><code>subs</code></td><td>订阅体检</td><td>开始体检、退订等发件人操作、清理历史邮件；网页退订给 https 链接，要发信退订的写明寄到哪；可疑发件人不给退订</td></tr>
-<tr><td><code>rules</code></td><td>规则</td><td>添加、删除、预演 Gmail 过滤器，导出到 Gmail（过滤器文件交给螺壳窗口的保存对话框；本体不支持存文件时存进「下载」），打开 Gmail 过滤器设置；列出按习惯自动处理的那些习惯；邮件列表的规则按发件人的名字显示（取这个列表最新一封的发件人名，没有名字用地址），不显示 List-Id</td></tr>
-<tr><td><code>activity</code></td><td>处理记录</td><td>操作记录逐条可撤销（退订除外）</td></tr>
-<tr><td><code>settings</code></td><td>设置</td><td>邮箱（设为螺壳自己的邮箱或改回、移除；添加邮箱、修改授权码在页里填，授权码用密码框，「保存并测试连接」；本体不支持密码框时要到浏览器页面填）、处理模式、后台自动整理、自动标已读、往来邮件、功耗、分析范围和署名、学习的开关、用户网站、全部清除</td></tr>
+<tr><td><code>sweep</code></td><td>清理旧邮件</td><td>收件箱中的旧邮件和已归档的邮件；分「建议删除」「待确认」「建议归档」「未分析」（已归档的是「建议删除」「建议保留」「未分析」）；读取邮件、继续分析或暂停、勾选和全选、处理、开启处理模式</td></tr>
+<tr><td><code>piece</code></td><td>精选内容</td><td>一条精选：标题、来源、日期、摘要、为什么选它；在浏览器或 Gmail 里打开；「多来点」「少来点」；每条只记一次打开</td></tr>
 </table></div>
 <ul>
 <li><b>两个工具</b>：<code>mail_view{page, button}</code> 只读，换显示的内容（翻页、筛选、展开、切换邮箱）；<code>mail_do{page, button, fields, choices, checks, secrets}</code> 会改东西，要用户在页面上点过：<code>ai.luoke/user-action</code> 里的 <code>componentId</code> 要等于 <code>button</code>、<code>surfaceId</code> 要以这一页结尾，否则拒绝；页面已经变了就请用户再点一次。</li>
 <li><b>能做什么</b>：按钮只带页面和按钮的编号，动作从最近 8 次画出的页面里查；能调的处理函数只在允许清单 <code>window.OPS</code> 里，另有四个本机动作：把 .ics 交给「日历」、打开浏览器里的设置或邮箱页、保存邮箱并测试连接（授权码只从密码框来，存进钥匙串）、导出 Gmail 过滤器。输入只收这一页画出来的输入框、密码框、选项和勾选，文字截到 2000 字。</li>
 <li><b>大小</b>：一页最多 400 个组件，列表一屏的条数翻倍（一般 20 封）；本体没列 <code>bigPages</code> 时是 200 个组件、一屏 10 封。每段文字最多 2000 字。</li>
-<li><b>本体列了才用的五样</b>：大页（<code>bigPages</code>）、带参数打开页面（<code>pageArgs</code> 和 <code>openPage</code>）、密码框（<code>secureField</code>）、自动刷新（<code>pageRefresh</code>）、存文件（<code>saveFile</code>）。每次请求看本体列了哪些，没列的退回原来的做法。</li>
+<li><b>本体列了才用的</b>：大页（<code>bigPages</code>）、带参数打开页面（<code>pageArgs</code> 和 <code>openPage</code>）、密码框（<code>secureField</code>）、自动刷新（<code>pageRefresh</code>）、存文件（<code>saveFile</code>）；六个后加的图标（撤销、记录、多来点、少来点、退订、留着别再问）在本体列了 <code>lucide2</code> 时才用。每次请求看本体列了哪些，没列的退回原来的做法。</li>
 <li><b>来自邮件的文字</b>先遮凭证、只当纯文字显示；链接只给 https，由螺壳先说明去哪。</li>
-<li><b>确认和结果</b>：要确认的操作在页面里显示「确认 / 取消」；做完在页面顶上显示结果和「撤销 / 知道了」；有任务在跑时顶上有一行「停止」，页面每 3 秒自己重读（清理的分析进度 5 秒）；页上有填过的输入，或本体没列 <code>pageRefresh</code> 时改给「刷新」按钮。选的邮箱各页共用，记在邮件助手这边。</li>
+<li><b>确认和结果</b>：要确认的操作在页面里显示「确认 / 取消」；做完在页面顶上显示结果和「撤销 / 知道了」；有任务在跑时顶上有一行「停止」，页面每 3 秒自己重读（清理的分析进度 5 秒）；页上有填过的输入，或本体没列 <code>pageRefresh</code> 时改给「刷新」按钮。选的邮箱各页共用，记在邮件助手这边；切换邮箱的地方显示用户给邮箱起的名字。</li>
 <li><b>留在浏览器页面的</b>：选模型服务、外观、打开整份记忆、「记忆」页；本体不支持密码框时，填邮箱授权码也在浏览器页面。</li>
 </ul>
+
+<h3>给主窗口的原始数据和动作</h3>
+<p>除了自己画的页面，邮件助手另给一套不带界面的数据和动作，供主窗口自己拼页面用（清单 <code>capabilities.data</code> 和 <code>actions</code>，代码在 <code>luoke_mail/agent_data.py</code>）。数据是九个只读的 MCP 资源 <code>luoke://luoke-mail/data/&lt;名&gt;</code>，出错时回 <code>{"error": {"code", "message"}}</code>。</p>
+<div class="tbl"><table>
+<tr><th>资源</th><th>参数</th><th>内容</th></tr>
+<tr><td><code>data/accounts</code></td><td>无</td><td><code>accounts[]</code>：<code>id</code>、<code>address</code>、<code>name</code>（用户起的名字）、<code>provider</code>、<code>own</code>（是不是螺壳自己的邮箱）、<code>last_sync</code>、<code>status</code>（<code>ok</code> / <code>needs_auth</code> / <code>error</code> / <code>snapshot</code>）、<code>error</code>；另有 <code>demo</code>（在用示例邮件）和 <code>job</code>（正在跑的任务）</td></tr>
+<tr><td><code>data/today</code></td><td><code>account</code></td><td><code>day</code>；<code>handled[]</code>（每次处理一条：<code>log_id</code>、<code>account</code>、<code>at</code>、<code>by</code>、<code>op</code>、<code>count</code>、<code>senders</code>（最多 5 个）、<code>categories</code>、<code>label</code>、<code>ok</code>、<code>undoable</code>、<code>undone</code>）；<code>picked</code>；<code>decide[]</code>（要用户定的，带 <code>ways</code>、<code>suggested</code>、<code>late</code>）；<code>replies</code>（等回复的封数）</td></tr>
+<tr><td><code>data/inbox</code></td><td><code>account</code>、<code>list</code>、<code>cursor</code>；或 <code>plan</code>、<code>part</code></td><td><code>list</code> 取 <code>reply</code>（默认）、<code>needs</code>、<code>suspicious</code>、<code>direct</code>、<code>all</code>；回 <code>items</code>、<code>counts</code>、<code>more</code>、<code>cursor</code>。带 <code>plan</code> 和 <code>part</code>（<code>todo</code> / <code>tidy</code> / <code>sus</code>）时给那张「邮箱」卡那一块里的邮件，另回 <code>plan{id, part, state}</code></td></tr>
+<tr><td><code>data/digest</code></td><td><code>account</code>、<code>range</code></td><td><code>range</code>、<code>items</code>、<code>counts{saved, archived, sources}</code>、<code>months</code>、<code>reading</code>（订阅是不是在读）</td></tr>
+<tr><td><code>data/clean</code></td><td><code>account</code></td><td><code>unsubscribe{checked_at, days, senders}</code>、<code>archive{scanned_at, days, judged, total, judging, groups}</code></td></tr>
+<tr><td><code>data/settings</code></td><td>无</td><td><code>accounts</code>、<code>rules</code>、<code>habits</code>、<code>auto</code>、<code>more</code></td></tr>
+<tr><td><code>data/activity</code></td><td><code>cursor</code>（一条记录的 <code>log_id</code>）</td><td>操作记录，新的在前</td></tr>
+<tr><td><code>data/mail</code></td><td><code>id</code>（本机编号，或 <code>&lt;邮箱&gt;|&lt;Message-ID&gt;</code>）</td><td>一封邮件：信头、摘要、建议、正文（最多 8000 字）</td></tr>
+<tr><td><code>data/providers</code></td><td>无</td><td>五种邮箱（<code>gmail</code>、<code>qq</code>、<code>163</code>、<code>126</code>、<code>custom</code>）怎么连：<code>key</code>、<code>name</code>、<code>host</code>、<code>port</code>、<code>secret_label</code>、<code>secret_hint</code>、<code>steps</code>、<code>links</code>、<code>notes</code>、<code>trouble</code></td></tr>
+</table></div>
+<ul>
+<li><b>大小</b>：一个列表最多 200 条（<code>LIST_MOST</code>）；只有 <code>data/inbox</code> 和 <code>data/activity</code> 用 <code>cursor</code> 翻页，其余的超出就截掉。</li>
+<li><b>遮凭证</b>：来自邮件的文字（主题、摘要、正文、发件人名字、收件人和抄送的名字、附件名、精选的标题和理由）先过 <code>memory.mask</code>。发件人地址、规则里的地址和值、<code>data/accounts</code> 的 <code>error</code>、草稿的说明不遮。网址只给 https。</li>
+<li><b>动作</b>是 34 个会改东西的工具，都要 <code>ai.luoke/user-action</code>，没有就回 <code>needs_user_action</code>：
+<ul>
+<li>处理邮件：<code>mail_act</code>（归档、删除、移到垃圾邮件、加星标、标已读或未读）、<code>mail_undo_step</code>、<code>mail_calendar</code>、<code>mail_draft</code>、<code>mail_draft_save</code>、<code>mail_change</code>（改建议，可同时建规则）、<code>mail_sync</code>、<code>mail_job_stop</code>；</li>
+<li>精选：<code>mail_digest_feedback</code>、<code>mail_digest_archive</code>、<code>mail_digest_open</code>、<code>mail_digest_reading</code>、<code>mail_digest_source</code>；</li>
+<li>订阅和旧邮件：<code>mail_unsubscribe</code>（收 <code>keys[]</code>，只做一键退订；里面有一个不能一键退订或发件人可疑，整次都不做；回 <code>done</code>、<code>web</code>、<code>failed</code>）、<code>mail_sender_keep</code>、<code>mail_sender_rule</code>、<code>mail_sender_history</code>、<code>mail_subscriptions_check</code>、<code>mail_old_scan</code>、<code>mail_old_judge</code>、<code>mail_old_archive</code>、<code>mail_old_keep</code>；</li>
+<li>设置和规则：<code>mail_settings</code>、<code>mail_set_name</code>、<code>mail_set_own</code>、<code>mail_learn</code>、<code>mail_site</code>、<code>mail_rule_add</code>、<code>mail_rule_delete</code>、<code>mail_rule_preview</code>、<code>mail_gmail_filters</code>；</li>
+<li>邮箱：<code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code>。<code>mail_unsubscribe</code>、<code>mail_remove</code>、<code>mail_forget</code> 在工具说明里标 <code>destructiveHint</code>。</li>
+</ul></li>
+<li><b><code>mail_connect</code></b>（<code>provider</code>、<code>address</code>、<code>secret</code>、<code>host</code>、<code>port</code>、<code>key</code>）：授权码只写不读、最长 512 字，存进钥匙串。存好后试连一次：连上回 <code>account</code>、<code>total</code>、<code>unseen</code>；连不上回 <code>failed</code>，带 <code>{saved: true, account, code: "failed"}</code> 和「已保存，但连不上：…」。授权码不对回 <code>invalid</code>；<code>key</code> 对不上现有邮箱回 <code>stale</code>；有控制字符、或改了服务器却没给授权码回 <code>failed</code>。改了地址会清掉旧地址在本机的数据。</li>
+<li><b><code>mail_remove</code></b>（<code>account</code>）：删掉这个邮箱在钥匙串里的授权码、设置里的那一条、本机存的邮件数据和 <code>calendar/luoke-&lt;id&gt;.ics</code>，停掉它的任务。</li>
+<li><b><code>mail_forget</code></b>（<code>memory</code>）：全部清除。删掉钥匙串里邮箱和模型服务的条目、本机库里的全部数据、<code>account-salt</code>、日志、通知记录和 <code>calendar/</code>，设置恢复成初始的；<code>memory</code> 为 <code>true</code> 时连写进记忆的邮件记录一起删，别的值都不删记忆。这两个工具做完，邮件助手会退出重来（回 <code>exiting</code>）。</li>
+</ul>
+
+<h3>数据快照</h3>
+<p>在开发实例里（螺壳.app 的 bundle id 是 <code>ai.luoke.core.dev</code> 或 <code>ai.luoke.core.&lt;名&gt;.lab</code>），数据目录里配了邮箱、但钥匙串里一个授权码也没有时，邮件助手把这份数据当成快照：只看，不连邮箱。<code>data/accounts</code> 的 <code>status</code> 报 <code>snapshot</code>；要连邮箱的动作回 <code>failed</code>（「这是数据的快照，只看不连邮箱。」）；<code>mail_connect</code> 回 <code>invalid</code>；后台不同步。</p>
 
 <h2>主控任务</h2>
 <p>提示词是包里的文件 <code>luoke_mail/prompts/</code>（随包打进螺壳.app）：每个任务一组 <code>.system.txt</code>、<code>.user.txt</code>、<code>.schema.json</code>，要重问的另有 <code>.retry.txt</code>，几个任务共用的句子在 <code>_shared.txt</code>；分拣自己的说明和 schema 还在 <code>triage.py</code>。每个任务的要点见<a href="#ref-prompts">提示词</a>页。</p>
@@ -723,22 +758,22 @@ sequenceDiagram
 
 <h2>agent 接口</h2>
 <ul>
-<li><b>谁能连</b>：<code>run/agent.sock</code> 是 0600，本账户的程序都连得上。打包版每个连接先核对端（<code>agent.Callers</code>）：连上来的进程要是邮件助手所在的那个螺壳.app（装在哪里都一样）自带的 Python（<code>Contents/Resources/python/bin/python3</code>），它的父进程是这个螺壳.app 的主程序，而且这个螺壳.app 签名完好、bundle id 是 <code>ai.luoke.core</code>、由开发者团队签名（<code>codesign</code> 核对；临时签名的谁都不放）。开发版螺壳（bundle id <code>ai.luoke.core.dev</code>，总是临时签名）照核进程和父进程，不核签名。签名每个螺壳版本核一次，没通过的下次再核，核对出错也当没通过；对不上的连上就断开，每个进程在日志里记一行。源码运行不核。这道核对挡普通程序和连错的，挡不住本账户里有意冒充 agent 的程序：「用户点过」（<code>ai.luoke/user-action</code>）现在是调用方自己写的。</li>
+<li><b>谁能连</b>：<code>run/agent.sock</code> 是 0600，本账户的程序都连得上。打包版每个连接先核对端（<code>agent.Callers</code>）：连上来的进程要是邮件助手所在的那个螺壳.app（装在哪里都一样）自带的 Python（<code>Contents/Resources/python/bin/python3</code>），它的父进程是这个螺壳.app 的主程序，而且这个螺壳.app 签名完好、bundle id 是 <code>ai.luoke.core</code>、由开发者团队签名（<code>codesign</code> 核对；临时签名的谁都不放）。开发版螺壳和开发实例（bundle id <code>ai.luoke.core.dev</code> 或 <code>ai.luoke.core.&lt;名&gt;.lab</code>，总是临时签名）照核进程和父进程，不核签名。签名每个螺壳版本核一次，没通过的下次再核，核对出错也当没通过；对不上的连上就断开，每个进程在日志里记一行。源码运行不核。这道核对挡普通程序和连错的，挡不住本账户里有意冒充 agent 的程序：「用户点过」（<code>ai.luoke/user-action</code>）现在是调用方自己写的。</li>
 <li><b>outbox</b>（<code>luoke://luoke-mail/outbox</code>）：每个邮箱依次报刚收到的可疑邮件、要你先处理的、邮箱里不急的、已自动处理四类；一个邮箱都没连时只报一条「还没连邮箱」。时间是带 T 的 ISO 格式。
 <ul>
 <li><b>要你处理的邮件</b>（<code>new-mail</code>）：建议是回复、加入日程、加星标，还没加星标，而且今天读来是高优先级（<code>priority_now</code> 为 high）的；新的在前，最多 8 行，其余要处理的在「邮箱」那张卡上。这个邮箱要处理的总数比卡上多时按钮写「查看全部 N 封」，否则写「在邮件助手里看」。主按钮写明做什么（如「加星标 4 · 写草稿 1」）。同一地址群发、建议相同、主题去掉数字后相同的合成一行（合并的行不给写草稿，加入日程的不合并）。选项：回复给「写草稿 / 加星标 / 归档 / 先不动」（类别是工作或个人、又不是群发的默认写草稿，其余默认加星标）；加入日程、加星标给「加星标 / 归档 / 先不动」（默认加星标）。加入日程的那一行上带日历按钮；本体没列新模板的写法时，日历按钮放在卡片下面，最多 3 个。</li>
-<li><b>邮箱里不急的邮件</b>（<code>mailbox</code>，low）：每个邮箱一张「邮箱」，分三块，没有的块不画。<b>待处理</b>：其余要回复、加入日程、加星标的，最多 8 行，选项同上。<b>可以整理</b>：建议归档或删除的，一个决定，按钮写明归档几封、删除几封，另一个「先不动」，附一行说明多是谁发的；要删 1 封以上而处理模式没开时写「批量删除前，要先在邮件助手的设置里开启处理模式。」；做方案时的那批还有九成以上在等就沿用，后来的新邮件等下一张卡。<b>判为可疑</b>：不是刚收到的可疑邮件，最多 8 行，先收起（「N 封，都先不动」），其余的到收件箱的「判为可疑」列表看。整张卡一个方案，每块的按钮带 <code>part</code>（<code>todo</code> / <code>tidy</code> / <code>sus</code>），点一下只做这一块。0.19.47 以前的 <code>tidy</code> 卡和旧的可疑合并卡会撤回。</li>
+<li><b>邮箱里不急的邮件</b>（<code>mailbox</code>，low）：每个邮箱一张「邮箱」，分三块，没有的块不画。<b>待处理</b>：其余要回复、加入日程、加星标的，最多 8 行，选项同上。<b>可以整理</b>：建议归档或删除的，一个决定，按钮写明归档几封、删除几封，另一个「先不动」，附一行说明多是谁发的，和一个「看是哪几封」（打开收件箱页，带 <code>box</code>、<code>plan</code>、<code>part=tidy</code>）；要删 1 封以上而处理模式没开时写「批量删除前，要先在邮件助手的设置里开启处理模式。」；做方案时的那批还有九成以上在等就沿用，后来的新邮件等下一张卡。<b>判为可疑</b>：不是刚收到的可疑邮件，最多 8 行，先收起（「N 封，都先不动」），其余的到收件箱的「判为可疑」列表看。整张卡一个方案，每块的按钮带 <code>part</code>（<code>todo</code> / <code>tidy</code> / <code>sus</code>），点一下只做这一块。0.19.47 以前的 <code>tidy</code> 卡和旧的可疑合并卡会撤回。</li>
 <li><b>可疑邮件</b>（<code>suspicious</code>）：收到不到 2 天的每封一张、急，最多 3 张，按钮「移到垃圾邮件」「先不动」「在邮件助手里看」（打开那一封）；更早的和超出 3 张的放进「邮箱」卡的「判为可疑」一块。</li>
 <li><b>按习惯自动处理的</b>（<code>auto-done</code>）：今天还没撤销的合成一张，每批一个「撤销」，撤销习惯做的记成反证。</li>
 <li><b>还没连邮箱</b>（<code>needs-access</code>，low）：按钮「去设置」在窗口里打开设置页（<code>agent.open_page{page: "settings"}</code>）；本体不支持密码框时调 <code>mail_open_page{page: "accounts"}</code>；用户答过或关掉后不再提。</li>
 <li>选了「先不动」的邮件一天内不再主动提。</li>
 <li><b>卡片的写法</b>：标题后面是邮箱地址的标签；每行是发件人（加粗）和主题、一行理由；选项和按钮带图标。这些只在本体列出对应写法时用（<code>badge</code>、<code>strong</code>、<code>maxLines</code>、<code>optionIcons</code>、<code>lucide</code>、<code>tooltip</code> 六样齐了才用新模板）；没列时标题后面写「（地址）」，没有图标和收起。卡片上的「在邮件助手里看」「查看全部」在本体列了 <code>openPage</code> 时用 <code>agent.open_page</code> 打开窗口里的收件箱（列了 <code>pageArgs</code> 时带 <code>id</code>，或 <code>box</code> 和 <code>list</code>），否则调 <code>mail_open</code> 打开浏览器页面。</li>
 </ul></li>
-<li><b>资源</b>共 11 个：<code>outbox</code>；<code>permissions</code>（连了邮箱报 <code>mailbox: granted</code>，没连报 <code>ask</code>）；<code>summary</code>（<code>{count, text}</code>：<code>count</code> 是要处理的加可疑的，一天内选过「先不动」的、已加星标的不算；<code>text</code> 是一句各类几封的话）；八个 <code>page/&lt;id&gt;</code>（见「页面」；可带参数读，<code>page/&lt;id&gt;?键=值</code>）。</li>
-<li><b>要用户在卡片或页面上点过才执行的</b>（六个，没有 <code>ai.luoke/user-action</code> 就拒绝）：<code>mail_apply_plan</code>（可带 <code>part</code>，只做「邮箱」卡的那一块；出方案之后在页面上改过的那几封不再动，回话里说明几封没动）、<code>mail_undo</code>（收方案编号，也收单条操作记录和自动处理记录的编号）、<code>mail_do</code>（照窗口页面上点的按钮处理，见「页面」）、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
-<li><b>只读、不用点的</b>：<code>outbox_ack</code>；<code>mail_view</code>（换窗口页面上显示的内容）；<code>mail_search</code>（只搜本机已存的邮件，近期的按主题、发件人和正文，更早的只按信头，不含已删除、已移到垃圾邮件的；不连邮箱、不经模型、不记日志；默认 20 条，最多 50）；<code>mail_read</code>（一封的正文，遮凭证，最多 4000 字，标 <code>untrusted</code>；只有信头的旧邮件现取、不标已读，取到的 Message-ID 对不上就不给）；<code>mail_plan</code>（对同一邮箱里还在待处理的最多 8 封出一张方案卡片，不改邮箱）；<code>mail_open</code>、<code>mail_open_settings</code>、<code>mail_open_page</code>。会在 Mac 上打开东西的六个工具（这三个和 <code>mail_open_calendar</code>、<code>mail_show</code>、<code>mail_disconnect</code>）在工具说明里带 <code>_meta: {"ai.luoke/where": "mac"}</code>。</li>
+<li><b>资源</b>：<code>outbox</code>；<code>permissions</code>（连了邮箱报 <code>mailbox: granted</code>，没连报 <code>ask</code>）；<code>summary</code>（<code>{count, text}</code>：<code>count</code> 是要处理的加可疑的，一天内选过「先不动」的、已加星标的不算；<code>text</code> 是一句各类几封的话）；十个 <code>page/&lt;id&gt;</code>（见「页面」；可带参数读，<code>page/&lt;id&gt;?键=值</code>）；九个 <code>data/&lt;名&gt;</code>（见「给主窗口的原始数据和动作」）。</li>
+<li><b>要用户在卡片或页面上点过才执行的</b>（没有 <code>ai.luoke/user-action</code> 就拒绝）：卡片和窗口页面用的六个，加给主窗口的 34 个动作（见「给主窗口的原始数据和动作」）。六个是：<code>mail_apply_plan</code>（可带 <code>part</code>，只做「邮箱」卡的那一块；出方案之后在页面上改过的那几封不再动，回话里说明几封没动）、<code>mail_undo</code>（收方案编号，也收单条操作记录和自动处理记录的编号）、<code>mail_do</code>（照窗口页面上点的按钮处理，见「页面」）、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
+<li><b>只读、不用点的</b>：<code>outbox_ack</code>；<code>mail_view</code>（换窗口页面上显示的内容）；<code>mail_search</code>（只搜本机已存的邮件，近期的按主题、发件人和正文，更早的只按信头，不含已删除、已移到垃圾邮件的；不连邮箱、不经模型、不记日志；默认 20 条，最多 50；查的词正好是发件人的全名或地址时也算强匹配）；<code>mail_read</code>（一封的正文，遮凭证，最多 4000 字，标 <code>untrusted</code>；只有信头的旧邮件现取、不标已读，取到的 Message-ID 对不上就不给）；<code>mail_plan</code>（对同一邮箱里还在待处理的最多 8 封出一张方案卡片，不改邮箱）；<code>mail_open</code>、<code>mail_open_settings</code>、<code>mail_open_page</code>。会在 Mac 上打开东西的六个工具（这三个和 <code>mail_open_calendar</code>、<code>mail_show</code>、<code>mail_disconnect</code>）在工具说明里带 <code>_meta: {"ai.luoke/where": "mac"}</code>。</li>
 <li>只执行邮件助手自己做出的方案、只用卡片给出的选项，执行前再核对邮件仍在待处理；删除、移到垃圾邮件合计超过 1 封要处理模式；退订和开启处理模式不经 agent。</li>
-<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告五类：<code>new-mail</code>（normal）、<code>suspicious</code>（urgent）、<code>mailbox</code>（low）、<code>auto-done</code>（normal）、<code>needs-access</code>（low）；写入动作就是上面要点按的六个；<code>service.summary</code> 为 true；<code>service.pages</code> 是八页（today、inbox、clean、digest、subs、rules、activity、settings）；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」、<code>rules</code>「规则」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
+<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告五类：<code>new-mail</code>（normal）、<code>suspicious</code>（urgent）、<code>mailbox</code>（low）、<code>auto-done</code>（normal）、<code>needs-access</code>（low）；写入动作共 40 个（上面的六个加给主窗口的 34 个）；<code>data</code> 列九样原始数据；<code>service.summary</code> 为 true；<code>service.pages</code> 是十页（today、inbox、digest、clean 四个标签页，legacy-settings、activity、rules、subs、sweep、piece 六页标 <code>hidden</code>）；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」、<code>rules</code>「规则」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
 </ul>
 
 <h2>可靠性</h2>
@@ -747,6 +782,13 @@ sequenceDiagram
 <li><b>撤销</b>：先用上次见到的 UID 找并核对 Message-ID，再按 Message-ID 搜索，不是 Gmail 的再查文件夹里最新 500 封（没有 Message-ID 的 <code>&lt;nomid-…&gt;</code> 直接查最新 500 封）；改动前先备好撤销步骤，断线时记"结果未确认"并保留撤销。</li>
 <li><b>主控不可用</b>：邮件照常入库、暂不分析，主控就绪后自动开始；模型忙时用户等待的请求原地等，后台任务延后。</li>
 <li><b>邮箱差异</b>：网易登录后需发 IMAP ID；QQ 先查 CAPABILITY 再用扩展命令；Gmail 归档即移到"所有邮件"，标签用 <code>X-GM-LABELS</code>。TLS 握手失败（139 只支持 RSA 密钥交换）时，用允许 RSA+AESGCM 的设置重连一次，证书校验不变，这个主机失去前向保密；连 139 的超时 90 秒，其他 30 秒。取信头时服务器少回的，按 50、10 一批再取；还缺的不当作已删，清理的扫描这时不删已有记录和判断。139 的 INTERNALDATE 只有一位的日期先补成两位。QQ 新建的归档文件夹要列得出来才移信，否则不移并提示开启「收取“我的文件夹”」；同时有 Archive 和「邮件归档」时用 Archive。</li>
+</ul>
+
+<h3>往外连的地址</h3>
+<ul>
+<li>一键退订和读用户网站之前先看地址指向哪里（<code>netguard.py</code>）：指向本机、局域网、链路本地、运营商内网、组播和保留地址的不连（包在 IPv6 里的 IPv4 按 IPv4 判）；跳转的每一步都再判一次。一键退订只连 https 的公网地址，不跟跳转。</li>
+<li>本机的页面服务：请求的 Host 要是 <code>127.0.0.1:&lt;端口&gt;</code> 或 <code>localhost:&lt;端口&gt;</code>（否则 403），<code>/api</code> 要带页面令牌（否则 401）。</li>
+<li>钥匙串不收带控制字符的授权码；邮箱拒绝登录时状态报成要重新授权。</li>
 </ul>
 
 <h2>已知限制</h2>
@@ -758,7 +800,10 @@ sequenceDiagram
 <li>正文只有图片的邮件，模型看不到图里的字。一封邮件最多识别 4 个日程。</li>
 <li>网易默认只开放最近 30 天的邮件给 IMAP。</li>
 <li>agent.sock 的对端核对挡不住本账户里有意冒充螺壳 agent 的程序（见「agent 接口」）。</li>
-<li>螺壳窗口里的页面：一页最多 400 个组件、列表一屏一般 20 封，要翻页；页上有填过的输入时不会自己更新进度，要点「刷新」；没有「记忆」页、选模型服务和外观设置；大页、带参数打开、密码框、自动刷新、存文件五样都要本体列出对应写法才用，没列的退回原来的做法（200 个组件、点「刷新」、到浏览器页面添加邮箱、过滤器存进「下载」、卡片上的按钮打开浏览器页面）。</li>
+<li>给主窗口的原始数据：一个列表最多 200 条，只有收件箱和处理记录能翻页，精选、今日、清理超出的看不到；<code>data/clean</code> 给的退订网址只看是不是 https，没看是不是公网地址（执行退订时会再看）。</li>
+<li>窗口里自己画的收件箱页不认 <code>plan</code> 和 <code>part</code>：卡片上的「看是哪几封」在这一页打开的是默认列表。</li>
+<li>数据快照下 <code>mail_remove</code>、<code>mail_forget</code> 没有拦，照样删这份快照里的数据。</li>
+<li>螺壳窗口里的页面：一页最多 400 个组件、列表一屏一般 20 封，要翻页；页上有填过的输入时不会自己更新进度，要点「刷新」；没有「记忆」页、选模型服务和外观设置；大页、带参数打开、密码框、自动刷新、存文件和后加的图标都要本体列出对应写法才用，没列的退回原来的做法（200 个组件、点「刷新」、到浏览器页面添加邮箱、过滤器存进「下载」、卡片上的按钮打开浏览器页面）。</li>
 <li>模型给的「高」优先级偏多：代码只把已过期的按「中」显示，没过期的照旧。</li>
 <li><code>settle_risks</code> 只放行以前来过信的发件方：新连的邮箱、或某个官方域名第一次来信时，被模型当成冒充的正常邮件仍标可疑。</li>
 <li>交给模型的话里，建议仍叫「待跟进」「移到垃圾箱」（<code>PROMPT_ACTIONS</code>），和界面上的「加星标」「删除」不同。</li>
@@ -2723,6 +2768,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-14</h2>
+<ul>
+<li>邮件页按代码 06a251f（0.19.65）复核：窗口页面从八页到十页（今日、收件箱、精选、清理四个标签页，其余六页收起；新增「清理旧邮件」「精选内容」，今日、收件箱、精选、清理四页重写）；新增「给主窗口的原始数据和动作」（九个 <code>data/*</code> 资源、34 个动作，含 <code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code>）和「数据快照」（开发实例里只看不连邮箱）；新增「往外连的地址」（一键退订和读用户网站不连本机和局域网地址）；已知限制加三条。</li>
+</ul>
 
 <h2>2026-11-13</h2>
 <ul>
