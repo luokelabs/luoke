@@ -100,7 +100,7 @@
 **对 luoke-mail**（公开发布以后实现，接口先定）：
 1. 照工具协议 §8a 报"工具自己做了的事"和每天的复查（ADR 0016）：`auto-done`（一次合成一件、按习惯分组、每组一个 [撤销]，用户撤销交给记忆当反证）和 `daily-review`（每天 20:00 一份，不急）。luoke-mail 2026-10-19 接下，公开发布以后实现。
 2. 公开发布后打开 agent 接口时，照 agent 当时的版本重拷 `mcp.py`、`cards.py`，测试里的 `a2ui.py` 也一起换。
-**对 luoke-core**：agent 随螺壳一起装（不单独勾选），由螺壳拉起后台进程；要有可用的版本校验：`luoke-agent` 进配方的 verified（或等价的内置放行），否则 `GET /tasks`、`/accessories` 都会被拒。怎么做 beta1 之后一起定。
+**对 luoke-core**：
 
 社区工具开放前（luoke#1）：`GET /accessories` 要给 agent 工具的发布者名字、级别、撤下状态和签名身份，这些由主控核过，不取工具自己写的；扩展的工具协议由主控转发，接法见上面「社区和第三方接入」第 1 节（luoke-core 已同意）。
 
