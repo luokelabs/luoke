@@ -102,8 +102,6 @@
 2. 公开发布后打开 agent 接口时，照 agent 当时的版本重拷 `mcp.py`、`cards.py`，测试里的 `a2ui.py` 也一起换。
 **对 luoke-core**：agent 随螺壳一起装（不单独勾选），由螺壳拉起后台进程；要有可用的版本校验：`luoke-agent` 进配方的 verified（或等价的内置放行），否则 `GET /tasks`、`/accessories` 都会被拒。怎么做 beta1 之后一起定。
 
-开发实例带上扫描（2026-11-14 提）：走查要看到全部功能，扫描不能缺。不碰真文件的做法是让实例里的扫描跑在假目录上：`luoke-scan mcp --fixture <假目录>`（扫描已有，录场景样例就是这样跑的；假目录用扫描的 `scripts/record_agent_fixtures.py --only full-report --keep` 造），空闲任务也带 `--fixture`；清理移进假目录自己的 `Trash/`，数据在实例的环境目录里，不碰 `~/.luoke-scan`。怎么做由 luoke-core 定。
-
 社区工具开放前（luoke#1）：`GET /accessories` 要给 agent 工具的发布者名字、级别、撤下状态和签名身份，这些由主控核过，不取工具自己写的；扩展的工具协议由主控转发，接法见上面「社区和第三方接入」第 1 节（luoke-core 已同意）。
 
 ## 在记忆里读写什么
