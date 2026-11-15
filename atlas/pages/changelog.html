@@ -1,6 +1,11 @@
 <!-- id: changelog | nav: 文档修订 | group: 其他 -->
 <h1>文档修订</h1>
 
+<h2>2026-11-15</h2>
+<ul>
+<li>主控页、本机文件按代码 a78662c 复核：开发版和装好的螺壳用同一个环境目录 <code>luoke-core</code>；同一时间只开一个螺壳，后开的发现已有主控在应答就把开着的叫到前面后退出（主控进程退出码 4）。</li>
+</ul>
+
 <h2>2026-11-14</h2>
 <ul>
 <li>主控页、接口、配件清单、本机文件、术语、出版页按代码 62f5427（主控 0.2.0）复核：主控不再核配件版本，只认配件名；配件清单新增可选的 <code>min_core</code>，主控比它旧时答 <code>core_too_old</code>（403）；留有上一版的都能换回；去掉本机放行、<code>local-verified.json</code>、<code>verified-history.json</code>。</li>

@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-14 16:55</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-15 16:54</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -254,7 +254,7 @@ sequenceDiagram
 <section class="page" id="core" data-title="螺壳（主控） luoke-core">
 <h1>螺壳（主控）</h1>
 <p class="lede">用户装的应用「螺壳」（<code>螺壳.app</code>）；"主控"是它在内部分工里的叫法。本机所有模型推理的唯一入口。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 都打在它的包里，跟它一起升级；输入法单独一个包，由它安装和升级。它按配方为每个硬件档选择模型，调度各配件的请求和空闲任务，监管推理引擎和专用模型进程，并负责下载、升级和卸载。</p>
-<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，数据在 <code>luoke-core-dev</code>，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
+<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
 
 <h2>组成</h2>
 <div class="tbl"><table>
@@ -278,7 +278,7 @@ sequenceDiagram
 <h3>启动</h3>
 <ol>
 <li>本体判断是否以安装器身份运行：位于认得的安装位置（<code>/Applications</code> 或 <code>~/Applications</code> 下的 <code>螺壳.app</code>、<code>螺壳主控.app</code>）时不是；否则文件名不是 <code>螺壳.app</code>、位于 <code>/Volumes/</code> 或被系统隔离时是，进入安装流程。</li>
-<li>不是装好的那份（按 <code>/Applications/螺壳.app</code>、<code>/Applications/螺壳主控.app</code>、<code>~/Applications/螺壳.app</code>、<code>~/Applications/螺壳主控.app</code> 的顺序取第一个 bundle id 相同的）时弹框说明后退出。先装上菜单栏图标；上次换包没成时弹框说明原因（「App 管理」挡住时指明去系统设置里打开），升级标记作废；把 <code>luoke</code> 命令行链接改指到装好的那份；在后台清理上次经「检查更新」升级时留下的安装包（首次运行没走完也清）。首次运行未完成时显示首次运行向导（升级标记作废，有预选时预选上那个应用，主控进程到下载那一步才启动）；否则启动主控进程，随后起 agent 核心和螺壳里开着的应用（先挪走收进来以前单独装的旧 .app，见下文「旧的单独 .app」），有升级标记（<code>run/upgrade.json</code>）时重新登记登录项（用户关掉过的不动）并接着显示升级卡片；没有则直接拉起常驻配件，有预选（<code>run/preselect.json</code>）时打开「应用」窗口在那一行里装。主控进程启动时注销 <code>previous.noindex</code> 里旧版的 LaunchServices 登记。</li>
+<li>不是装好的那份（按 <code>/Applications/螺壳.app</code>、<code>/Applications/螺壳主控.app</code>、<code>~/Applications/螺壳.app</code>、<code>~/Applications/螺壳主控.app</code> 的顺序取第一个 bundle id 相同的）时弹框说明后退出。环境目录的 <code>run/hub.sock</code> 上已有主控在应答（另一个螺壳开着）时，这一个什么都不起，把开着的那个叫到前面后退出；主控进程自己遇到这种情况也不起，退出码 4。先装上菜单栏图标；上次换包没成时弹框说明原因（「App 管理」挡住时指明去系统设置里打开），升级标记作废；把 <code>luoke</code> 命令行链接改指到装好的那份；在后台清理上次经「检查更新」升级时留下的安装包（首次运行没走完也清）。首次运行未完成时显示首次运行向导（升级标记作废，有预选时预选上那个应用，主控进程到下载那一步才启动）；否则启动主控进程，随后起 agent 核心和螺壳里开着的应用（先挪走收进来以前单独装的旧 .app，见下文「旧的单独 .app」），有升级标记（<code>run/upgrade.json</code>）时重新登记登录项（用户关掉过的不动）并接着显示升级卡片；没有则直接拉起常驻配件，有预选（<code>run/preselect.json</code>）时打开「应用」窗口在那一行里装。主控进程启动时注销 <code>previous.noindex</code> 里旧版的 LaunchServices 登记。</li>
 <li>主控先绑定 socket 并应答（启动期间除 <code>/tasks</code>、<code>/status</code>、<code>/downloads</code> 外答 <code>busy</code>），再启动引擎：清理上次留下的孤儿进程、等待底座出现、做冒烟检查。</li>
 <li>启动采样线程，进入运行状态；设置中开启了端点则开启端点。</li>
 </ol>
@@ -2526,7 +2526,7 @@ sequenceDiagram
 <p>邮件助手、螺壳搜索、螺壳扫描收进螺壳.app 以前各是一个 .app，装在 <code>~/Applications</code>；升到带上它们的螺壳后，旧的被挪进废纸篓，数据目录不动。</p>
 
 <h2>主控 <code>~/Library/Application Support/luoke-core/</code></h2>
-<p>开发版（bundle id <code>ai.luoke.core.dev</code>）用 <code>luoke-core-dev/</code>，结构相同。</p>
+<p>开发版（bundle id <code>ai.luoke.core.dev</code>）和装好的螺壳用同一个 <code>luoke-core/</code>，同一时间只开一个；只有评测和自动化测试用的实验室构建另用 <code>luoke-core-lab/</code>，结构相同。</p>
 <div class="tbl"><table>
 <tr><th>路径</th><th>内容</th></tr>
 <tr><td><code>run/hub.sock</code></td><td>任务接口 socket</td></tr>
@@ -2766,6 +2766,11 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-15</h2>
+<ul>
+<li>主控页、本机文件按代码 a78662c 复核：开发版和装好的螺壳用同一个环境目录 <code>luoke-core</code>；同一时间只开一个螺壳，后开的发现已有主控在应答就把开着的叫到前面后退出（主控进程退出码 4）。</li>
+</ul>
 
 <h2>2026-11-14</h2>
 <ul>

@@ -1,7 +1,7 @@
 <!-- id: core | nav: 螺壳（主控） luoke-core | group: 组件 -->
 <h1>螺壳（主控）</h1>
 <p class="lede">用户装的应用「螺壳」（<code>螺壳.app</code>）；"主控"是它在内部分工里的叫法。本机所有模型推理的唯一入口。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 都打在它的包里，跟它一起升级；输入法单独一个包，由它安装和升级。它按配方为每个硬件档选择模型，调度各配件的请求和空闲任务，监管推理引擎和专用模型进程，并负责下载、升级和卸载。</p>
-<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，数据在 <code>luoke-core-dev</code>，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
+<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
 
 <h2>组成</h2>
 <div class="tbl"><table>
@@ -25,7 +25,7 @@
 <h3>启动</h3>
 <ol>
 <li>本体判断是否以安装器身份运行：位于认得的安装位置（<code>/Applications</code> 或 <code>~/Applications</code> 下的 <code>螺壳.app</code>、<code>螺壳主控.app</code>）时不是；否则文件名不是 <code>螺壳.app</code>、位于 <code>/Volumes/</code> 或被系统隔离时是，进入安装流程。</li>
-<li>不是装好的那份（按 <code>/Applications/螺壳.app</code>、<code>/Applications/螺壳主控.app</code>、<code>~/Applications/螺壳.app</code>、<code>~/Applications/螺壳主控.app</code> 的顺序取第一个 bundle id 相同的）时弹框说明后退出。先装上菜单栏图标；上次换包没成时弹框说明原因（「App 管理」挡住时指明去系统设置里打开），升级标记作废；把 <code>luoke</code> 命令行链接改指到装好的那份；在后台清理上次经「检查更新」升级时留下的安装包（首次运行没走完也清）。首次运行未完成时显示首次运行向导（升级标记作废，有预选时预选上那个应用，主控进程到下载那一步才启动）；否则启动主控进程，随后起 agent 核心和螺壳里开着的应用（先挪走收进来以前单独装的旧 .app，见下文「旧的单独 .app」），有升级标记（<code>run/upgrade.json</code>）时重新登记登录项（用户关掉过的不动）并接着显示升级卡片；没有则直接拉起常驻配件，有预选（<code>run/preselect.json</code>）时打开「应用」窗口在那一行里装。主控进程启动时注销 <code>previous.noindex</code> 里旧版的 LaunchServices 登记。</li>
+<li>不是装好的那份（按 <code>/Applications/螺壳.app</code>、<code>/Applications/螺壳主控.app</code>、<code>~/Applications/螺壳.app</code>、<code>~/Applications/螺壳主控.app</code> 的顺序取第一个 bundle id 相同的）时弹框说明后退出。环境目录的 <code>run/hub.sock</code> 上已有主控在应答（另一个螺壳开着）时，这一个什么都不起，把开着的那个叫到前面后退出；主控进程自己遇到这种情况也不起，退出码 4。先装上菜单栏图标；上次换包没成时弹框说明原因（「App 管理」挡住时指明去系统设置里打开），升级标记作废；把 <code>luoke</code> 命令行链接改指到装好的那份；在后台清理上次经「检查更新」升级时留下的安装包（首次运行没走完也清）。首次运行未完成时显示首次运行向导（升级标记作废，有预选时预选上那个应用，主控进程到下载那一步才启动）；否则启动主控进程，随后起 agent 核心和螺壳里开着的应用（先挪走收进来以前单独装的旧 .app，见下文「旧的单独 .app」），有升级标记（<code>run/upgrade.json</code>）时重新登记登录项（用户关掉过的不动）并接着显示升级卡片；没有则直接拉起常驻配件，有预选（<code>run/preselect.json</code>）时打开「应用」窗口在那一行里装。主控进程启动时注销 <code>previous.noindex</code> 里旧版的 LaunchServices 登记。</li>
 <li>主控先绑定 socket 并应答（启动期间除 <code>/tasks</code>、<code>/status</code>、<code>/downloads</code> 外答 <code>busy</code>），再启动引擎：清理上次留下的孤儿进程、等待底座出现、做冒烟检查。</li>
 <li>启动采样线程，进入运行状态；设置中开启了端点则开启端点。</li>
 </ol>
