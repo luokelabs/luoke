@@ -111,6 +111,8 @@
    - 本机模型不可用时的说明（旧界面的 `model_note`）：收件箱、订阅体检、设置里都用得到。
    怎么做由 luoke-mail 定；给了哪样，agent 就在页上接哪样。
 **对 luoke-mail、luoke-mem、luoke-scan**（2026-11-16 提）：清单里每个后台任务（job）填上 `title`。右边栏「任务」的每一行照它写标题；现在都没填，几行都显示「后台整理」，看不出各是什么。主控已经把 `name` 和 `title` 原样带给窗口（luoke-core V1），只差各应用填。写法用书面的短语，例如「整理新邮件」「订阅体检」「旧邮件分析」「整理记忆」「例行检查」。
+**对 luoke-scan**（2026-11-16 提，luoke-scan-private#202）：窗口里原样显示的字（侧栏概览、「今天」的卡片、点按后的结果一句）改成书面的界面用语；`data/overview` 要注意的每一项带一个短名字（现在只有规则代号，agent 按前缀对照，新规则认不出）；侧栏概览和扫描页的可释放大小以哪个为准。
+**对 luoke-search**（2026-11-16 提，luoke-search-private#126）：`data/index` 给出语义搜索不可用的状态和原因代号；`data/permissions` 的 `files.system` 什么时候是 `granted`；显示在窗口里的字改成书面的界面用语。
 
 **对 luoke-mem**（2026-11-16 提，主窗口的记忆页要用）：
 - `data/note` 给出同一类的那几条的编号（现在 `data/notes` 只有个数 `alike`）：页上要放「否定同类记忆」（`mem_note` 的 `reject_family` 要 `family`），没有编号放不了。
