@@ -64,7 +64,7 @@
 <p>以下路由（注明不要求身份的除外）要求身份为 <code>luoke-core</code>，并按内核报告的对端 PID 核对对端是主控进程的父进程（即本体）。<code>/settings</code> 和 <code>/endpoint*</code> 另外接受主控自带的命令行 <code>luoke</code>（与主控同一个 Python 可执行文件、参数为 <code>-m luoke_core.cli</code>）。不符时答 <code>forbidden</code>。</p>
 <div class="tbl"><table>
 <tr><th>路由</th><th>说明</th></tr>
-<tr><td><code>GET /status</code></td><td>运行状态（不要求身份，启动期间也答）：档、底座、引擎、交互、后台、冒烟、设置、下载、空闲任务、端点（不含密钥）等</td></tr>
+<tr><td><code>GET /status</code></td><td>运行状态（不要求身份，启动期间也答）：档、底座、引擎、交互、后台、冒烟、设置、下载、空闲任务、端点（不含密钥）等。<code>queue</code> 是给主窗口任务队列用的：<code>running</code> 每行 <code>{id, tool, name, kind, started}</code>，<code>kind</code> 是 <code>request</code>（带 <code>fraction</code>）、<code>job</code>（带 <code>title</code>）或 <code>endpoint</code>；<code>queued</code> 每行 <code>{id, tool, name, title, wait}</code>，<code>wait.kind</code> 说在等什么：<code>soon</code>、<code>time</code>（带 <code>at</code>）、<code>power</code>、<code>thermal</code>、<code>memory</code>、<code>paused</code>、<code>quiet</code>、<code>busy</code></td></tr>
 <tr><td><code>GET/POST /downloads</code></td><td>GET 答 <code>{needed, downloads}</code>：缺少的下载项和进度；POST <code>{names?}</code> 开始下载，不给就下缺的；没有发布清单的开发构建答 <code>unsupported</code></td></tr>
 <tr><td><code>GET/PUT /settings</code></td><td><code>power_mode</code>（<code>full</code>、<code>balanced</code>、<code>quiet</code>）、<code>background_on_battery</code>、<code>tier</code>（只能选内存够的档，空为按内存定）、<code>endpoint_enabled</code>、<code>endpoint_port</code>（1024–65535）；PUT 还收 <code>endpoint_key</code>，只写进密钥文件，GET 不返回；端口往后都被占时答 <code>busy</code></td></tr>
 <tr><td><code>GET /endpoint</code>、<code>POST /endpoint/key</code></td><td>端点状态和密钥；生成新密钥</td></tr>
