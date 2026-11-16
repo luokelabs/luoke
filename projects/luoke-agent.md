@@ -122,7 +122,7 @@
 **对 luoke-core**：
 开发构建要能发系统通知（2026-11-14 提）：负责人拿开发构建当日常的螺壳用，现在它不在系统设置的通知列表里，「打开通知」问不出来（ad-hoc 签名，起来后又从 LaunchServices 注销了）。怎么做由 luoke-core 定。
 
-吉祥物的那一句要一个生成任务（2026-11-16 提，luoke-core 当天接下、转给配方的负责人）：「今天」最上面吉祥物从记忆里找话、轻轻调侃的那一句（界面规范 §15「逗一下」），用本机模型写。agent 这边已经做完：提示词在 `luoke_agent/prompts/hello.*`（顶层 ADR 0019 的格式），评测集和评测脚本在 `bench/hello_set.py`、`bench/run_hello.py`（34 道、每道 3 遍，硬性加软性），生成、核对、一天一次的调度在 `hello.py`、`runner.py`（luoke-agent DESIGN §6）。还要的：主控的配方里加 `luoke-agent.hello`（生成任务，后台，三档都开，温度 0.7；一次请求约 1000 字输入、一句话输出），三档各跑一遍评测记证据；主控打包时把 `luoke_agent/prompts/` 下的 `.txt`、`.json` 拷进应用（`ui-refactor` 上已由本会话改了 `app/build_app.sh`）。配方里没有这个任务以前，agent 不问模型，窗口只画吉祥物。
+吉祥物的那一句要一个生成任务（2026-11-16 提，luoke-core 当天接下、转给配方的负责人）：「今天」最上面吉祥物从记忆里找话、轻轻调侃的那一句（界面规范 §15「逗一下」），用本机模型写。agent 这边已经做完：提示词在 `luoke_agent/prompts/hello.*`（顶层 ADR 0019 的格式），评测集和评测脚本在 `bench/hello_set.py`、`bench/run_hello.py`（34 道、每道 3 遍，硬性加软性），生成、核对、一天一次的调度在 `hello.py`、`runner.py`（luoke-agent DESIGN §6）。还要的：主控的配方里加 `luoke-agent.hello`（生成任务，后台，三档都开，温度 0.7；一次请求约 1000 字输入、一句话输出），三档各跑一遍评测记证据；主控打包时把 `luoke_agent/prompts/` 下的 `.txt`、`.json` 拷进应用（`app/build_app.sh`，由 luoke-core 走 PR，等配方和出版的负责人批准）。配方里没有这个任务以前，agent 不问模型，窗口只画吉祥物。
 
 右边栏「任务」每一行的名字（2026-11-16 提，luoke-core 当天答复）：主控已经把每个任务的 `name` 和 `title` 带给窗口，是各应用的清单没填 `title`，见下面对 luoke-mail、luoke-mem、luoke-scan 的需求。没填 `title` 时主控的窗口壳现在一律写「后台整理」，建议改成写任务的 `name`。
 
