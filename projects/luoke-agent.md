@@ -129,6 +129,8 @@
 
 吉祥物的那一句要一个生成任务（2026-11-16 提，luoke-core 当天接下、转给配方的负责人）：「今天」最上面吉祥物从记忆里找话、轻轻调侃的那一句（界面规范 §15「逗一下」），用本机模型写。agent 这边已经做完：提示词在 `luoke_agent/prompts/hello.*`（顶层 ADR 0019 的格式），评测集和评测脚本在 `bench/hello_set.py`、`bench/run_hello.py`（34 道、每道 3 遍，硬性加软性），生成、核对、一天一次的调度在 `hello.py`、`runner.py`（luoke-agent DESIGN §6）。还要的：主控的配方里加 `luoke-agent.hello`（生成任务，后台，三档都开，温度 0.7；一次请求约 1000 字输入、一句话输出），三档各跑一遍评测记证据；主控打包时把 `luoke_agent/prompts/` 下的 `.txt`、`.json` 拷进应用（`app/build_app.sh`，由 luoke-core 走 PR，等配方和出版的负责人批准）。配方里没有这个任务以前，agent 不问模型，窗口只画吉祥物。
 
+占空间的文件的用途说明要第二个生成任务（2026-11-17 提）：扫描「状态」页上每个大文件下面一句「是做什么用的、能不能清」（负责人 11-17 要的），用本机模型写。agent 这边已经做完：提示词在 `luoke_agent/prompts/explain.*`，生成、核对、调度在 `explain.py`、`runner.py`（luoke-agent DESIGN §6）。还要的：主控的配方里加 `luoke-agent.explain`（生成任务，后台，三档都开，温度 0；一次请求最多 6 项、约 600 字输入，输出每项一句话加一个代号）。评测集 agent 这边补。配方里没有这个任务以前，页上只是没有那一句。
+
 右边栏「任务」每一行的名字（2026-11-16 提，luoke-core 当天答复）：主控已经把每个任务的 `name` 和 `title` 带给窗口，是各应用的清单没填 `title`，见下面对 luoke-mail、luoke-mem、luoke-scan 的需求。没填 `title` 时主控的窗口壳现在一律写「后台整理」，建议改成写任务的 `name`。
 
 社区工具开放前（luoke#1）：`GET /accessories` 要给 agent 工具的发布者名字、级别、撤下状态和签名身份，这些由主控核过，不取工具自己写的；扩展的工具协议由主控转发，接法见上面「社区和第三方接入」第 1 节（luoke-core 已同意）。
