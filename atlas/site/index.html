@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-16 16:57</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-17 16:55</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -811,7 +811,7 @@ sequenceDiagram
 <section class="page" id="ime" data-title="输入法 luoke-ime">
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。语音输入是随包自带的快捷键引擎，设置里默认关：按住说话、松开上屏，转写和整理都交给主控。个人化组件把上屏写入记忆，把打分和联想请求转给主控，并给语音提供热词。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.88（build 91），按代码 6b827c6 核对 · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.103（build 106）；界面上的名字、输入法菜单和语音提示按代码 24d828b 核对，其余按 6b827c6（0.1.88） · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
@@ -831,7 +831,7 @@ sequenceDiagram
 <li><b>停止</b>：关闭 stdin，1 秒后对整个进程组 SIGKILL。</li>
 <li><b>崩溃与卡死</b>：一次询问 1 秒没有答复视为卡死并杀掉；60 秒内崩溃 3 次则停用该引擎。</li>
 <li><b>退出</b>：收到 SIGTERM、SIGINT、SIGHUP、正常结束或换版让位时，把使用计数写盘、结束系统日志订阅，并向主控发 <code>POST /accessory/exiting</code>（1 秒超时）。</li>
-<li><b>重启条件</b>：每秒轮询读到设置文件变化时，当前引擎、开发模式或模糊音变了才重启打字引擎，语音开关、说完后整理、说话的键变了重启快捷键引擎，记忆开关变了重启个人化组件，确认过的第三方引擎变了全部重扫重启，其余只重新绑定；菜单和设置窗口的改动同样，只在上面这几项变了时重启对应的引擎。另外用户引擎目录变化、非自带引擎的文件变化、<code>options.json</code> 变化、主控 Python 被替换（每 10 秒检查）也会重启。</li>
+<li><b>重启条件</b>：每秒轮询读到设置文件变化时，当前引擎、开发模式或模糊音变了才重启打字引擎，语音开关、语音整理、语音输入按键变了重启快捷键引擎，记忆开关变了重启个人化组件，确认过的第三方引擎变了全部重扫重启，其余只重新绑定；菜单和设置窗口的改动同样，只在上面这几项变了时重启对应的引擎。另外用户引擎目录变化、非自带引擎的文件变化、<code>options.json</code> 变化、主控 Python 被替换（每 10 秒检查）也会重启。</li>
 <li><b>麦克风</b>：语音打开、壳启动声明了麦克风的快捷键引擎时，系统还没问过就向系统申请麦克风（弹窗里的应用名是「螺壳」，说明用 Info.plist 的「你启用的输入法引擎（比如语音输入）声明需要使用麦克风。」）；用户拒绝了不再问，设置窗口里提示去系统设置打开。</li>
 </ul>
 
@@ -849,7 +849,7 @@ sequenceDiagram
 <li>可选 <code>context</code>（0–2000 字前文）、<code>app</code>、<code>feedback</code>、<code>forget_all</code>、<code>asks</code>（⊆ personal、hub）、<code>options</code>、<code>punctuation</code>。</li>
 <li><code>permissions</code>：<code>network</code>（none / local / any）、<code>write</code>（≤ 16 个路径）、<code>local_ports</code>、<code>microphone</code>、<code>camera</code>、<code>screen</code>、<code>gpu</code>、<code>memory</code>（只有个人化组件能声明）。</li>
 <li>声明 <code>asks: personal</code> 的引擎只能 <code>network: none</code>，或 <code>local</code> 并用 <code>local_ports</code> 限定端口；个人化组件不能联网，不能声明麦克风、摄像头、屏幕，<code>asks</code> 里只能有 <code>hub</code>。</li>
-<li>设置里的「语音输入」管所有声明了麦克风的快捷键引擎（包括第三方的）：关着时不启动、不要麦克风；选的说话键盖过它们的 <code>hotkey.key</code>；「说完后整理」经 <code>hello</code> 的选项 <code>tidy</code> 交给它们。</li>
+<li>设置里的「语音输入」管所有声明了麦克风的快捷键引擎（包括第三方的）：关着时不启动、不要麦克风；选的说话键盖过它们的 <code>hotkey.key</code>；「语音整理」经 <code>hello</code> 的选项 <code>tidy</code> 交给它们。</li>
 </ul>
 <h3>第三方引擎</h3>
 <ul>
@@ -872,7 +872,7 @@ sequenceDiagram
 <li><b>日期和时间</b>：打出「日期」「时间」「星期」「农历」这几个词本身时，这会儿的值跟在它后面：日期给 <code>YYYY-MM-DD</code> 和「Y年M月D日」两种，时间给「时:分」，星期给「星期几」，农历给干支、生肖和月日（如「丙午马年九月二十六」）；三个方案都按打出的词触发，不用别的触发码。</li>
 <li><b>以词定字</b>：组字中按 <code>[</code> 只要高亮候选的第一个字、<code>]</code> 只要最后一个字，这个候选用掉的键算打完，剩下的键接着打；全打完就直接上屏、接着请求联想。还没有答复时先等第一份，候选还没画出来时这一下只把候选画出来；没有候选时照常当标点。上屏反馈里这一段带 <code>char</code>（<code>first</code> / <code>last</code>）。</li>
 <li><b>慢的机器换小档</b>：主控在 <code>GET /tasks</code> 里给 rerank 标 <code>slow</code>，个人化组件每 60 秒读一次、随打分答复带上；引擎据此换小档：完整档每步给 12 / 4 / 8 个候选（苹果 / 单字 / RIME）、步数不限，小档 6 / 2 / 4、最多 2 步。</li>
-<li><b>引擎怎么学</b>：选了非首选就记一次，下次放首位；分几段选出来的一整段全是汉字且不超过 8 个字时，整串键也记住拼起来的词；切走时的自动上屏和以词定字的那一段不学；「清掉学到的词」保留忘掉的名单。</li>
+<li><b>引擎怎么学</b>：选了非首选就记一次，下次放首位；分几段选出来的一整段全是汉字且不超过 8 个字时，整串键也记住拼起来的词；切走时的自动上屏和以词定字的那一段不学；「清除已学词语」保留忘掉的名单。</li>
 <li><b>模糊音</b>（0.1.38 起，默认关）：z = zh、s = sh、c = ch、an = ang、en = eng、in = ing 六组，打开后默认全勾，三个打字引擎共用一份设置，壳经 <code>hello</code> 的 <code>fuzzy</code> 交给引擎（盖过 <code>options.json</code> 里的同名值）。苹果那一路用私有接口 <code>MecabraSetFuzzyPinyinPairs</code>，系统没有这个函数就不开；RIME 那一路在拼写规则最前面插入，an = ang 不含 ian / iang、uan / uang。打开后 600 句整句首选约降 1.5–2 个点。</li>
 <li><b>拼音显示位置</b>：默认显示在输入框里（显示串），可按全局或应用改成显示在候选窗里。</li>
 <li><b>中英文间自动空格</b>（设置里开着时）：上屏的一段和光标前的字之间、上屏的这一段里面都补，快捷键引擎的显示串也一样。</li>
@@ -885,7 +885,7 @@ sequenceDiagram
 <ul>
 <li>在空格或数字选词、标点、以词定字上屏、快捷键引擎（包括语音）上屏、选中联想后触发；开不开按应用算：应用设置优先，没设时终端（Terminal、iTerm2、Ghostty、Warp 等）默认关，其余跟随全局；个人化组件须在运行。上屏后 0.25 秒内没有按键才发出请求，期间按键即取消。</li>
 <li>个人化组件请主控续写（<code>/v1/continue</code>，k=8、最多 6 个 token、遇标点停），开头的 token 是汉字、概率 ≥ 0.2 的才要；再从最近 5000 段上屏中找用户写过的接续（最多 3 个，至少 2 个字、全是汉字），交 <code>luoke-ime.rerank</code> 打分（加上续写里把握最大的那个开头作参照），每个字平均对数概率不低于 -1 才留下。两路放在一起按每字平均对数概率排，去掉单字，最多 5 个。没有模型（主控不可用）时不给联想；给写过的接续打分失败时只给模型的。老主控没有 <code>/v1/continue</code> 时退回 <code>/v1/predict</code>。</li>
-<li>发出后 1 秒内无答复则放弃；未激活时淡显前 3 个、不放显示串，按键照常交给应用，4 秒后收起；按 Tab 激活后列出全部，数字、空格选，方向键和 Tab 移动，Esc、回车、退格收起；激活后高亮的那个放在光标处当显示串（拼音显示在候选窗里时也一样），免得 Chromium 把 Tab 交给网页。</li>
+<li>发出后 1 秒内无答复则放弃；未激活时淡显前 3 个、不放显示串，按键照常交给应用，4 秒后收起；按 Tab 激活后列出全部，数字、空格选，方向键和 Tab 移动，Esc、回车、退格收起；激活后高亮的那个放在光标处当显示串（拼音显示在候选窗里时也一样），免得 Chromium 把 Tab 交给网页。拼音显示在候选窗里、还在组字时，光标处放一个零宽的占位符：不然 Chromium 和 Electron 会把退格交回网页，删掉拼音前面已经上屏的字。</li>
 <li>有的应用（Grok 这类 Electron 应用）在输入法接下 Tab 后自己又插一个制表符：选词时连它一起换掉；收起联想时不去掉。</li>
 </ul>
 
@@ -894,14 +894,14 @@ sequenceDiagram
 <ul>
 <li><b>按键</b>：按下说话键（不在快捷键会话中、不在密码框）就发 <code>arm</code>，引擎开始录音；同一个键 0.3 秒内又来一次按下算同一次。按满 150 ms 且期间没按别的，用同一个号发 <code>start</code>，带光标前最多 200 字（正在组字的先上屏）。不到 150 ms 松开发 <code>cancel short</code>，按着时按了别的键或鼠标发 <code>cancel key</code>，切走发 <code>cancel focus</code>。松开发 <code>stop</code>，10 秒还没结果就把显示着的字上屏、发 <code>cancel timeout</code>。会话中按 Esc 什么都不上屏，按别的键先把显示着的字上屏，再照常处理这个键。</li>
 <li><b>录音</b>：收到 <code>arm</code> 才开麦克风（AudioQueue，只开输入设备），16 kHz 单声道 PCM16，0.1 秒一块；<code>start</code> 之前只录不送。默认输入是蓝牙耳机、机器有内置麦克风且盖子没合上时，改用内置麦克风；内置麦克风开不了或开头 0.3 秒全是零，换回默认输入（选项 <code>bluetooth_mic</code> 为 true 时一律用默认输入）。松开、取消、结束时马上关麦克风，不等识别和整理；0.5 秒内又来一次 <code>arm</code> 就接着录。</li>
-<li><b>光标旁的提示</b>：还没收到声音时黄点闪「准备中…」，有声音了红点跳「正在听」，松开后灰点呼吸「识别中…」，整理时「整理中…」；字比别的提示大、颜色深。识别出的字作为显示串放在输入框里，还没上屏。</li>
+<li><b>光标旁的提示</b>：还没收到声音时黄点闪「准备中…」，有声音了红点跳「录音中」，松开后灰点呼吸「识别中…」，整理时「整理中…」；字比别的提示大、颜色深。识别出的字作为显示串放在输入框里，还没上屏。</li>
 <li><b>草稿</b>：每 0.5 秒（内存 24 GiB 及以下的 Mac 1 秒）送新录的音频、要一份草稿，同时只有一份在算；新草稿多出来的字每 40 ms 逐字补出，前面变了的字就地换掉，不删了重打。听到说话的块（音量约满幅的 1%）不到 0.3 秒时不显示草稿，松开后也不上屏。</li>
 <li><b>分段</b>：这一段说到 30 秒以后在停顿处分段，一直不停顿时 100 秒硬切（主控一次最长 120 秒）：先要这一段的终稿、在后台整理，再开新的一段；显示的是前面各段的原文接上这一段的草稿。</li>
 <li><b>终稿和上屏</b>：松开后等录到的音频都送出去再要终稿；各段都整理完（最多等 2.5 秒）一起上屏，没整理成的用原文；整段是空的就不上屏。</li>
-<li><b>整理</b>（「说完后整理」开着时）：先由代码去掉单独成段的「嗯、呃、啊、额」，只剩语气词的那段算空的；再交 <code>luoke-ime.tidy</code> 去口头禅、理顺改口，写成书面的数字和英文（提示词见「提示词」页）。结果的字母和数字个数不在原文的 0.5 倍到 1.3 倍加 2 之间、2.5 秒没回来或出错，都用原文。</li>
+<li><b>整理</b>（「语音整理」开着时）：先由代码去掉单独成段的「嗯、呃、啊、额」，只剩语气词的那段算空的；再交 <code>luoke-ime.tidy</code> 去口头禅、理顺改口，写成书面的数字和英文（提示词见「提示词」页）。结果的字母和数字个数不在原文的 0.5 倍到 1.3 倍加 2 之间、2.5 秒没回来或出错，都用原文。</li>
 <li><b>数字</b>（整不整理都做）：连着 5 个以上的汉字数字逐位换成阿拉伯数字；紧跟在英文后面的汉字数字（可带十、百、千、两、点）换成阿拉伯数字，和英文之间空一格，后面跟量词的不换。</li>
 <li><b>上下文和热词</b>：交给转写的 <code>context</code> 开头一行是「常用说法：」加热词（<code>hello</code> 和每次 <code>arm</code> 时向个人化组件要 50 个，5 分钟内不重复要），后面是光标前的字接前面各段原文的最后 300 字；转写结果里连着出现 4 个以上热词的一串去掉。</li>
-<li><b>出错</b>：<code>superseded</code> 丢掉这份草稿；<code>session_lost</code> 这一段从头重送；<code>not_ready</code>、<code>busy</code> 按 <code>retry_after</code> 重发（缺省 1 秒，最多 3 秒）。还没识别出字时遇到 <code>unsupported</code>、<code>task_unavailable</code>、<code>unavailable</code>，光标旁说明原因（「这一版螺壳还没开放语音输入」「螺壳的语音模型还没准备好，稍后再试」「没连上螺壳，语音输入用不了」），不再送音频，松开 2 秒后结束、不上屏；别的错误用最近一份草稿顶上，尽量不丢字。取消时已经 <code>start</code> 过的，告诉主控 <code>want: cancel</code>。</li>
+<li><b>出错</b>：<code>superseded</code> 丢掉这份草稿；<code>session_lost</code> 这一段从头重送；<code>not_ready</code>、<code>busy</code> 按 <code>retry_after</code> 重发（缺省 1 秒，最多 3 秒）。还没识别出字时遇到 <code>unsupported</code>、<code>task_unavailable</code>、<code>unavailable</code>，光标旁说明原因（「当前版本的螺壳不支持语音输入」「螺壳语音模型准备中，请稍后重试」「未连接螺壳，语音输入不可用」），不再送音频，松开 2 秒后结束、不上屏；别的错误用最近一份草稿顶上，尽量不丢字。取消时已经 <code>start</code> 过的，告诉主控 <code>want: cancel</code>。</li>
 <li><b>上屏以后</b>：写进记忆（<code>ime-commit</code>，<code>kind</code> 为 <code>hotkey</code>），接着请求联想；不记使用计数。</li>
 </ul>
 
@@ -955,8 +955,8 @@ sequenceDiagram
 <tr><td><code>$TMPDIR/luoke-ime/&lt;id&gt;</code></td><td>引擎的临时目录；<code>~/.luoke</code> 和 <code>~/.luoke/ime</code> 以 700 建；第三方引擎不给系统共用的 TemporaryItems</td></tr>
 </table></div>
 
-<p><b>设置窗口</b>四页：通用（输入方案、模糊音（一个总开关，打开后才列出六组勾选，关着时勾选照样留着）、语音、中英文、排版、候选窗口，装了个人化组件才有联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案学到的词和忘掉的词；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（最前面是使用统计：最近 7 天的上屏次数、首选占比、上屏后马上退格的占比，装了个人化组件时加联想出现、打开、选中的次数和字数，能清零；然后是开发模式记录、记录文件夹、引擎文件夹、设置文件）。联想、记忆记录、记忆页和高级页的行带一句说明；窗口里不放文本框。语音一节：开关「语音输入：按住右 ⌥（Alt）说话，松开上屏」（键名跟着设置变），打开后才出现「按住哪个键说话」（右 ⌥（Alt）、右 ⌘、右 ⌃，说明外接 Windows 键盘、对调过修饰键的选右 ⌘ 试试）和开关「说完后整理：去掉口头禅、理顺改口」，没有麦克风权限时红字提示并给一个去系统设置的按钮；下面说明识别和整理都由螺壳在这台 Mac 上做。</p>
-<p><b>输入法菜单</b>只放常用操作：输入方案、当前中英文模式、清掉学到的词、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用（打字引擎、个人化组件、快捷键引擎包括语音，都带原因和「重新启用」）、沙盒拦截、等确认的第三方引擎也列在这里。</p>
+<p><b>设置窗口</b>四页：通用（输入方案、模糊音（一个总开关，打开后才列出六组勾选，关着时勾选照样留着）、语音、中英文、排版、候选窗口，装了个人化组件才有联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案的「已学词语」和「已忘记词语」；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（最前面是使用统计：最近 7 天的上屏次数、首选占比、上屏后马上退格的占比，装了个人化组件时加联想出现、打开、选中的次数和字数，能清零；然后是开发模式记录、记录文件夹、引擎文件夹、设置文件）。联想、记忆记录、记忆页和高级页的行带一句说明；窗口里不放文本框。语音一节：开关「语音输入」（下面一行小字说明按住哪个键说话、松开上屏，键名跟着设置变），打开后才出现「语音输入按键」（右 ⌥（Alt）、右 ⌘、右 ⌃，说明外接 Windows 键盘、对调过修饰键的选右 ⌘ 试试）和开关「语音整理：去除口头禅、修正改口、整理列表和分段」，没有麦克风权限时红字提示并给一个去系统设置的按钮；下面说明识别和整理都由螺壳在这台 Mac 上做。</p>
+<p><b>输入法菜单</b>连不上螺壳时最上面多一行「未连接螺壳：AI 重排和联想不可用」（开着语音输入时写「AI 重排、联想和语音输入不可用」）：每次打开菜单时试连一次主控的 socket（0.2 秒），连不上才显示，不轮询。菜单只放常用操作：输入方案、当前中英文模式、清除当前方案的已学词语、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用（打字引擎、个人化组件、快捷键引擎包括语音，都带原因和「重新启用」）、沙盒拦截、等确认的第三方引擎也列在这里。</p>
 
 <h2>安全</h2>
 <ul>
@@ -1341,7 +1341,7 @@ sequenceDiagram
 <section class="page" id="search" data-title="螺壳搜索 luoke-search">
 <h1>螺壳搜索</h1>
 <p class="lede">给 Mac 上用户选的文件夹和照片图库建索引，按字词和按意思找回来。随螺壳一起出：程序放在螺壳.app 里，用户开启后由螺壳本体起，系统权限都在螺壳名下。没有自己的窗口，入口在 agent 的对话和螺壳窗口的全局搜索；窗口侧栏的应用页显示它的状态、文件夹和搜照片开关。窗口和对话由 luoke-agent 写。向量由主控算，自己不带模型。</p>
-<p class="src">仓库 <code>luoke-search</code>（Swift 包 <code>LuokeSearchKit</code>，Apache-2.0）· 版本 0.1.13，按代码 f68fbe8 核对 · 未发布：随螺壳 beta 2 第一次发布（封闭测试）· 只支持 macOS 26.2 及以上</p>
+<p class="src">仓库 <code>luoke-search</code>（Swift 包 <code>LuokeSearchKit</code>，Apache-2.0）· 版本 0.1.24；缩略图和结果里的时长按代码 826ec1f 核对，其余按 f68fbe8（0.1.13）及其后各次修订 · 未发布：随螺壳 beta 2 第一次发布（封闭测试）· 只支持 macOS 26.2 及以上</p>
 
 <h2>职责</h2>
 <ul>
@@ -1452,14 +1452,14 @@ sequenceDiagram
 <tr><td><code>search_open_system_settings</code></td><td>是</td><td><code>pane</code>：<code>files</code>（文件和文件夹）/ <code>full_disk</code>（完全磁盘访问）/ <code>photos</code> → 打开系统设置对应隐私页。标 Mac</td></tr>
 <tr><td><code>outbox_ack</code></td><td>是</td><td><code>id</code>、<code>state</code>（shown / answered / dismissed）；只收 outbox 现在可能有的 id，别的答 <code>invalid</code>；<code>shown</code> 不记，answered、dismissed 的不再出</td></tr>
 </table></div>
-<p>结果条目：<code>id</code>（条目号加位置，如 <code>12#p3</code> 第 3 页、<code>#s</code> 幻灯片、<code>#w</code> 工作表、<code>#c</code> 第几部分、<code>#t25.0</code> 秒）、<code>kind</code>、<code>title</code>、<code>path</code>（照片图库的条目为空）、<code>where</code>（<code>page</code> / <code>part</code> / <code>sheet</code> / <code>time</code> / <code>end</code>）、<code>date</code>、<code>snippet</code>（约 160 字）、<code>why</code>（"第 3 页的文字对得上"等）、<code>score</code>、<code>strong</code>，以及给窗口用的 <code>source</code>（<code>files</code> / <code>photos</code>）、<code>kind_label</code>（"截图""录音"这样的叫法）、<code>line</code>、<code>thumb</code>、<code>actions</code>（[打开]、文件的 [在访达中显示]，已有向量的再加 [找相似的]，调 <code>search_similar</code>）。<code>skipped</code> 每项是 <code>source</code>、<code>why</code>、<code>text</code>、<code>detail</code>，要权限的带 <code>permission</code>：现在只有照片图库，<code>why</code> 是 <code>off</code>（没开）、<code>needs_access</code>（还没允许）、<code>denied</code>（拒绝过）、<code>not_updated</code>（不让读了，以前读过的照样搜得到）；后三种只有判断权限的常驻服务才报；只要 <code>files</code> 或只要图库没有的类型时不列。</p>
+<p>结果条目：<code>id</code>（条目号加位置，如 <code>12#p3</code> 第 3 页、<code>#s</code> 幻灯片、<code>#w</code> 工作表、<code>#c</code> 第几部分、<code>#t25.0</code> 秒）、<code>kind</code>、<code>title</code>、<code>path</code>（照片图库的条目为空）、<code>where</code>（<code>page</code> / <code>part</code> / <code>sheet</code> / <code>time</code> / <code>end</code>）、<code>date</code>、<code>snippet</code>（约 160 字）、<code>why</code>（"第 3 页的文字对得上"等）、<code>score</code>、<code>strong</code>，以及给窗口用的 <code>source</code>（<code>files</code> / <code>photos</code>）、<code>kind_label</code>（"截图""录音"这样的叫法）、<code>line</code>、<code>thumb</code>、<code>duration</code>（秒，只有视频和录音、读过内容且时长大于 0 时才有；照片图库里的视频用图库自己记的时长）、<code>actions</code>（[打开]、文件的 [在访达中显示]，已有向量的再加 [找相似的]，调 <code>search_similar</code>）。<code>skipped</code> 每项是 <code>source</code>、<code>why</code>、<code>text</code>、<code>detail</code>，要权限的带 <code>permission</code>：现在只有照片图库，<code>why</code> 是 <code>off</code>（没开）、<code>needs_access</code>（还没允许）、<code>denied</code>（拒绝过）、<code>not_updated</code>（不让读了，以前读过的照样搜得到）；后三种只有判断权限的常驻服务才报；只要 <code>files</code> 或只要图库没有的类型时不列。</p>
 <h3>资源</h3>
 <ul>
 <li><code>luoke://luoke-search/outbox</code>（也可写 <code>outbox</code>）：见下。</li>
 <li><code>summary</code>：<code>{count, text}</code>，<code>count</code> 只算 <code>needs-setup</code> 和 <code>needs-access</code>。</li>
 <li><code>permissions</code>：<code>{photos: granted|denied|ask}</code>，不弹框；读不了图库的进程报 denied；用户还没在螺壳里同意让搜索用照片时（<code>LUOKE_PERMISSIONS_OFF</code>），不管 macOS 给没给都报 ask。</li>
 <li><code>page/overview</code>：应用页，A2UI 消息，见「运行形态」。</li>
-<li><code>thumb/&lt;条目号&gt;</code>：缩略图，答 <code>blob</code>、<code>image/jpeg</code>，不在 <code>resources/list</code> 里列。长边 400 px、不超过 256 KB、最多等 2 秒、同时最多做 2 张；SVG、AVFoundation 打不开的视频、内容只在 iCloud 的、加密 PDF 不给；照片没有权限时不去图库里找。</li>
+<li><code>thumb/&lt;条目号&gt;</code>：缩略图，答 <code>blob</code>、<code>image/jpeg</code>，不在 <code>resources/list</code> 里列。长边 400 px、不超过 256 KB、同时最多做 2 张；两个名额都占着时先等名额（最多 2 秒），拿到后再给 2 秒去做，所以一张最多 4 秒；在做和在等的加起来最多 8 张，再多的马上答没有。没给图时照旧答「没有这个资源」，不带原因码，窗口可以过一会儿再要一次；原因只写进标准错误的一行日志（只在 iCloud、没有名额、做得太久、画不出来，带种类和用时，不带文件名）。SVG、AVFoundation 打不开的视频、内容只在 iCloud 的、加密 PDF 不给；照片没有权限时不去图库里找。</li>
 </ul>
 <h3>outbox</h3>
 <p>只报三类事，不推搜索结果：</p>
@@ -2683,6 +2683,7 @@ sequenceDiagram
 <tr><td>0023</td><td>螺壳自己的任务协议和统一调度</td><td>给整个螺壳定一套自己的任务协议：任务声明优先级、权限、资源等，有注册流程，螺壳自己的组件和外来的应用都走这一套，外来应用接入不另做一套；由主控统一排序（2026-11-06 更正，原写引擎层），同一优先级默认按时间先后；可以做一个任务队列组件，让用户看到当前的队列、拖动调整顺序。推理仍归主控（ADR 0018）。外来应用照这套协议自己接入，不用逐个经我们同意；用户接入螺壳没覆盖的模型时要有提示，等于允许自定义配方（优先级不高）。协议和调度的方案、现在的 <code>user-waiting</code> / <code>background</code> 两档优先级和空闲任务怎么迁过去、外来应用的任务能不能排到官方任务前面、协议名都还没定。</td></tr>
 <tr><td>0024</td><td>记忆和螺壳搜索的本机数据加密存放</td><td>挡同一账户里别的程序直接读文件和流出去的拷贝（硬盘被拿走靠 FileVault）；密钥归主控，只交给螺壳自己起的进程，拿不到密钥不打开、不另建明文；第一次拿到密钥时把明文库换成加密的，页面令牌不再写进文件。修订（2026-11-09）：默认加密，密钥放登录钥匙串，随迁移助理和时间机器带走，不放 iCloud、不和 Apple ID 绑；「密钥只留在这台 Mac」加一次恢复码是用户自己打开的一档；打不开时照实说、不删文件；界面用正式说法，口语的解释放「?」帮助或文档。下一版做，密钥怎么交由主控出方案。</td></tr>
 <tr><td>0025</td><td>螺壳小精灵在螺壳之外</td><td>给还没装螺壳的人的轻量入口：打开就检测这台 Mac、跑起小模型、做一次本地 AI 能力的自检并方便分享，再介绍螺壳。不是螺壳的组件：不进配方、不由螺壳安装、不读写记忆。没装螺壳时可以自带小模型，是 ADR 0018 唯一的例外；装了螺壳就把模型交给主控。模型要在国内下得动；数字照实说，8 GB 的机器照实说螺壳暂时跑不了。先做原型，验证国内网络下出第一句话要多久、动画好不好玩、8 GB 机器上的内存和速度。</td></tr>
+<tr><td>0028</td><td>主窗口的界面只在 agent，工具只给原始数据和动作</td><td>主窗口里的一切（「今天」、右边栏、卡片、各应用的页面、应用管理、设置）只在 agent 里改：每一页放什么、什么顺序、哪些按钮、什么措辞都在这里定。自带的应用和主控只给结构化的东西：是哪一种事、涉及什么、数字、状态、能做的动作和参数；卡片、侧栏概览、动作结果上的句子和固定的名字由 agent 照数据写，全窗口一个口径。邮件主题、文件名、摘要、记忆里的理解算内容，仍由工具给。工具自己带界面描述的卡片留给 agent 不认识的工具，和自带应用的过渡期。有自己窗口的（首次安装、升级、菜单栏、输入法的设置）自己改，照同一份界面规范。</td></tr>
 </table></div>
 
 <h2>设计原则</h2>
@@ -2767,6 +2768,13 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-17</h2>
+<ul>
+<li>设计决定页加 ADR 0028：主窗口的界面只在 agent，自带的应用只给结构化的数字、状态和动作，卡片、概览、动作结果上的句子和名字由 agent 写；工具自己带界面描述的卡片留给 agent 不认识的工具和过渡期。</li>
+<li>搜索页按代码 826ec1f（0.1.24）复核缩略图和结果字段：缩略图先等名额、一张最多 4 秒、同时最多 8 张在手；视频和录音的结果带 <code>duration</code>（秒）。</li>
+<li>输入法页按代码 24d828b（0.1.103）复核界面上的名字：「语音整理」「语音输入按键」「已学词语」等书面用语；连不上螺壳时菜单最上面多一行；拼音显示在候选窗里时光标处放零宽占位符。</li>
+</ul>
 
 <h2>2026-11-16</h2>
 <ul>
