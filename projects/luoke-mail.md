@@ -13,9 +13,9 @@
 - 起草回复，只放进草稿箱；
 - 「今日处理」：每天处理过的每一封和它的结果，逐封撤销或修改。
 
-支持 Gmail、QQ、网易 163/126 和自定义 IMAP，可以同时连接多个邮箱。形态是只监听 127.0.0.1 的本机网页。0.19.28 起收进螺壳.app（顶层 ADR 0022）：代码进螺壳自带的 Python，清单在 `Contents/Resources/mail/luoke-accessory.json`，由螺壳本体起一个常驻进程（`-m luoke_mail --resident --parent-pid`），经 stdin / stdout 一行一个 JSON 和本体说话；不再有单独的「螺壳邮件助手.app」（`scripts/package-app.sh` 在流水线切换前还留着）。
+支持 Gmail、QQ、网易 163/126 和自定义 IMAP，可以同时连接多个邮箱。形态是只监听 127.0.0.1 的本机网页。0.19.28 起收进螺壳.app（顶层 ADR 0002）：代码进螺壳自带的 Python，清单在 `Contents/Resources/mail/luoke-accessory.json`，由螺壳本体起一个常驻进程（`-m luoke_mail --resident --parent-pid`），经 stdin / stdout 一行一个 JSON 和本体说话；不再有单独的「螺壳邮件助手.app」（`scripts/package-app.sh` 在流水线切换前还留着）。
 
-**替用户做事的边界**（顶层 ADR 0016）：
+**替用户做事的边界**（顶层 ADR 0006）：
 - 能撤回的先做、事后复查：分析过的邮件标为已读；记忆里确认过的习惯（按「发件人 × 类别」）自动归档、标已读或加标签。每封都列在「今日处理」里，能撤销，撤销记成反证。
 - 用户自己的邮箱里，移到垃圾箱、标垃圾邮件、退订永远要用户点；批量的这类操作要先开「处理模式」。
 - 螺壳自己的邮箱（第 5 条）：用户另开、专门给螺壳、在设置里明确设为「螺壳自己的邮箱」的那个邮箱，里面的归档、移到垃圾箱自动做，同样进「今日处理」。
@@ -31,9 +31,9 @@
 
 ## 在记忆里读写什么
 
-**工具记录，记忆下结论**（顶层 ADR 0015）：邮件助手把发生了什么写成记录，带原文；关于用户的事实、关注的话题、不感兴趣、精选的口味、处理习惯都由 luoke-mem 归纳和定档，问什么也由它定。工具标识 `luoke-mail`。示例收件箱用单独的记忆文件。
+**工具记录，记忆下结论**（顶层 ADR 0005）：邮件助手把发生了什么写成记录，带原文；关于用户的事实、关注的话题、不感兴趣、精选的口味、处理习惯都由 luoke-mem 归纳和定档，问什么也由它定。工具标识 `luoke-mail`。示例收件箱用单独的记忆文件。
 
-**每条记录都带**：`account`（来源邮箱）、`sender`（`list:` / `from:`）、`name`、`by`（user / rule / suggestion）、`happened_at`（真正发生的时间）。凭证经 `mask_secrets` 只遮那一串，其余原样（ADR 0013）；敏感的上下文用 `sensitive=` 标给记忆。
+**每条记录都带**：`account`（来源邮箱）、`sender`（`list:` / `from:`）、`name`、`by`（user / rule / suggestion）、`happened_at`（真正发生的时间）。凭证经 `mask_secrets` 只遮那一串，其余原样（ADR 0001）；敏感的上下文用 `sensitive=` 标给记忆。
 
 **写的记录**
 
@@ -91,7 +91,7 @@
 - 其余任务：`bench/task_sets.py` + `bench/run_tasks.py`（应用自己的代码路径，直连或经写明的主控，结果带题集 sha256）——清理判断、订阅体检、了解你（发出的邮件、机构来信）、`thread`（硬性条目 `done_as_you`、`missed_you`）。
 - 起草回复、精选的阅读和挑选还没有评测集。
 
-## 对主控的需求：日历（beta1 之后，ADR 0014 修订）
+## 对主控的需求：日历（beta1 之后，ADR 0002 修订）
 
 邮件助手要用主控的本机日历接口，判断「这封邮件的日程是不是已在日历里」（luokelabs/luoke-ops#3），具体怎么做和 luoke-core 商定：
 - 按时间段读事件：标题、开始和结束时间、地点、所在日历、事件编号。
@@ -123,9 +123,12 @@
 
 1. ~~`service.summary`、`service.pages`~~：已做。0.19.45 起邮件助手整体在螺壳窗口里（ops#123，主人 11-09 定一次搬完）：`service.pages` 是今日处理 `today`、收件箱 `inbox`、清理 `clean`、精选 `digest`、订阅体检 `subs`、规则 `rules`、处理记录 `activity`、设置 `settings`，数据和动作跟网页同一套。页上的按钮走两个工具：`mail_view`（只读，换显示的内容）和 `mail_do`（写入，要用户点按）；按钮只带页 id 和按钮 id，邮件助手按自己画过的按钮查出做什么。0.19.46 起用上工具协议 §4 在 11-10 补的五样（看核心报的 `features`，旧的核心照旧开浏览器、放「刷新」）：一页 400 个组件、卡片上的「在邮件助手里看」跳到收件箱的那一封（`page/inbox?id=…`）、设置里用密码框添加邮箱、有任务在跑时页自己重读、导出 Gmail 过滤器弹存文件的框。0.19.52 照设计规范 §18.2 重排（luoke-agent 转来逐页写法，PR #91）：标签页今日、收件箱、精选、清理，其余是 hidden 页（设置、处理记录带图标；规则、订阅体检、清理旧邮件 `sweep`、精选内容 `piece`）。`service.ask.suggest` 还没做。
    **给核心拼页的原始数据（0.19.54–0.19.59，11-13）**：七份只读资源 `data/accounts`、`today`、`inbox`、`digest`、`clean`、`settings`、`activity`，加打开一封信的 `data/mail`，清单 `capabilities.data` 列出给了哪几样；配一组写入工具（`mail_act`、`mail_undo_step`、`mail_unsubscribe`、`mail_old_archive`、`mail_digest_feedback`、`mail_settings`……，都要用户点按）。形状和清单在仓库 `docs/agent-data.md`，luoke-agent 照效果图核过。添加邮箱 / 改授权码、移除邮箱、清除全部数据：`mail_connect`、`mail_remove`、`mail_forget`（0.19.64，johnz 安全复审批准、主人 11-13 同意合）。授权码只来自窗口的密码框；换了服务器必须重填授权码；只在「设置」页接，确认框由 agent 弹。luoke-agent 的需求 3（邮箱类型和拿授权码的步骤）已做：`data/providers`，连同 `mail_connect`「已保存，但连不上」带 `saved`、`account` 标记（0.19.65，只加不改，会话自己合）。
-   **11-13 起（顶层 ADR 0028）页面层归 luoke-agent**：邮件助手只给原始数据和动作，不再改 `window/pages` 的页面内容、顺序、按钮和措辞；现有页面层由 luoke-agent 牵头商定怎么搬、先搬哪页，搬完删掉这边的。界面要改的事转给 luoke-agent；它缺数据或动作向这边提。
+   **11-13 起（顶层 ADR 0002）页面层归 luoke-agent**：邮件助手只给原始数据和动作，不再改 `window/pages` 的页面内容、顺序、按钮和措辞；现有页面层由 luoke-agent 牵头商定怎么搬、先搬哪页，搬完删掉这边的。界面要改的事转给 luoke-agent；它缺数据或动作向这边提。
    **界面重构在 `ui-refactor` 分支上**：这轮由 luoke-agent 一个会话直接在本仓库的 `ui-refactor` 分支上改给页面供数据和动作的那层，把剩下的页面代码搬过去；整条分支合回 main 之前，邮件助手把这边的改动过一遍。数据快照那一档已在 `ui-refactor` 上去掉：开发构建用真实数据，`data/accounts` 不再有 `snapshot` 状态，`mail_connect`、`mail_remove`、`mail_forget` 不再因为快照拒绝。
    **补回旧界面功能要的数据和动作（luoke-agent 需求 3，11-15 接下，在 `ui-refactor` 上）**：`data/clean` 加订阅体检的全部结果 `subscriptions`（建议退订、无法退订、可疑、已处理、建议保留几组，已处理的做了什么、哪天，退订后还在发信的，大小、最近主题，`mailto` 和回信关键词）；`data/sender` 清历史邮件前给封数和大小；`data/old?scope=inbox|archive` 清理旧邮件的全部分组（建议、待确认、未分析），`mail_old_trash` 按组移到已删除；`data/job` 看任务跑完的结果（旧邮件清理的撤销编号、Gmail 过滤器预演）；`data/digest` 加精选来源列表；`data/mail` 列信里的几个日程；`data/inbox?list=archived` 归档了还要处理的；`mail_sync`、`mail_subscriptions_check`、`mail_old_scan` 认 `account=all`；`mail_sender_reset` 撤回体检里的决定、`mail_sender_unsubscribed` 记用户自己退订了；读 `data/piece` 记「打开过」（读资源里唯一写的一处，主人同意）。只加不改，形状在 `docs/agent-data.md`。
+   **补回旧界面说明句要的数据（luoke-agent 需求 4，11-15 接下，在 `ui-refactor` 上）**：`data/accounts` 的 `model`（为什么现在分析不了邮件）；`data/providers` 的 `block`（在各家邮箱里拉黑的步骤和设置页）、`purge_days`；订阅体检每个发件人的 `verdict`、`kind`（为什么这样建议）、`domain` 和这次体检的 `model_note`；旧邮件分析停下的 `problem`；设置里后台整理的 `stalled`（登录项被移除、程序挪了位置）和 `next_in_min`，了解你的 `problem`，网站打不开的原因和时间。只加不改。
+   **后台任务的标题（luoke-agent 11-16 提，当天在 `ui-refactor` 上做完）**：清单里三个 `jobs` 都填了 `title`：`clean`「旧邮件分析」、`digest`「挑选精选内容」、`learn`「从邮件中学习偏好」（不带人称，和主窗口邮件设置里的同名一行一致）。
+   **代号和数代替句子（luoke-agent 11-17 提，顶层 ADR 0002；当天在 `ui-refactor` 上做了前几项）**：停下的原因给代号（`problem_code`、`error_code`，代号表在 `docs/agent-data.md`「停下的原因」）；定时整理上次的结果给数（`auto.last` 的 `new`、`needs_you`、`auto`、`unanalyzed`，每个邮箱一份在 `accounts`）；订阅体检的模型说明给 `model_check`（原因、几个没看、一共几个）；侧栏概览 `summary` 给 `connected`、`needs`、`suspicious`、`tidy`、`auto_today`；「在 Gmail 中屏蔽」的步骤里按钮名改成窗口上的。原文的句子过渡期照旧给。动作的答复和出错给结果的代号和数，另排。
 2. `daily-review`：跟着从螺壳自己的邮箱外发走，进不进 beta 2 等主人定。
 3. 打开类工具带 `ai.luoke/where: mac`：等 luoke-agent 的帮手支持 `_meta`。
 4. ~~随 agent 上线的版本把接口改成默认开、清单声明能力~~：0.19.26 已进 main（11-05），连同 agent.sock 的调用方核对（安全审查 S2 邮件这一半）。
@@ -148,7 +151,7 @@
 - **精选的数量是固定配额**（`editor.WEEK_QUOTA` / `MONTH_QUOTA`）：配额比分数门槛好，这点不退回，但数字改成随这个用户的反应变；反馈现在只影响挑什么，不影响挑多少。提示词里的「2 分以上要克制」和 `digest.PICK` 一起看，要重评。
 - **了解你自己设门槛**：`learner.AGREE`（两封一致才交）和 `learn.FACT_TOPICS` / `LIFE_TOPICS`（列表外静默丢掉）是在工具这边挡，改成都交给记忆，由它的 `fit` 定；和 luoke-mem 商定。
 - **清理的「没勾的记住」只记那一封**：`triage.DELETE_KINDS` 的建议不随反应变。用户反复不勾的「发件人 × 类别」，以后默认不勾。
-- **分拣提示词里的口味**（「ignore」含群发、「重要的人」）：随 ADR 0019 搬提示词时一起改，要重评。
+- **分拣提示词里的口味**（「ignore」含群发、「重要的人」）：随 ADR 0007 搬提示词时一起改，要重评。
 
 是 bug，先修：
 
