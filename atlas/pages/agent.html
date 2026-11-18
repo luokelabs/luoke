@@ -248,7 +248,7 @@
   应用页和搜索结果上只认 <code>agent.open_url</code> 和 <code>agent.open_page</code>。</li>
 <li><b>应用页另有的写法</b>：根 Column 写 <code>"layout": "sections"</code> 时下面一层一段一张卡片；一段写 <code>"placement": "aside"</code> 时宽窗口里放到第二栏；页可写 <code>refresh</code>（2–60 秒）；动作的结果可带一个文件交给用户存：不超过 512 KB，只认 .txt、.csv、.json、.md、.xml。</li>
 <li><b>搜索结果</b>：应用只给命中（<code>hits</code>）不给卡片时，核心画一张纯文本卡，最多 15 条，每条有标题、位置和日期、摘要，最多 2 个按钮。</li>
-<li><b>渲染器</b>：Swift 包 <code>LuokeA2UI</code>（macOS 14、iOS 17）。<code>LuokeA2UICore</code> 只依赖 Foundation，校验规则和核心的 <code>a2ui.py</code> 用同一批例子核对；<code>LuokeA2UI</code> 是 SwiftUI 画法，另给宿主改样式的接口。另有输入法用的目录 <code>ai.luoke/a2ui/ime/1</code>。<code>DateTimeInput</code> 目前画成文本框。</li>
+<li><b>渲染器</b>：Swift 包 <code>LuokeA2UI</code>（macOS 26.2、iOS 17）。<code>LuokeA2UICore</code> 只依赖 Foundation，校验规则和核心的 <code>a2ui.py</code> 用同一批例子核对；<code>LuokeA2UI</code> 是 SwiftUI 画法，另给宿主改样式的接口。另有输入法用的目录 <code>ai.luoke/a2ui/ime/1</code>。<code>DateTimeInput</code> 目前画成文本框。</li>
 </ul>
 
 <h2>与记忆的交互</h2>

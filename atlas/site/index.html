@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-17 16:55</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-18 16:54</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -1249,7 +1249,7 @@ sequenceDiagram
   应用页和搜索结果上只认 <code>agent.open_url</code> 和 <code>agent.open_page</code>。</li>
 <li><b>应用页另有的写法</b>：根 Column 写 <code>"layout": "sections"</code> 时下面一层一段一张卡片；一段写 <code>"placement": "aside"</code> 时宽窗口里放到第二栏；页可写 <code>refresh</code>（2–60 秒）；动作的结果可带一个文件交给用户存：不超过 512 KB，只认 .txt、.csv、.json、.md、.xml。</li>
 <li><b>搜索结果</b>：应用只给命中（<code>hits</code>）不给卡片时，核心画一张纯文本卡，最多 15 条，每条有标题、位置和日期、摘要，最多 2 个按钮。</li>
-<li><b>渲染器</b>：Swift 包 <code>LuokeA2UI</code>（macOS 14、iOS 17）。<code>LuokeA2UICore</code> 只依赖 Foundation，校验规则和核心的 <code>a2ui.py</code> 用同一批例子核对；<code>LuokeA2UI</code> 是 SwiftUI 画法，另给宿主改样式的接口。另有输入法用的目录 <code>ai.luoke/a2ui/ime/1</code>。<code>DateTimeInput</code> 目前画成文本框。</li>
+<li><b>渲染器</b>：Swift 包 <code>LuokeA2UI</code>（macOS 26.2、iOS 17）。<code>LuokeA2UICore</code> 只依赖 Foundation，校验规则和核心的 <code>a2ui.py</code> 用同一批例子核对；<code>LuokeA2UI</code> 是 SwiftUI 画法，另给宿主改样式的接口。另有输入法用的目录 <code>ai.luoke/a2ui/ime/1</code>。<code>DateTimeInput</code> 目前画成文本框。</li>
 </ul>
 
 <h2>与记忆的交互</h2>
@@ -1568,7 +1568,7 @@ sequenceDiagram
 <h2>已知限制</h2>
 <ul>
 <li>按意思搜要这一版搜索在主控的发布评测里有证据：没有时内部版照出、只能按字词搜，RC 和正式版出不来。</li>
-<li><b>完全磁盘访问</b>（ADR 0021）：清单没有声明 <code>fda</code>，搜索不靠它。受保护的文件夹（桌面、文稿、下载、外接盘、网络卷）由 macOS 按文件夹问螺壳；拒绝过的，<code>needs-access</code> 卡片叫用户在「文件和文件夹」里允许螺壳。</li>
+<li><b>完全磁盘访问</b>（ADR 0004）：清单没有声明 <code>fda</code>，搜索不靠它。受保护的文件夹（桌面、文稿、下载、外接盘、网络卷）由 macOS 按文件夹问螺壳；拒绝过的，<code>needs-access</code> 卡片叫用户在「文件和文件夹」里允许螺壳。</li>
 <li>发布流水线里螺壳搜索还算可缺：没钉它的提交时出的螺壳不带搜索。<code>scripts/build_app.sh</code> 还能打单独的 <code>螺壳搜索.app</code>，不做公证，螺壳不用它。</li>
 <li>16 GB 档的主控只收文字：那一档上图片、视频、录音、照片只能按文件名、拍摄时间和 OCR 的字找。</li>
 <li>拒答门槛未开启，<code>confident</code> 有结果时恒为 <code>null</code>，答复不表示"有把握"。</li>
@@ -1611,7 +1611,7 @@ sequenceDiagram
 <li><b>第一轮</b>：用户开启螺壳扫描或刚确认权限时，清单里标了 <code>first_use</code> 的 <code>scan</code> 马上跑一轮（用户在跟前也不让路，只看超时）；还没有病毒库时这一轮自己先下载再查（最多 10 分钟，和 <code>update</code> 同一个上游；<code>scan --this-mac</code> 一直这样，开发版用 <code>--update-first</code>）。之后每天一轮，被打断的隔 10 分钟就能接着跑。自动清默认关，<code>persistence.new</code> 第一轮只记基线，<code>space.growth</code> 要攒几天历史。</li>
 <li><b>装好的包只认 <code>--this-mac</code></b>：<code>--home</code>、<code>--data</code>、<code>--tmp</code>、<code>--projects</code>、<code>--tool-dir</code>、<code>--fixture</code>、<code>--clock</code>、<code>--clock-start</code>、<code>--no-full-disk-access</code> 这类开发参数和 <code>eval-*</code>、<code>make-skill-evalset</code> 都拒绝。扫描工具只用 <code>Helpers</code> 里同一份的，每次用之前核签名（标识 <code>ai.luoke.scan.&lt;名字&gt;</code>、发行团队），不对就当没有，不找 Homebrew 的（那些文件夹用户可写，会借到完全磁盘访问）。提示词、规则清单（<code>rules/*.json</code>）、<code>freshclam.conf</code> 和 ClamAV 的根证书编在 <code>luoke-scan</code> 里，起它之前核的签名也盖住它们。</li>
 <li><b><code>--this-mac</code> 查哪里</b>：家目录、本用户的临时目录（<code>$TMPDIR</code>），<code>/Library</code> 和 <code>/var/db/receipts</code>，应用目录 <code>/Applications</code>、<code>~/Applications</code>、<code>/System/Applications</code>，项目目录取 <code>~/Developer</code>、<code>~/Projects</code>、<code>~/Documents/GitHub</code>、<code>~/code</code>、<code>~/src</code>、<code>~/repos</code>、<code>~/workspace</code> 里存在的；数据放 <code>~/.luoke-scan</code>。</li>
-<li><b>完全磁盘访问</b>：授给螺壳本身（ADR 0021），本体起的扫描和扫描起的程序都跟着用。有没有：打开 <code>TCC.db</code> 试探（不弹框），试不出算没有。用户没在螺壳的权限窗口确认这一项时，本体给 <code>LUOKE_PERMISSIONS_OFF=fda</code>，扫描不管 macOS 给没给都当没有，连 Mail、Messages、Safari 这类隐私目录也不碰；<code>scan_now</code> 那一轮从起它的进程继承。</li>
+<li><b>完全磁盘访问</b>：授给螺壳本身（ADR 0004），本体起的扫描和扫描起的程序都跟着用。有没有：打开 <code>TCC.db</code> 试探（不弹框），试不出算没有。用户没在螺壳的权限窗口确认这一项时，本体给 <code>LUOKE_PERMISSIONS_OFF=fda</code>，扫描不管 macOS 给没给都当没有，连 Mail、Messages、Safari 这类隐私目录也不碰；<code>scan_now</code> 那一轮从起它的进程继承。</li>
 <li><b>没有完全磁盘访问时</b>：不碰 macOS 会弹框问的地方（桌面、文稿、下载、音乐、<code>~/Movies/TV</code>、<code>~/Library/Photos</code>、iCloud 云盘、<code>CloudStorage</code>、<code>Containers</code>、<code>Daemon Containers</code>、<code>Group Containers</code>，和任何 <code>.photoslibrary</code>），走别的目录时碰到也不进，<code>~/Documents/GitHub</code> 连在不在都不看。看不到的写成「没有完全磁盘访问，…没看」，已看到的照报；受保护文件夹里的程序签名记成"不知道"，不当成不存在；方案不碰这些路径；记过的大小、哈希、项目结论不忘。outbox 出 <code>needs-access</code>。</li>
 <li><b>一次一轮</b>：每个数据目录用 <code>round.lock</code> 保证空闲任务和 agent 叫的那一轮不重叠（等 3 秒还拿不到就说「已经在查了」、退出码 0）；快速扫描另有 <code>quick.lock</code>；一份方案同时只在一个进程里执行（<code>plans/&lt;编号&gt;.lock</code>）；数据表和 <code>agent-state.json</code> 读改写都加锁。</li>
 <li><b>跑得轻</b>：外部命令都带超时（默认 20 秒），超时或这一轮被叫停时先 TERM、2 秒后 KILL；起的程序留在扫描自己的进程组里，主控按组强杀时一起结束。只在 iCloud 的文件不读（读会触发下载）。一轮扫描、快速扫描、<code>update</code> 和 <code>scan_now</code> 起的那一轮开头都调低优先级（CPU nice 10，磁盘读写降到 utility 档），起的 clamscan、git 等跟着低；答 agent 请求的 <code>mcp</code> 不降。</li>
@@ -1810,7 +1810,7 @@ sequenceDiagram
 <p>装好的包里，终端只能跑 <code>version</code>、<code>report</code>、<code>findings</code>、<code>status</code>，其余的不是螺壳起的都退出码 77（见「只由螺壳起」）。开发版用 <code>--home</code>、<code>--data</code>、<code>--tmp</code>、<code>--projects</code>、<code>--tool-dir</code> 指向假目录和自己的数据目录；<code>--fixture &lt;假目录&gt;</code> 连进程、系统设置这些也换成假目录里 <code>fakes.json</code> 的答案（<code>--clock</code>、<code>--clock-start</code> 定时钟，<code>--no-full-disk-access</code> 当作没有完全磁盘访问），移到废纸篓只挪进假目录的 <code>Trash/</code>，系统命令只记进 <code>commands.log</code>。假目录由外部测试 <code>blackbox/fx.py</code> 造。</p>
 
 <h2>生成任务</h2>
-<p>三个任务的提示词在 <code>prompts/</code>（照顶层 ADR 0019 的格式），装好的包用编在 <code>luoke-scan</code> 里的那份，开发版从程序往上找仓库里的；建议参数 temperature 0、top_p 1、不思考。每一轮规则查完（自动清理之后）、存报告之前问：先 <code>GET /tasks</code>，只问 available 的任务，<code>POST /tasks/&lt;任务&gt;/v1/chat/completions</code>，后台优先级、流式，请求体和 <code>bench/run_eval.py</code> 发的逐字节一样。每轮新问的最多 skills 10 条、identify 5 条、explain 10 条，三个任务一共最多 3 分钟，一条最多等 90 秒；一个任务被挡回、出错或超时，这一轮就不再问它（主控说等不超过 5 秒时等一次再问）。答复按任务、提示词指纹和输入记在 <code>model_answers</code> 表，同一输入下一轮直接用，30 天没用到就删；agent 叫的那一轮只用记下的。只在装好的螺壳里，或指向自己主控（<code>LUOKE_HUB_SOCKET</code>）的开发版、用这台 Mac 自己的数据目录时问；主控不在、任务没开时只多一次 <code>GET /tasks</code>，报告照旧。模型说的只作为证据（<code>model_explain</code>、<code>model_identify</code>、<code>model_note</code>）附在发现下面，不改结论、轻重、标题和编号；卡片、清理方案、病毒提醒、<code>scan_findings</code> 和 <code>report</code> 上都显示。</p>
+<p>三个任务的提示词在 <code>prompts/</code>（照顶层 ADR 0007 的格式），装好的包用编在 <code>luoke-scan</code> 里的那份，开发版从程序往上找仓库里的；建议参数 temperature 0、top_p 1、不思考。每一轮规则查完（自动清理之后）、存报告之前问：先 <code>GET /tasks</code>，只问 available 的任务，<code>POST /tasks/&lt;任务&gt;/v1/chat/completions</code>，后台优先级、流式，请求体和 <code>bench/run_eval.py</code> 发的逐字节一样。每轮新问的最多 skills 10 条、identify 5 条、explain 10 条，三个任务一共最多 3 分钟，一条最多等 90 秒；一个任务被挡回、出错或超时，这一轮就不再问它（主控说等不超过 5 秒时等一次再问）。答复按任务、提示词指纹和输入记在 <code>model_answers</code> 表，同一输入下一轮直接用，30 天没用到就删；agent 叫的那一轮只用记下的。只在装好的螺壳里，或指向自己主控（<code>LUOKE_HUB_SOCKET</code>）的开发版、用这台 Mac 自己的数据目录时问；主控不在、任务没开时只多一次 <code>GET /tasks</code>，报告照旧。模型说的只作为证据（<code>model_explain</code>、<code>model_identify</code>、<code>model_note</code>）附在发现下面，不改结论、轻重、标题和编号；卡片、清理方案、病毒提醒、<code>scan_findings</code> 和 <code>report</code> 上都显示。</p>
 <div class="tbl"><table>
 <tr><th>任务</th><th>提示词</th><th>输入 → 输出</th></tr>
 <tr><td><code>luoke-scan.explain</code></td><td>第 4 版，至多 120 字、300 token</td><td>卡片上要用户看的发现（不是仅供参考的，或仅供参考但风险高的；skill 和说明文件的不问），重的、大的在前：结论、标题、位置、大小、规则的依据（整个不超过 3000 字）→ 一两句大白话：是什么、为什么报、处理会怎样。不改结论，不编数字，不说已经处理，<code>would_lose</code> 每项都说，不写命令。显示前照评测的检查再核：超长、Markdown、命令、网址、说已经做了、把不是放心删的说成能删、输入里没有的带单位的数字，都不显示</td></tr>
@@ -2666,24 +2666,20 @@ sequenceDiagram
 </section>
 <section class="page" id="decisions" data-title="决策">
 <h1>决策</h1>
-<p class="lede">影响多个组件的设计决策以 ADR（Architecture Decision Record）记录，原文保存在顶层仓库 <code>docs/adr/</code>。0001–0012 已归档，下列为当前有效的决策。</p>
+<p class="lede">影响多个组件的设计决策以 ADR（Architecture Decision Record）记录，原文保存在顶层仓库 <code>docs/adr/</code>。现在有效的是 0001 起的十条，每条只写现行的决定，变了就直接改写正文。2026-11-18 以前的 0013–0028 已并进这十条，旧路径各留一个占位文件，旧号和新号的对照在 <code>docs/adr/README.md</code>。</p>
 
 <div class="tbl"><table>
 <tr><th>编号</th><th>决策</th><th>要点</th></tr>
-<tr><td>0013</td><td>本机就是边界</td><td>数据不离开用户自己的设备（设备之间端到端加密）；本机组件之间不为隐私设限；凭证不进记忆，走钥匙串；高级用户端点的密钥可自定义或留空。修订（2026-10-21）：写进用户自己选定并在用的账户（他的邮箱、日历等）不算外传，内容仍不能发到螺壳自己的服务器和用户没选过的第三方；深度搜索的本机索引可以原样存文件里认出的完整证件号、卡号，也原样送主控的嵌入模型，交给 agent 或画成卡片时再遮（只遮那一串、保留后四位），名字像密码、密钥的文件照旧不读，记忆仍不存凭证的值</td></tr>
-<tr><td>0014</td><td>分工</td><td>模型在主控，理解在记忆，事情在工具，沟通在 agent；工具之间不互相调用，只有 agent 调用工具的能力；高级用户端点经主控调度。修订（2026-10-21）：日历由主控提供（EventKit 薄接口：按时间段读、写一个事件并返回编号，日历权限挂在主控名下，配方登记哪些配件能用，第三方配件要先得到用户同意，beta1 之后做）；浏览器桥（native messaging host）也放在主控里，插件经它把页面信息交给主控的任务、调用日历接口、写记忆记录，网页内容只接受固定格式。修订（2026-10-24）：用户看到的应用「螺壳」就是主控（<code>螺壳.app</code>，bundle id 仍是 <code>ai.luoke.core</code>）；agent 并进它，对话、卡片、提示从螺壳的窗口和通知出去，agent 作为后台组件保留，分工不变 修订（2026-11-02）：主窗口由 luoke-agent 这边写，写完开 PR 大家一起审，主控不排窗口外壳，也不写 A2UI 渲染；装、升级、换回、卸载仍归主控。修订（2026-11-06，跟 ADR 0022、0021 对齐）：「每个工具一个签名的 .app」作废，除输入法外都在螺壳.app 里，签名只有螺壳一份，每个工具仍是一个配件、一个身份；装、升级、换回现在只对单独成包的输入法、引擎、模型，包里的应用在「应用」窗口里开启、停用（停用时可选同时删数据），没有单独退回，出了问题出一版新螺壳来修；工具不再自己向系统要权限，经螺壳要。</td></tr>
-<tr><td>0015</td><td>记忆如何形成理解</td><td>工具只记录、记忆读原文下结论；三档把握程度；合理默认、按反馈调整；看依据的时间；空闲时反刍产出提问和建议；不按上下文隔离</td></tr>
-<tr><td>0016</td><td>替用户做事</td><td>能撤回的在确认习惯后自动执行并提示，事后每日复查；不可逆或对外的始终由用户点按；agent 自己的邮箱可按类型放开外发。修订（2026-10-20）：系统检查查出的"会重建的缓存"（npm、uv、pip、Xcode DerivedData、Homebrew 旧版本等）用户确认一次后可对该类自动清理，每次提示，对应应用在用时跳过；其余类别每次由用户点按，删除优先移到废纸篓；只往本机下载的签名规则包、特征库不算数据外传</td></tr>
-<tr><td>0017</td><td>v1 首发</td><td>首发邮件助手和输入法，主控和记忆随装；Apple 芯片、16 GB 起、macOS 26.2+；先封闭测试再公开。修订（2026-10-20）：所有面向用户的界面按同一套设计规范，由品牌负责人在 <code>luoke-brand</code> 牵头制定，各项目照着改；beta1 只修明显的不一致，整体改版在 beta1 之后；顶层仓库公开，各组件仓库仍私有。修订（2026-10-22）：主控的所有窗口和邮件助手的网页在 beta1 前按设计规范整体改，记忆界面、输入法设置、agent 卡片仍在 beta1 之后；封闭测试顺延到 11-02，只做一批，招满 30 位为止，开测时对应的项目在 GitHub 上公开。修订（2026-10-23）：记忆页和输入法设置也在 beta1 前改（agent 卡片仍在之后）；主控里加「应用」窗口，各应用单独安装、升级、换回、卸载，升级主控不再顺带替换应用；「螺壳主控」改名「螺壳」，bundle id、数据目录和命令名不变；版本截止 10-28 20:00，beta1 10-29。修订（2026-10-28）：内部版换到单独的公开仓库 <code>luokelabs/luoke-internal-builds</code>，<code>luoke-releases</code> 只放 beta 和正式版，螺壳按渠道查对应仓库，过渡的那一版两边都发；检查更新往后翻页，随 beta1.1。螺壳、邮件助手、记忆、输入法四个组件公开：原名是公开仓库，从新的初始提交开始，团队开发和 issue 在 <code>&lt;名&gt;-private</code>，往公开仓库同步每次先问主人。修订（2026-10-29）：beta 和正式版的发布包在 GitLab 上放一份镜像，GitHub 仍是主渠道；私有仓库留一个和公开仓库 <code>main</code> 完全一样的 <code>public</code> 分支，同步时把导出的树作为一个新提交加在上面，扫过泄漏再推成公开 <code>main</code>，不改写历史。修订（2026-10-31）：公开仓库只在发 beta 或正式版时同步，四个组件一起，是发版流程里的一步；从下一个公开版起，beta 和正式版只钉 <code>public</code> 上的提交，内部版照旧从私有 <code>main</code> 出。公开仓库发现泄漏时立刻修。修订（2026-11-01）：要发给大家用的组件默认开源，体检、agent、深度搜索第一次随 beta 或正式版发布时建公开仓库；agent 和体检一起上，和螺壳窗口进同一个 v1.x，用户看得到清了什么、点得到「放回」之前，体检不开放 修订（2026-11-02）：下一版是 beta 2，以 agent（螺壳主界面）上线为放行标准，体检和深度搜索一起进，这两个的名字可能改；语音输入作为输入法下一个大版本自己演进；会议纪要等放到 beta 2.x 讨论。 修订（2026-11-03）：开源许可统一用 Apache-2.0（邮件助手、记忆从 beta 2 起换）；输入法这类应用的新功能做好了可以单独发给测试者，不必等螺壳整体的 beta。修订（2026-11-06，跟 ADR 0022 对齐）：主控和应用分开升级、应用自己发版，现在都只对输入法；收进螺壳的应用要发新版，就出一版新螺壳。</td></tr>
-<tr><td>0018</td><td>推理和权重归主控</td><td>体系内没有脱离主控的模型运行实例；垂类模型也做成主控的任务，对延迟敏感的走优先通道。修订（2026-10-20）：嵌入任务由深度搜索（<code>luoke-search</code>）接手，任务名由 <code>digup.embed</code> 改为 <code>luoke-search.embed</code>，接口、评测和多模态安排不变</td></tr>
-<tr><td>0019</td><td>提示词放成文件</td><td>每个用到模型的配件在仓库根目录 <code>prompts/</code> 里按任务放 system、user、retry 的 <code>.txt</code> 和 <code>schema.json</code>，代码只读文件、填占位符；枚举只写在 schema 里；本站「任务与提示词」页改为从各仓库生成；出版证据记 <code>prompt_sha256</code>；没有评测集的任务补齐。修订（2026-11-04）：现在开始搬，Python 配件可以放在包目录里（如 <code>luoke_mem/prompts/</code>），没有重试的不写 retry、没有共用句子的不写 <code>_shared</code>，可选段写 <code>{{#名}}…{{/名}}</code>；改了提示词文件的 PR 要作者以外的一位成员 Approve，安全相关的提示词还要附改动前后三档的逐题对比，只看总分不算数</td></tr>
-<tr><td>0020</td><td>引擎换成自己做的薄引擎</td><td>只服务配方模型，底层用官方 mlx-lm，不换 mlx-serve。先进内部版，beta 线和 11-02 的测试不换；推理和权重仍归主控（ADR 0018）。现在的引擎还是 oMLX。</td></tr>
-<tr><td>0021</td><td>完全磁盘访问授权给螺壳本身</td><td>用户只授权一次，螺壳扫描、螺壳搜索复用；本体起主控时 disclaim，主控、引擎、工作进程都脱离；要读全盘的程序由本体核过声明和签名后起；清单按程序写 <code>"permissions": ["fda"]</code>。请求授权的卡片要等主控起 <code>jobs</code> 前核签名和版本、旧版回退、测试机实测都做完才出。螺壳扫描这边已改（读磁盘的程序跟着螺壳用授权，没有授权时卡片请用户给「螺壳」打开）；主控这边的脱离还没做；起螺壳里的程序前核签名的有螺壳扫描、螺壳搜索。修订（2026-11-06）：组件不直接向系统要权限，向螺壳请求，用户同意后螺壳先查自己有没有、没有再向系统要；螺壳扫描这类要敏感权限的，在「应用」里开启以后由螺壳拉起一次，当场把权限要到，不在跑的时候突然弹窗。哪几条跟着改、授权卡片跟不跟 beta 2 还没定。同日补记现状：本体要起什么写死在本体里，不读清单，权限页才读清单里的声明；空闲任务由主控起螺壳的 <code>--run-tool</code>，核过再起工具；权限状态还没由本体报，现在是扫描自己探测；「主控脱离」等 disclaim 在真签名下的实测结果再定。同日 johnz 定：只在「应用」里开启时确认一次，开启后马上发起第一次检查，不在第一次用到时再弹第二个框；用户手动关掉以后才再请求；要用的权限都要声明；授权请求只在用户操作之后马上弹，不静默弹窗；权限页列出每个组件确认过什么。</td></tr>
-<tr><td>0022</td><td>除输入法外的应用都收进螺壳.app</td><td>邮件助手、螺壳搜索、螺壳扫描和以后的 <code>luoke-</code> 应用都合并进螺壳.app（记忆和 agent 已经在里面）；输入法照旧单独一个包，装在 <code>~/Library/Input Methods</code>，由螺壳安装和升级。系统权限已授给螺壳本身（ADR 0021），版本和评测按任务名认、和在不在一个包里无关，只有输入法必须单独成包。合进来以后每个工具对主控和记忆仍是一个配件、一个身份，工具之间不互相调用（ADR 0014）；通知改由螺壳发出，从单独的 .app 换过来的用户要重新允许一次。修订（2026-11-05）：收进来的应用跟螺壳一起升级，不按组件单独升级，哪个应用有新版就出一版新螺壳；输入法、引擎、模型照旧单独下载、单独换。修订（2026-11-06）：集成做完，邮件助手、螺壳搜索、螺壳扫描、agent 都在 internal-1106 的螺壳.app 里；螺壳扫描不常驻，用时由螺壳起，起之前核签名和版本的只有它；通知由螺壳本体代发邮件助手和 agent 的。</td></tr>
-<tr><td>0023</td><td>螺壳自己的任务协议和统一调度</td><td>给整个螺壳定一套自己的任务协议：任务声明优先级、权限、资源等，有注册流程，螺壳自己的组件和外来的应用都走这一套，外来应用接入不另做一套；由主控统一排序（2026-11-06 更正，原写引擎层），同一优先级默认按时间先后；可以做一个任务队列组件，让用户看到当前的队列、拖动调整顺序。推理仍归主控（ADR 0018）。外来应用照这套协议自己接入，不用逐个经我们同意；用户接入螺壳没覆盖的模型时要有提示，等于允许自定义配方（优先级不高）。协议和调度的方案、现在的 <code>user-waiting</code> / <code>background</code> 两档优先级和空闲任务怎么迁过去、外来应用的任务能不能排到官方任务前面、协议名都还没定。</td></tr>
-<tr><td>0024</td><td>记忆和螺壳搜索的本机数据加密存放</td><td>挡同一账户里别的程序直接读文件和流出去的拷贝（硬盘被拿走靠 FileVault）；密钥归主控，只交给螺壳自己起的进程，拿不到密钥不打开、不另建明文；第一次拿到密钥时把明文库换成加密的，页面令牌不再写进文件。修订（2026-11-09）：默认加密，密钥放登录钥匙串，随迁移助理和时间机器带走，不放 iCloud、不和 Apple ID 绑；「密钥只留在这台 Mac」加一次恢复码是用户自己打开的一档；打不开时照实说、不删文件；界面用正式说法，口语的解释放「?」帮助或文档。下一版做，密钥怎么交由主控出方案。</td></tr>
-<tr><td>0025</td><td>螺壳小精灵在螺壳之外</td><td>给还没装螺壳的人的轻量入口：打开就检测这台 Mac、跑起小模型、做一次本地 AI 能力的自检并方便分享，再介绍螺壳。不是螺壳的组件：不进配方、不由螺壳安装、不读写记忆。没装螺壳时可以自带小模型，是 ADR 0018 唯一的例外；装了螺壳就把模型交给主控。模型要在国内下得动；数字照实说，8 GB 的机器照实说螺壳暂时跑不了。先做原型，验证国内网络下出第一句话要多久、动画好不好玩、8 GB 机器上的内存和速度。</td></tr>
-<tr><td>0028</td><td>主窗口的界面只在 agent，工具只给原始数据和动作</td><td>主窗口里的一切（「今天」、右边栏、卡片、各应用的页面、应用管理、设置）只在 agent 里改：每一页放什么、什么顺序、哪些按钮、什么措辞都在这里定。自带的应用和主控只给结构化的东西：是哪一种事、涉及什么、数字、状态、能做的动作和参数；卡片、侧栏概览、动作结果上的句子和固定的名字由 agent 照数据写，全窗口一个口径。邮件主题、文件名、摘要、记忆里的理解算内容，仍由工具给。工具自己带界面描述的卡片留给 agent 不认识的工具，和自带应用的过渡期。有自己窗口的（首次安装、升级、菜单栏、输入法的设置）自己改，照同一份界面规范。</td></tr>
+<tr><td>0001</td><td>本机就是边界</td><td>数据不出用户自己的设备（设备之间端到端加密）；写进用户自己选定并在用的账户（他的邮箱、日历）不算外传。本机组件之间不为隐私设限，要读什么就读什么；每条理解都查得到依据，用户能否定、修改、忘掉。凭证（密码、验证码、密钥、令牌、完整卡号和证件号）不进记忆，走钥匙串，值不经过模型，命中时只遮那一串；螺壳搜索的本机索引可以存原值，交给 agent 或画成卡片时再遮。记忆和螺壳搜索的本机数据默认加密存放，密钥归主控，拿不到密钥就不打开、不另建明文。</td></tr>
+<tr><td>0002</td><td>组件分工，一个螺壳.app</td><td>模型在主控，理解在记忆，事情在工具，沟通、主窗口的界面和措辞在 agent。工具之间不互相调用，调用工具能力的只有 agent；每个工具仍是一个配件、一个身份；空闲任务由主控定时机。除输入法外所有应用都在螺壳.app 里，跟螺壳整体升级，签名只有一份，通知由螺壳代发；输入法单独一个包，由螺壳安装和升级。主窗口里的一切（「今天」、右边栏、卡片、各应用的页面、应用管理、设置）只在 agent 里改；自带的应用和主控只给结构化的东西（哪一种事、涉及什么、数字、状态、能做的动作和参数），卡片、概览、动作结果上的句子和固定的名字由 agent 照数据写，邮件主题、文件名、摘要、记忆里的理解算内容、仍由工具给；工具自己带界面描述的卡片留给 agent 不认识的工具和过渡期。清单里的能力只加不改；会改动东西的动作只认用户点按；凭证不在卡片里填；装、卸载、开启、停用每一步要用户点。主控另提供日历接口（EventKit）和浏览器桥。</td></tr>
+<tr><td>0003</td><td>推理、模型和调度归主控</td><td>本机的模型推理和权重都归主控，工具按任务要结果、不点名模型，不自带模型也不自己加载；垂类模型同样做成主控的任务；一直加载的小模型（语音转写、搜索的嵌入）由主控按任务管内存。唯一的例外是没装螺壳时的小精灵。调度在主控，引擎只管跑模型；螺壳自己的任务协议：任务声明优先级、权限、资源，自己的组件和外来应用走同一张任务表，外来应用照协议自己接入；任务队列在右边栏看得见。引擎换成螺壳自己做的，在单独的仓库里做。高级用户的本机端点：127.0.0.1 上的 OpenAI 兼容端点，默认关，只听本机、校验 Host、拒绝带 Origin 的请求，请求文字不落盘。</td></tr>
+<tr><td>0004</td><td>系统权限授权给螺壳本身</td><td>完全磁盘访问这类系统权限只授权给螺壳本身，螺壳扫描、螺壳搜索复用这一份。组件不直接向系统要权限：要用的在清单里声明（<code>permissions</code>），经螺壳请求。用户在「应用管理」里开启组件时确认一次，不在第一次用到时再弹第二个框；所有授权请求都紧跟在用户操作之后弹；权限页列出每个组件确认过什么。</td></tr>
+<tr><td>0005</td><td>记忆怎么想</td><td>工具只记发生了什么（谁做的、什么时候真正发生，可以带原文），不下关于用户的结论；记忆读原文去理解、下结论。三档把握程度：猜测、比较确定、确定，工具只用比较确定以上的，确定只来自用户说的或确认的。先粗后细，按用户的确认、否定、撤回逼近；按依据里最新一条的真实时间算新鲜度，太久没有新依据的算「以前的事」；同一机构的事实合成一条；空闲时反刍，产出「想问的」和「建议」，只提议不动手；用户对理解说的话归记忆，卸载工具时留着；不按上下文隔离记忆。</td></tr>
+<tr><td>0006</td><td>替用户做事</td><td>能撤回、不毁灭的（归档、标已读、加标签），用户确认一次之后可以自动做，每次提示做了什么并能撤销，撤销算这条习惯的反证。不可逆或对外的（删除、标垃圾邮件、退订、发信、花钱、往外传数据）永远要用户自己点。邮件先做、事后复查，每天一个复查页；推荐给螺壳开一个独立邮箱。螺壳扫描按确定的规则挑出的四类不用先确认就清、事后能放回，开启条件是规则评测「不该删的误判为 0」；其余照旧要用户点。</td></tr>
+<tr><td>0007</td><td>提示词放成文件</td><td>每个用到模型的配件，提示词放在 <code>prompts/</code> 里，每个任务一组纯文本文件；代码只读文件、填占位符、发请求和解析，占位符加载时严格核对，枚举只写在 <code>schema.json</code>。系统文档的「任务与提示词」页从各配件的 <code>prompts/</code> 生成；每个任务的评测证据带 <code>prompt_sha256</code>；每个用到模型的任务都要有评测集；改了提示词的改动附评测结果，安全相关的附改动前后三档的逐题对比。</td></tr>
+<tr><td>0008</td><td>发布、开源和品牌</td><td>Apple 芯片、16 GB 起、推荐 32 GB 以上、macOS 26.2 以上；每个任务在哪一档开按评测定，连过 3 遍才开、失败一遍就关。对外以「螺壳实验室」（Luoke Labs）为主，用户装的应用叫「螺壳」。beta 和正式版放 <code>luokelabs/luoke-releases</code>，内部版放 <code>luokelabs/luoke-internal-builds</code>，发布后同步到 GitLab 镜像。要发给大家用的组件默认开源，许可统一 Apache-2.0，名字、图标和品牌素材不随许可授予；公开的树由导出工具从私有仓库生成，只在发 beta 或正式版时同步。主控不再按版本认配件，配件能不能发由配件发版的 CI 把关，配件只声明自己需要的主控版本。只在 RC 截版后只修不加。</td></tr>
+<tr><td>0009</td><td>产品线和发版品控分开</td><td>螺壳的产品代码归产品线一处迭代；所有应用是同一个架构，界面和交互在 agent，业务逻辑在各自的后端。发版和品控是另一条线：出版流水线、截版和发布、公开同步、评测、配方的验证、配件发布的 CI。品控按版本做，不按 PR 做：没过就报哪一项没过、卡在哪个提交，怎么修由产品这边定。推理引擎和专用小模型作为科研单独做。两条线之间只有三样往来：交版本、回结果、报进展。</td></tr>
+<tr><td>0010</td><td>螺壳小精灵</td><td>给还没装螺壳的人的轻量入口：检测这台 Mac、把模型跑起来、做一次本地 AI 能力的自检并给出实测数字，再介绍螺壳。在螺壳之外：不进配方、不由螺壳安装、不读写记忆。16 GB 内存、macOS 26.2 起。没装螺壳时可以自带一个小模型，是 0003 唯一的例外；装了螺壳就删掉自己下的模型，改用主控的任务接口。模型要在国内下得动；数字照实说。</td></tr>
 </table></div>
 
 <h2>设计原则</h2>
@@ -2768,6 +2764,12 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-18</h2>
+<ul>
+<li>决策页整页换成新的十条 ADR（0001–0010）：原来的 0013–0028 并进这十条，旧路径留占位文件，对照表在 <code>docs/adr/README.md</code>。搜索页、扫描页里提到的 ADR 号跟着改（0021 改 0004，0019 改 0007）。</li>
+<li>最低系统版本：螺壳按 macOS 26.2 起（ADR 0008）。agent 的三个 Swift 包已改到 26.2（代码 84f1949），主控的声明还在改；搜索、扫描本来就是 26.2。</li>
+</ul>
 
 <h2>2026-11-17</h2>
 <ul>
