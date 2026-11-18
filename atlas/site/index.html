@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-18 16:54</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-18 17:01</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -254,7 +254,7 @@ sequenceDiagram
 <section class="page" id="core" data-title="螺壳（主控） luoke-core">
 <h1>螺壳（主控）</h1>
 <p class="lede">用户装的应用「螺壳」（<code>螺壳.app</code>）；"主控"是它在内部分工里的叫法。本机所有模型推理的唯一入口。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 都打在它的包里，跟它一起升级；输入法单独一个包，由它安装和升级。它按配方为每个硬件档选择模型，调度各配件的请求和空闲任务，监管推理引擎和专用模型进程，并负责下载、升级和卸载。</p>
-<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
+<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对；起子进程的方式、开启和停用、电池设置、配件版本、本体接口的核对按 8bc9f92（主控 0.2.0）复核 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
 
 <h2>组成</h2>
 <div class="tbl"><table>
@@ -335,8 +335,8 @@ sequenceDiagram
 <li><b>下载</b>：依据发布清单（每项有文件列表、大小、sha256、多个镜像地址）。多地址时先测速排序；每个地址重试 3 次，403、404、410 直接换地址；支持续传；sha256 对上才落位。本机已有同名模型（<code>~/.omlx/models</code>、Hugging Face 缓存、LM Studio）时逐文件核对后 APFS 克隆，不重复下载。首次运行以后发现还缺模型时自动补下（失败后从 30 秒起加倍间隔，最长半小时）；网络按流量计费或开了低数据模式时不自动补下，只在设置「下载」的「还缺」一行说明，点「重试」照下；首次运行、「应用」窗口、换档是用户点的，照下。下了模型或引擎包才重启引擎、重做冒烟检查，只装应用不动引擎；发布版的新引擎冒烟检查通过后，删除 <code>engines/</code> 里的其他版本。</li>
 <li><b>配件安装校验</b>：<code>codesign --verify --deep --strict</code>、Team ID、bundle id 与清单一致、公证票据有效。</li>
 <li><b>安装位置</b>：主控 DMG 是拖放窗口，左边「螺壳」、右边「应用程序」快捷方式，拖过去装在 <code>/Applications/螺壳.app</code>。在 DMG 里直接双击「螺壳」时提示先拖进「应用程序」，另给「帮我装进去」。发布页只放螺壳的 DMG（<code>Luoke.dmg</code>），应用在「应用」窗口里装；应用的安装器（<code>安装&lt;应用&gt;.app</code>）和「帮我装进去」把主控拷进 <code>/Applications/螺壳.app</code>（写不进去时拷进 <code>~/Applications/螺壳.app</code>），去掉下载标记并登记；目标位置已有 bundle id 不同的同名应用时不覆盖，改放另一处，两处都被占才弹框请用户改名或挪走。已装的主控以实际位置为准：<code>/Applications</code>、<code>~/Applications</code> 两处，<code>螺壳.app</code>、<code>螺壳主控.app</code> 两个名字都认，只认 bundle id 相同的，两处都有时用 <code>/Applications</code> 那份：另一份被打开时（例如登录项还指着它）直接交给装好的那份后退出，装好的那份启动时把没在跑的另几份移进 <code>previous.noindex</code>、注销登记并重新登记登录项（用户关掉过的不动）；已装着主控而安装器不比它新时，把预选交给它后退出。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 核心在 <code>螺壳.app</code> 里，不另装；单独成包的只有输入法，装在 <code>~/Library/Input Methods</code>。</li>
-<li><b>螺壳里的应用</b>：邮件助手、螺壳搜索、螺壳扫描、agent 核心各自在包里的位置见「参考 · 配件清单与配方」的打包布局；这一版没带上的，「应用」窗口里没有它。签名只有螺壳一份：发布时由内向外签，<code>Contents/Helpers</code> 里的程序保留打包时定的签名标识和 entitlements，签完再核一遍标识（螺壳搜索 <code>ai.luoke.search</code>；螺壳扫描 <code>ai.luoke.scan</code>、<code>ai.luoke.scan.admin</code>，它用的 ClamAV、YARA 程序是 <code>ai.luoke.scan.clamscan</code> 这样的标识）；邮件助手、agent 核心是 Python 代码，由螺壳的签名盖着。本体当子进程直接起它们（邮件助手、搜索、agent 核心用 Foundation 的 <code>Process</code>，扫描用 <code>posix_spawn</code>），不经 <code>open</code>、不经主控，也不 disclaim：它们用到的完全磁盘访问、照片、Apple Events 都算在螺壳头上；带了搜索时，这几项权限的说明写在螺壳的 <code>Info.plist</code>，照片和 Apple Events 的 entitlement 在螺壳外层的签名里。起之前核签名和版本的是扫描和搜索（见「组成」）。主控按包里各自的清单把它们当配件认，版本就是这一版螺壳带的版本。</li>
-<li><b>开启、停用</b>：螺壳里的应用不用下载。开没开记在 <code>state.json</code> 的 <code>enabled</code>（主控没起时本体也直接读）；用户没选过时按清单的 <code>default_on</code>，邮件助手默认开着，螺壳搜索、螺壳扫描默认关。在「应用」窗口那一行点「开启」：螺壳搜索先开「开启螺壳搜索」窗口，读一次选中的文件夹（桌面、文稿、下载默认勾上，第一次读时 macOS 问），勾了照片的要照片权限，要到至少一样才把选中的写进搜索的设置；别的直接开启。开启都经 <code>POST /accessories/enable</code> 记下（<code>hub.log</code> 里是 <code>enabled luoke-scan=True</code> 这样一行），常驻的随即起来。没开着的不起、不跑空闲任务，<code>GET /accessories</code> 也不列。「…」里的「停用」走卸载窗口，写明「它在螺壳里，这里只是停用」，可选同时删除数据（有 <code>uninstall</code> 命令的先跑它）、从记忆里忘掉；本体先停掉它，主控停它的空闲任务、记下停用（<code>enabled …=False</code>），删掉 <code>previous.noindex</code> 里同 bundle id 的旧版 .app，注销同 bundle id 的其他登记，螺壳里的程序不动。</li>
+<li><b>螺壳里的应用</b>：邮件助手、螺壳搜索、螺壳扫描、agent 核心各自在包里的位置见「参考 · 配件清单与配方」的打包布局；这一版没带上的，「应用」窗口里没有它。签名只有螺壳一份：发布时由内向外签，<code>Contents/Helpers</code> 里的程序保留打包时定的签名标识和 entitlements，签完再核一遍标识（螺壳搜索 <code>ai.luoke.search</code>；螺壳扫描 <code>ai.luoke.scan</code>、<code>ai.luoke.scan.admin</code>，它用的 ClamAV、YARA 程序是 <code>ai.luoke.scan.clamscan</code> 这样的标识）；邮件助手、agent 核心是 Python 代码，由螺壳的签名盖着。本体当子进程直接起它们（邮件助手、搜索、agent 核心用 Foundation 的 <code>Process</code>，扫描用 <code>posix_spawn</code>），不经 <code>open</code>、不经主控。子进程都从一处起（<code>Spawn.swift</code>），默认 disclaim，系统权限不算在螺壳头上；只有螺壳搜索、螺壳扫描（含它起的工具和要管理员权限的那一步）和换包、安装、升级的几步带着螺壳的身份起，它们用到的完全磁盘访问、照片、Apple Events 算在螺壳头上；agent 核心、邮件助手和主控自己都是 disclaim 的；带了搜索时，这几项权限的说明写在螺壳的 <code>Info.plist</code>，照片和 Apple Events 的 entitlement 在螺壳外层的签名里。起之前核签名和版本的是扫描和搜索（见「组成」）。主控按包里各自的清单把它们当配件认，版本就是这一版螺壳带的版本。</li>
+<li><b>开启、停用</b>：螺壳里的应用不用下载。开没开记在 <code>state.json</code> 的 <code>enabled</code>（主控没起时本体也直接读）；用户没选过时按清单的 <code>default_on</code>，邮件助手默认开着，螺壳搜索、螺壳扫描默认关。在「应用」窗口那一行点「开启」：螺壳搜索先开「开启螺壳搜索」窗口，读一次选中的文件夹（桌面、文稿、下载默认勾上，第一次读时 macOS 问），勾了照片的要照片权限，要到至少一样才把选中的写进搜索的设置；别的直接开启。开启都经 <code>POST /accessories/enable</code> 记下（<code>hub.log</code> 里是 <code>enabled luoke-scan=True</code> 这样一行），常驻的随即起来。没开着的不起、不跑空闲任务，<code>GET /accessories</code> 也不列。「停用」在那一行里直接做，经 <code>POST /accessories/disable</code>，不走卸载窗口；删除数据是另一步，<code>POST /accessories/delete-data</code>，可带 <code>dry_run</code> 先看会删什么。停用时本体先停掉它，主控停它的空闲任务、记下停用（<code>enabled …=False</code>），删掉 <code>previous.noindex</code> 里同 bundle id 的旧版 .app，注销同 bundle id 的其他登记，螺壳里的程序不动。</li>
 <li><b>旧的单独 .app</b>：从各自单独装的版本升上来的用户，螺壳每次起来（主控进程起来以后），本体在 <code>~/Applications</code> 和 <code>/Applications</code> 里按 bundle id（<code>ai.luoke.mail</code>、<code>ai.luoke.search</code>、<code>ai.luoke.scan</code>，邮件助手还有更早的 AppleScript 启动器）找收进来以前的 .app：先结束里面的进程（SIGTERM，等 15 秒，再 SIGKILL），注销登记，挪进废纸篓，用户没开启的也挪；邮件助手和搜索等旧的挪完才起螺壳里的那份，免得两份抢同一个数据目录。邮件助手还先移除旧的登录项 <code>local.luoke-mail</code>，注销并删掉 <code>~/.luoke-mail/notifier</code> 里通知用的小 App。数据目录和钥匙串里的授权码不动，螺壳里的那份接着用；搜索的系统授权不跟过来，旧的挪走时搜索还没开启，就弹「开启螺壳搜索」窗口重新要。挪走的每一个在系统日志里记一行，不进 <code>hub.log</code>。开发版、实验室构建不动本机装着的。旧的「螺壳 agent.app」不挪：它在跑时 agent 核心不起，主窗口里请用户退出它、从「应用程序」里删掉；登录时不再拉起它，「应用」窗口也不列它。</li>
 <li><b>首次运行</b>：步骤条五步：这台 Mac（预检：档位、磁盘、系统版本、照实说明体验；内存不到 16 GB 或系统版本低于引擎要求时停在这一步）→ 选应用（发布清单里单独成包的，现在只有输入法）→ 确认下载 → 下载安装（逐项进度，主控排第一行；总进度的剩余时间在头 10 秒、下到 2% 以前不估；应用装好即打开，不等模型；含本机试跑）→ 完成；后来加装应用在「应用」窗口那一行里装，不走向导。离开下载页时注册登录项；下载页结束时分几种结局给出下一步：有项没下下来（先继续 / 重试）、试跑没过（重新检查 / 继续）、缺底座、主控没起来（重试会重启主控）。确认页上废纸篓里有旧输入法时提示。完成页：输入法的 <code>--status</code> 答 <code>not_registered</code> 时调一次它的 <code>--register</code>，每秒检查是否已添加；添加后输入法没在跑时在后台拉起它，可试打并一键切换（<code>--select</code>），切过去后试打框重新取得焦点，切不过去、或输入法报告还登记着别的副本时给「重新登记输入法」，重新登记后仍不行则提示注销重新登录；邮件助手开着时有一行写「已经在浏览器里打开了，第一次要连接邮箱。」，给「打开」；带了螺壳搜索时有一行「螺壳搜索」，没开启的给「开启」（走「开启螺壳搜索」窗口）；单独成包的普通应用（<code>type</code> 为 <code>app</code>）列出通知权限（经启动器的 <code>--notify-status</code>）：已允许 / 还没问过（按钮发一条测试通知，让系统询问）/ 已关闭（按钮打开该应用的通知设置），未全部允许时每 2 秒刷新；螺壳里的应用和输入法不在这里列。</li>
 <li><b>升级</b>：同一张卡片走完五步：下载安装包 → 核对签名和公证 → 换成新版螺壳 → 补齐推理引擎和模型 → 本机试跑，大小、位置相同。有两条路：菜单「检查更新」（前三步在「检查更新」窗口里），或打开比已装的新的安装器（应用的安装器，或在主控 DMG 里直接双击「螺壳」；第三步在安装器的卡片里）。两条路都先把新版拷到环境目录的 <code>staging.noindex</code> 并核对签名，写 <code>run/upgrade.json</code>，起一个独立的换包脚本，再结束旧主控、旧包里的应用（按程序路径认）和记忆进程、自己退出。脚本等它退出（最多 2 分钟），把旧版（连同它里面的应用）移走（在 <code>~/Applications</code> 的移入 <code>previous.noindex</code>，只留上一份；以 root 换 <code>/Applications</code> 里的那份时放进 root 自己的临时目录），把新版换到目标位置并登记，再用 <code>/usr/bin/open</code> 以用户身份打开新版，结果写入 <code>run/swap-result.json</code>。目标位置：已装在 <code>/Applications</code> 的还在那里；装在 <code>~/Applications</code> 的，<code>/Applications</code> 写得进去就搬过去，否则留在原处；名字统一为 <code>螺壳.app</code>。目标目录写不进去（标准账户的 <code>/Applications</code>）时，脚本经系统的管理员授权框以 root 运行；授权框在旧主控退出之前弹出，取消则什么都不动、原来的主控照常用；只有换包两步用 root，打开新版时切回用户身份。以 root 运行时脚本不落在磁盘上（直接作为参数交给 <code>sh</code>），环境只带系统的 <code>PATH</code>；先把 <code>staging.noindex</code> 里的新版拷进一个只有 root 能进的临时目录，在那里核签名（和正在运行的螺壳同一个开发者团队、同一个 bundle id），换上去的只是这份核过的拷贝；正式版读不到自己的签名时不换。结果文件、日志和清理暂存都以用户身份做。换包没成时脚本把旧版放回并重新打开，旧版启动时弹框说明原因；脚本起不来或授权被取消时卡片写原因，给「先用着」和「重试」。新主控读到标记（读后删除）接着显示卡片：常驻配件在卡片一开始就拉起，补齐未装的引擎包和本档缺的模型，等本机试跑通过或推迟后写「已升级到 X」和这一版的更新说明；已装的应用有新版本时列出名字并给「去升级应用」。螺壳里的应用跟着整个包换，不单独升级；输入法不随主控升级。补齐或试跑没成时卡片写哪一步、为什么，给「先用着」（标记写回，下次主控启动接着补）和「重试」。经应用的安装器顺带升级的，完成后到「应用」窗口那一行里接着装那个应用。</li>
@@ -360,7 +360,8 @@ sequenceDiagram
 <tr><td>专用模型进程空闲或内存紧张</td><td>停掉；按需重起时答 <code>not_ready</code>（retry_after 2），内存不够时 retry_after 30</td></tr>
 <tr><td>专用模型进程失败 ≥ 3 次</td><td>该任务暂停，不再重启</td></tr>
 <tr><td>下载失败</td><td>分三类说明：服务器上找不到、连不上、核对不过</td></tr>
-<tr><td>配件版本未通过验证</td><td>调用返回 <code>unknown_accessory</code></td></tr>
+<tr><td>调用没带配件名、名字不认得，或要的任务不是这个配件的</td><td>调用返回 <code>unknown_accessory</code>；主控不核配件版本</td></tr>
+<tr><td>配件清单的 <code>min_core</code> 比主控的版本（0.2.0）新</td><td>调用返回 <code>core_too_old</code>（403）</td></tr>
 </table></div>
 
 <h2>菜单和窗口</h2>
@@ -368,8 +369,8 @@ sequenceDiagram
 <li><b>菜单</b>：第一行是状态（启动中 / 工作中 · 底座模型 / 空闲 · 底座模型），后台暂停时下一行写原因（在用电池、低电量模式、过热、等内存）；然后是主窗口那几项（带了 agent 时：急事（有才列）、打开螺壳、暂停提醒一小时）、记忆（随主控带的时候才有）、开着的邮件助手（打开它的页面）、应用、设置、检查更新，「应用」「检查更新」有新版本时写成「名称：有新版本」、值加粗；最后「退出螺壳」（⌘Q）。主控没连上或引擎出错时，第一行是「出错了」，下一行写原因（进程退出码、连不上的原因或熔断原因），给「重新启动螺壳」和「导出诊断信息」。菜单栏图标是单色海螺，五种状态，都不动：虚线（启动中）、实心（准备好了）、半满（在处理请求或后台任务）、空心（后台暂停）、实心带圆点（出错：连不上主控、引擎没在运行或熔断）。</li>
 <li><b>窗口期间</b>：主控的任何窗口（首次运行、升级卡片、应用、卸载、检查更新、设置、主控小窗口）开着时，主控出现在程序坞和 ⌘Tab 里，全关后回到只在菜单栏。同一流程只开一个窗口：卸载接替「应用」或设置窗口，安装器的升级卡片出现后「检查更新」窗口关掉。</li>
 <li><b>再次打开主控</b>：有安装器交来的预选时，首次运行没走完就回到首次运行并预选那个应用，否则在「应用」窗口那一行里装；没有预选时，带了主窗口、首次运行已走完、首次运行和升级窗口都没开着就打开主窗口；不然有开着的窗口就叫到前面；都没有且首次运行已走完时弹出主控小窗口，显示运行状态（在运行 / 启动中 / 没连上），说明主控在菜单栏的海螺图标里、找不到时可能的原因，给「打开菜单栏设置」，并列出 记忆（随主控带的时候才有）、应用、检查更新、设置 四个入口。⌘, 打开设置窗口。</li>
-<li><b>设置</b>：通用（能耗模式 全速 / 均衡 / 静音、使用电池时仍运行后台、登录时启动螺壳）、下载（有下载或缺模型时出现：逐项进度或排队中，缺的可重试）、模型（占多少空间——可选档多于一个时出现，磁盘不够换档时在下面写明；底座模型；换档等待时的说明；已下载的模型及大小）、高级（本机端点）、关于（螺壳版本即发布号、导出诊断信息、卸载螺壳）。Finder「显示简介」里的版本也是发布号（如 beta1、internal-1027；<code>CFBundleShortVersionString</code>），主控版本号在 <code>CFBundleVersion</code>。档位、引擎、本机试跑在诊断信息里。</li>
-<li><b>只给本体用的接口</b>（下载、设置、端点、冒烟、卸载、开启、停用、权限、第一次任务、删数据、回到上一版本、重新登记、重新启动输入法）按 socket 对端进程核对是不是本体，<code>/settings</code>、<code>/endpoint</code> 也认主控自带的 <code>luoke</code> 命令行；不是的答 <code>forbidden</code>（403）。</li>
+<li><b>设置</b>：通用（能耗模式 全速 / 均衡 / 静音；用电池时三档：照常运行、少干活（默认）、不运行大模型，<code>PUT /settings</code> 的 <code>battery_mode</code> 取 <code>normal</code> / <code>light</code> / <code>no_large_model</code>，旧的 <code>background_on_battery</code> 仍收、对到这三档；选了不运行大模型又在用电池时，后台状态的原因是 <code>battery_no_large_model</code>，等着的请求答 <code>needs_user</code>；登录时启动螺壳）、下载（有下载或缺模型时出现：逐项进度或排队中，缺的可重试）、模型（占多少空间——可选档多于一个时出现，磁盘不够换档时在下面写明；底座模型；换档等待时的说明；已下载的模型及大小）、高级（本机端点）、关于（螺壳版本即发布号、导出诊断信息、卸载螺壳）。Finder「显示简介」里的版本也是发布号（如 beta1、internal-1027；<code>CFBundleShortVersionString</code>），主控版本号在 <code>CFBundleVersion</code>。档位、引擎、本机试跑在诊断信息里。</li>
+<li><b>只给本体用的接口</b>（下载、设置、端点、冒烟、卸载、开启、停用、权限、第一次任务、删数据、回到上一版本、重新登记、重新启动输入法）按 socket 对端进程核对是不是本体（主控成了孤儿、父进程是 1 时谁都不认），<code>/settings</code>、<code>/endpoint</code> 也认主控自带的 <code>luoke</code> 命令行；不是的答 <code>forbidden</code>（403）。</li>
 </ul>
 
 <h2>文件</h2>
@@ -387,7 +388,7 @@ sequenceDiagram
 <section class="page" id="mem" data-title="记忆 luoke-mem">
 <h1>记忆</h1>
 <p class="lede">螺壳各组件共用的本机记忆：一个 SQLite 文件。工具写入"发生了什么"（记录）；记忆是唯一形成结论的地方，从记录归纳出带依据、分三档把握程度的理解，并在空闲时整理，产出想问用户的问题和建议。</p>
-<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.42.0，按代码 d1cb709 核对 · 许可 Apache-2.0 · schema 9 · 接口和表结构见「参考 · 记忆」</p>
+<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.44.0，按代码 c60631b 核对 · 许可 Apache-2.0 · schema 9 · 接口和表结构见「参考 · 记忆」</p>
 
 <h2>职责</h2>
 <ul>
@@ -395,7 +396,7 @@ sequenceDiagram
 <li>归纳关于用户的理解：事实、关注的话题、不感兴趣、处理习惯、常用说法，以及只供精选使用的口味。</li>
 <li>写入时遮去凭证；提供整份记忆的查看和管理界面。</li>
 <li>认人：从用户发出的邮件和写信的记录里认出反复出现的人，同一个人的事并在一起；人名和用户常打的英文专名成为常用说法，给语音输入当热词（见「人」）。</li>
-<li>按 luoke-agent 的工具协议给螺壳主窗口两样东西：<b>原始数据</b>（<code>data/*</code>，十样只读的 JSON）和<b>动作</b>（七个写入工具）。主窗口的记忆页由 luoke-agent 照效果图拼，页上放什么、怎么排、按钮叫什么不由记忆定；想问的和建议另做成卡片放进 outbox（见「工具协议」）。</li>
+<li>按 luoke-agent 的工具协议给螺壳主窗口两样东西：<b>原始数据</b>（<code>data/*</code>，十一样只读的 JSON）和<b>动作</b>（七个写入工具）。主窗口的记忆页由 luoke-agent 照效果图拼，页上放什么、怎么排、按钮叫什么不由记忆定；想问的和建议另做成卡片放进 outbox（见「工具协议」）。</li>
 <li>每个应用一个开关：关了，记忆不再从这个应用学（见「读写关系」）。</li>
 </ul>
 
@@ -489,7 +490,7 @@ sequenceDiagram
 <li><b>英文专名</b>：上次之后新打的字里，大写开头的英文词串（如产品名、公司名；两端去掉句子里的普通词，最长 30 字）记成常用说法（<code>data.sort</code> 为 <code>name</code>），门槛和别的常用说法一样。</li>
 <li><b>想问的</b>（都不问敏感的）：只问只有用户知道的。同一来源 ≥ 6 封但最近 90 天没有来信、用户未表态的机构事实；用户确认过、邮件里说法变了的机构事实（问「现在还是这样吗」）；两个人拿不准是不是同一个（见「人」），排在关于理解的问题后面。只等用户确认的猜测（只靠标签的兴趣、只靠亲手处理的习惯）和再多一天就会生效的打字话题不问：前者在「全部记忆」里标「待确认」，后者够了自己生效。14 天过期；不再值得问的撤回。</li>
 <li><b>常用说法不问用户</b>：只影响候选排序，错了几乎没代价，够门槛自己记下，不要的在记忆页删。</li>
-<li><b>建议</b>：「以后都这样？」（有发件人和类别、动作可自动执行的处理习惯，用户点「好」即成为确定并可自动执行）；「退订？」（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
+<li><b>建议</b>：处理习惯（问法是「某发件人的某类邮件自动怎么处理」，理由写「已手动这样处理 n 次」或「邮件助手的建议 n 次被改成这样」；库里旧的理由读出时换成这种说法，不改库；有发件人和类别、动作可自动执行的处理习惯，用户点「好」即成为确定并可自动执行）；「退订？」（30 天内用户亲手整批清掉同一发件人 ≥ 2 次）。</li>
 <li><b>每天最多三件</b>：问题和建议合起来算（<code>ASKS_PER_DAY</code> = 3），问题在前。</li>
 <li><b>归档</b>：用户可以把想问的事和建议先收起来（状态 <code>archived</code>）。不算回答：记忆不从它学什么，按反馈调门槛也不算它；归档着的不过期，同一件事归档着时不另问。已经过期、还没撤下的不能归档。用户在页上定了那条理解，归档着的问题跟着关掉；理解被并掉、让位或成了以前的事，归档着的问题跟着撤回，不算过期没答。放回后重新开着，归档时还剩几天就还剩几天，换一个新编号。</li>
 <li><b>去重</b>：同一件事已有未答的问题时不再生成；"以后再说"或过期未答 7 天后、已答或"不用"60 天后才可能再问；"别再提"永不再问。</li>
@@ -523,7 +524,7 @@ sequenceDiagram
 <p>记忆照 luoke-agent 的工具协议（版本 1，<code>transport: "stdio"</code>）给螺壳主窗口供内容：螺壳本体每个请求起一次 <code>-m luoke_mem --path {memory} mcp</code>（清单 <code>commands.mcp</code>，<code>capabilities</code> 写在发出去的清单 <code>packaging/accessory.json</code> 里，测试核对它和代码一致）。代码在 <code>luoke_mem/agent.py</code>；协议服务端 <code>mcp.py</code> 和拼卡片的 <code>cards.py</code> 拷自 luoke-agent（许可 Apache-2.0 OR MIT），只用标准库。字段、工具和参数见「参考 · 记忆」。</p>
 <ul>
 <li><b>分工</b>：主窗口的记忆页由 luoke-agent 照效果图拼。记忆给原始数据和动作，不决定页上的内容、顺序和措辞；清单 <code>capabilities.data</code> 列出它给哪几样数据，核心见到就照 <code>data/*</code> 拼，没列的照旧读 <code>page/*</code>。记忆自己拼的页（<code>page/*</code>）在 luoke-agent 搬完之前照旧答。</li>
-<li><b>原始数据</b>（<code>data/*</code>）：十样只读资源，JSON，不带卡片、不带页上的句子：最近了解到的（<code>recent</code>）、要确认的（<code>asks</code>，最多 3 件）和其中一件（<code>ask</code>）、全部记忆（<code>notes</code>：筛选、搜索、翻页、各筛选的条数）、一条理解和全部依据（<code>note</code>）、人物（<code>people</code>）和一个人（<code>person</code>）、各应用学不学和写过哪几类记录（<code>sources</code>）、整理的时间和两种条数（<code>data</code>），以及 <code>helped</code>（记忆不记谁读了什么，没有数可报）。哪些算最近、待确认、可以列，和记忆自己的页是同一套规则。</li>
+<li><b>原始数据</b>（<code>data/*</code>）：十一样只读资源，JSON，不带卡片、不带页上的句子；每条理解另带理由的代号和数（<code>why_data</code>），动作的结果带结果代号（<code>result</code>）和没做成的原因代号（<code>reason</code>），页上的话由 luoke-agent 照代号写：最近了解到的（<code>recent</code>）、要确认的（<code>asks</code>，最多 3 件）和其中一件（<code>ask</code>）、全部记忆（<code>notes</code>：筛选、搜索、翻页、各筛选的条数）、一条理解和全部依据（<code>note</code>）、人物（<code>people</code>）和一个人（<code>person</code>）、各应用学不学和写过哪几类记录（<code>sources</code>）、整理的时间和两种条数（<code>data</code>）、忘掉一个应用之前先看会删什么（<code>forget</code>），以及 <code>helped</code>（记忆不记谁读了什么，没有数可报）。哪些算最近、待确认、可以列，和记忆自己的页是同一套规则。</li>
 <li><b>一件要问的事带什么</b>（<code>data/ask</code>）：类型（是不是同一个人、关于一条理解、记忆自己的问题、退订、处理习惯、别的建议）、「为什么」凭的事实、答了改动哪个应用的哪件事、依据的记录、能怎么答（照原样交给 <code>mem_reply</code>）。</li>
 <li><b>outbox</b>：开着、没过期的想问的和建议（<code>asks(status=["open"])</code>），每件一张卡片；问不问、每天几个、「以后再说」之后何时再问仍由反刍定。卡片标题「记忆想问你」或「记忆有个建议」，下面是问题和理由；关于某条理解的附它最新的 3 条依据原文（「应用 · 日期：原文」，每条 120 字以内），没有就写 <code>evidence</code>。</li>
 <li><b>卡片上的按钮</b>：关于某条理解的问题有输入框「不太对的话，改成」和 对 / 不对 / 以前是，现在不是 / 按我改的 / 以后再说；「是不是同一个人」是 是 / 不是 / 以后再说；处理习惯的建议是 好 / 不用 / 别再提，退订建议是 知道了 / 别再提；每张最后有「归档」。点了交回 <code>mem_reply</code>，记忆照 <code>reply</code> 处理，卡片换成一句话的结果，这件从 outbox 撤下；改成的话里有密码、验证码、证件号码时不收，卡片留着让用户改。「以后再说」哪种问题都是 <code>choice: "later"</code>，过 7 天再问。</li>
@@ -557,7 +558,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.66，按代码 21a0ccc 核对 · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.71；给主窗口的数据和动作、发件人校验按代码 e124c8b 核对，其余按 21a0ccc（0.19.66） · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -642,6 +643,7 @@ sequenceDiagram
 <p>浏览器页面在 localStorage 中记住上次查看的邮箱，刷新或重新打开后仍停在该邮箱（仍连接时）；示例邮件只在还没连接邮箱时出现；存不了时显示第一个邮箱。</p>
 
 <h3>螺壳主窗口里的页面</h3>
+<p>螺壳主窗口现在显示的是 luoke-agent 照下面「给主窗口的原始数据和动作」自己拼的页面：标签页是收件箱、精选、清理，带图标的是设置、处理记录，另有从按钮进的隐藏页（一封邮件、一篇精选、发件人、订阅、旧邮件、精选来源、一项任务等）；旧页 id 有别名（旧设置和规则对到设置，清扫对到清理）。本节说的邮件助手自己画的十页只留作后备，agent 拼不了时才用。</p>
 <p>邮件助手把自己的页面画成 A2UI v0.9 的组件（目录 <code>ai.luoke/a2ui/agent/1</code>），由螺壳主窗口显示。每页是一个 MCP 资源 <code>luoke://luoke-mail/page/&lt;id&gt;</code>，共十页（清单 <code>service.pages</code>），代码在 <code>luoke_mail/window/</code>。前四页是标签页；后六页在清单里标 <code>hidden</code>，不出现在标签上，从别的页的按钮进（处理记录另有一个 <code>history</code> 图标）。</p>
 <div class="tbl"><table>
 <tr><th>id</th><th>页面</th><th>内容和动作</th></tr>
@@ -667,27 +669,32 @@ sequenceDiagram
 </ul>
 
 <h3>给主窗口的原始数据和动作</h3>
-<p>除了自己画的页面，邮件助手另给一套不带界面的数据和动作，供主窗口自己拼页面用（清单 <code>capabilities.data</code> 和 <code>actions</code>，代码在 <code>luoke_mail/agent_data.py</code>）。数据是九个只读的 MCP 资源 <code>luoke://luoke-mail/data/&lt;名&gt;</code>，出错时回 <code>{"error": {"code", "message"}}</code>。</p>
+<p>除了自己画的页面，邮件助手另给一套不带界面的数据和动作，供主窗口自己拼页面用（清单 <code>capabilities.data</code> 和 <code>actions</code>，代码在 <code>luoke_mail/agent_data.py</code>）。数据是十三个只读的 MCP 资源 <code>luoke://luoke-mail/data/&lt;名&gt;</code>，出错时回 <code>{"error": {"code", "message"}}</code>。</p>
 <div class="tbl"><table>
 <tr><th>资源</th><th>参数</th><th>内容</th></tr>
-<tr><td><code>data/accounts</code></td><td>无</td><td><code>accounts[]</code>：<code>id</code>、<code>address</code>、<code>name</code>（用户起的名字）、<code>provider</code>、<code>own</code>（是不是螺壳自己的邮箱）、<code>last_sync</code>、<code>status</code>（<code>ok</code> / <code>needs_auth</code> / <code>error</code> / <code>snapshot</code>）、<code>error</code>；另有 <code>demo</code>（在用示例邮件）和 <code>job</code>（正在跑的任务）</td></tr>
+<tr><td><code>data/accounts</code></td><td>无</td><td><code>accounts[]</code>：<code>id</code>、<code>address</code>、<code>name</code>（用户起的名字）、<code>provider</code>、<code>own</code>（是不是螺壳自己的邮箱）、<code>last_sync</code>、<code>status</code>（<code>ok</code> / <code>needs_auth</code> / <code>error</code>）、<code>error</code>、<code>model{status, progress, text}</code>；另有 <code>demo</code>（在用示例邮件）和 <code>job</code>（正在跑的任务）</td></tr>
 <tr><td><code>data/today</code></td><td><code>account</code></td><td><code>day</code>；<code>handled[]</code>（每次处理一条：<code>log_id</code>、<code>account</code>、<code>at</code>、<code>by</code>、<code>op</code>、<code>count</code>、<code>senders</code>（最多 5 个）、<code>categories</code>、<code>label</code>、<code>ok</code>、<code>undoable</code>、<code>undone</code>）；<code>picked</code>；<code>decide[]</code>（要用户定的，带 <code>ways</code>、<code>suggested</code>、<code>late</code>）；<code>replies</code>（等回复的封数）</td></tr>
-<tr><td><code>data/inbox</code></td><td><code>account</code>、<code>list</code>、<code>cursor</code>；或 <code>plan</code>、<code>part</code></td><td><code>list</code> 取 <code>reply</code>（默认）、<code>needs</code>、<code>suspicious</code>、<code>direct</code>、<code>all</code>；回 <code>items</code>、<code>counts</code>、<code>more</code>、<code>cursor</code>。带 <code>plan</code> 和 <code>part</code>（<code>todo</code> / <code>tidy</code> / <code>sus</code>）时给那张「邮箱」卡那一块里的邮件，另回 <code>plan{id, part, state}</code></td></tr>
+<tr><td><code>data/inbox</code></td><td><code>account</code>、<code>list</code>、<code>cursor</code>；或 <code>plan</code>、<code>part</code></td><td><code>list</code> 取 <code>reply</code>（默认）、<code>needs</code>、<code>suspicious</code>、<code>direct</code>、<code>archived</code>、<code>all</code>；回 <code>items</code>、<code>counts</code>、<code>more</code>、<code>cursor</code>。带 <code>plan</code> 和 <code>part</code>（<code>todo</code> / <code>tidy</code> / <code>sus</code>）时给那张「邮箱」卡那一块里的邮件，另回 <code>plan{id, part, state}</code></td></tr>
 <tr><td><code>data/digest</code></td><td><code>account</code>、<code>range</code></td><td><code>range</code>、<code>items</code>、<code>counts{saved, archived, sources}</code>、<code>months</code>、<code>reading</code>（订阅是不是在读）</td></tr>
-<tr><td><code>data/clean</code></td><td><code>account</code></td><td><code>unsubscribe{checked_at, days, senders}</code>、<code>archive{scanned_at, days, judged, total, judging, groups}</code></td></tr>
+<tr><td><code>data/clean</code></td><td><code>account</code></td><td><code>subscriptions{checked_at, days, scanned, senders[], model_check, model_note}</code>（每个发件人另带 <code>verdict</code>、<code>kind</code>、<code>group</code>、<code>decision</code>、<code>rule</code>、<code>still_sending</code>、<code>mailto</code>、<code>reply_keyword</code>、<code>size</code>、<code>subjects</code>）、<code>archive{scanned_at, days, judged, total, judging, groups}</code></td></tr>
 <tr><td><code>data/settings</code></td><td>无</td><td><code>accounts</code>、<code>rules</code>、<code>habits</code>、<code>auto</code>、<code>more</code></td></tr>
 <tr><td><code>data/activity</code></td><td><code>cursor</code>（一条记录的 <code>log_id</code>）</td><td>操作记录，新的在前</td></tr>
 <tr><td><code>data/mail</code></td><td><code>id</code>（本机编号，或 <code>&lt;邮箱&gt;|&lt;Message-ID&gt;</code>）</td><td>一封邮件：信头、摘要、建议、正文（最多 8000 字）</td></tr>
-<tr><td><code>data/providers</code></td><td>无</td><td>五种邮箱（<code>gmail</code>、<code>qq</code>、<code>163</code>、<code>126</code>、<code>custom</code>）怎么连：<code>key</code>、<code>name</code>、<code>host</code>、<code>port</code>、<code>secret_label</code>、<code>secret_hint</code>、<code>steps</code>、<code>links</code>、<code>notes</code>、<code>trouble</code></td></tr>
+<tr><td><code>data/sender</code></td><td><code>key</code></td><td>一个发件人：体检结果、怎么退订、今后的来信怎么处理；以往的来信有几封、多大另查，<code>history_state</code> 报 <code>ready</code> / <code>pending</code> / <code>error</code>，没查完不挡这一页</td></tr>
+<tr><td><code>data/old</code></td><td><code>scope</code>（<code>inbox</code> / <code>archive</code>）</td><td>旧邮件的分析结果</td></tr>
+<tr><td><code>data/job</code></td><td><code>id</code></td><td>一项后台任务的进度和停下的原因</td></tr>
+<tr><td><code>data/piece</code></td><td><code>id</code></td><td>一篇精选的内容；读它会记成「打开过」</td></tr>
+<tr><td><code>data/providers</code></td><td>无</td><td>五种邮箱（<code>gmail</code>、<code>qq</code>、<code>163</code>、<code>126</code>、<code>custom</code>）怎么连：<code>key</code>、<code>name</code>、<code>host</code>、<code>port</code>、<code>secret_label</code>、<code>secret_hint</code>、<code>steps</code>、<code>links</code>、<code>notes</code>、<code>trouble</code>、<code>purge_days</code>、<code>block</code></td></tr>
 </table></div>
 <ul>
+<li><b>代号</b>：写给人看的句子旁边都带代号，供主窗口照代号写自己的说法：<code>problem_code</code> / <code>error_code</code> 出现在 <code>data/accounts</code>、<code>data/digest</code> 的 <code>reading</code>、<code>data/old</code> 的 <code>judging</code>、<code>data/job</code>、<code>data/settings</code> 和 <code>data/clean</code> 的 <code>model_check</code> 里；代号表在 <code>docs/agent-data.md</code>「停下的原因」。<code>summary</code> 另给 <code>connected</code>、<code>needs</code>、<code>suspicious</code>、<code>tidy</code>、<code>auto_today</code> 几个数。清单的 <code>jobs[].title</code> 给后台任务的名字（旧邮件分析、挑选精选内容、从邮件中学习偏好）。</li>
 <li><b>大小</b>：一个列表最多 200 条（<code>LIST_MOST</code>）；只有 <code>data/inbox</code> 和 <code>data/activity</code> 用 <code>cursor</code> 翻页；<code>data/digest</code> 给前 200 条，<code>data/today</code>、<code>data/clean</code> 给全部。</li>
 <li><b>遮凭证</b>：来自邮件的文字（主题、摘要、正文、发件人名字、收件人和抄送的名字、附件名、精选的标题和理由）先过 <code>memory.mask</code>。发件人地址、规则里的地址和值、<code>data/accounts</code> 的 <code>error</code>、草稿的说明不遮。网址只给 https；<code>data/clean</code> 里的退订网址是给用户在浏览器里打开的，邮件助手自己不去请求，所以不判是不是公网地址。</li>
-<li><b>动作</b>是 34 个会改东西的工具，都要 <code>ai.luoke/user-action</code>，没有就回 <code>needs_user_action</code>：
+<li><b>动作</b>是 37 个会改东西的工具，都要 <code>ai.luoke/user-action</code>，没有就回 <code>needs_user_action</code>：
 <ul>
 <li>处理邮件：<code>mail_act</code>（归档、删除、移到垃圾邮件、加星标、标已读或未读）、<code>mail_undo_step</code>、<code>mail_calendar</code>、<code>mail_draft</code>、<code>mail_draft_save</code>、<code>mail_change</code>（改建议，可同时建规则）、<code>mail_sync</code>、<code>mail_job_stop</code>；</li>
 <li>精选：<code>mail_digest_feedback</code>、<code>mail_digest_archive</code>、<code>mail_digest_open</code>、<code>mail_digest_reading</code>、<code>mail_digest_source</code>；</li>
-<li>订阅和旧邮件：<code>mail_unsubscribe</code>（收 <code>keys[]</code>，只做一键退订；里面有一个不能一键退订或发件人可疑，整次都不做；回 <code>done</code>、<code>web</code>、<code>failed</code>）、<code>mail_sender_keep</code>、<code>mail_sender_rule</code>、<code>mail_sender_history</code>、<code>mail_subscriptions_check</code>、<code>mail_old_scan</code>、<code>mail_old_judge</code>、<code>mail_old_archive</code>、<code>mail_old_keep</code>；</li>
+<li>订阅和旧邮件：<code>mail_unsubscribe</code>（收 <code>keys[]</code>，只做一键退订；里面有一个不能一键退订或发件人可疑，整次都不做；回 <code>done</code>、<code>web</code>、<code>failed</code>）、<code>mail_sender_keep</code>、<code>mail_sender_rule</code>、<code>mail_sender_history</code>、<code>mail_subscriptions_check</code>、<code>mail_old_scan</code>、<code>mail_old_judge</code>、<code>mail_old_archive</code>、<code>mail_old_keep</code>、<code>mail_old_trash</code>、<code>mail_sender_reset</code>、<code>mail_sender_unsubscribed</code>；<code>mail_sync</code>、<code>mail_subscriptions_check</code>、<code>mail_old_scan</code> 的 <code>account</code> 可以给 <code>all</code>，回 <code>jobs</code> 和 <code>failed</code>；<code>mail_old_*</code> 带 <code>scope</code>；</li>
 <li>设置和规则：<code>mail_settings</code>、<code>mail_set_name</code>、<code>mail_set_own</code>、<code>mail_learn</code>、<code>mail_site</code>、<code>mail_rule_add</code>、<code>mail_rule_delete</code>、<code>mail_rule_preview</code>、<code>mail_gmail_filters</code>；</li>
 <li>邮箱：<code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code>。<code>mail_unsubscribe</code>、<code>mail_remove</code>、<code>mail_forget</code> 在工具说明里标 <code>destructiveHint</code>。</li>
 </ul></li>
@@ -695,9 +702,6 @@ sequenceDiagram
 <li><b><code>mail_remove</code></b>（<code>account</code>）：删掉这个邮箱在钥匙串里的授权码、设置里的那一条、本机存的邮件数据和 <code>calendar/luoke-&lt;id&gt;.ics</code>，停掉它的任务。</li>
 <li><b><code>mail_forget</code></b>（<code>memory</code>）：全部清除。删掉钥匙串里邮箱和模型服务的条目、本机库里的全部数据、<code>account-salt</code>、日志、通知记录和 <code>calendar/</code>，设置恢复成初始的；<code>memory</code> 为 <code>true</code> 时连写进记忆的邮件记录一起删，别的值都不删记忆。这两个工具做完，邮件助手会退出重来（回 <code>exiting</code>）。</li>
 </ul>
-
-<h3>数据快照</h3>
-<p>在开发实例里（螺壳.app 的 bundle id 是 <code>ai.luoke.core.dev</code> 或 <code>ai.luoke.core.&lt;名&gt;.lab</code>），数据目录里配了邮箱、但钥匙串里一个授权码也没有时，邮件助手把这份数据当成快照：只看，不连邮箱。<code>data/accounts</code> 的 <code>status</code> 报 <code>snapshot</code>；要连邮箱的动作回 <code>failed</code>（「这是数据的快照，只看不连邮箱。」）；<code>mail_connect</code>、<code>mail_remove</code>、<code>mail_forget</code> 回 <code>invalid</code>（「这是数据的快照，只看不改邮箱。」）；后台不同步。</p>
 
 <h2>主控任务</h2>
 <p>提示词是包里的文件 <code>luoke_mail/prompts/</code>（随包打进螺壳.app）：每个任务一组 <code>.system.txt</code>、<code>.user.txt</code>、<code>.schema.json</code>，要重问的另有 <code>.retry.txt</code>，几个任务共用的句子在 <code>_shared.txt</code>；分拣自己的说明和 schema 还在 <code>triage.py</code>。每个任务的要点见<a href="#ref-prompts">提示词</a>页。</p>
@@ -770,10 +774,10 @@ sequenceDiagram
 <li><b>卡片的写法</b>：标题后面是邮箱地址的标签；每行是发件人（加粗）和主题、一行理由；选项和按钮带图标。这些只在本体列出对应写法时用（<code>badge</code>、<code>strong</code>、<code>maxLines</code>、<code>optionIcons</code>、<code>lucide</code>、<code>tooltip</code> 六样齐了才用新模板）；没列时标题后面写「（地址）」，没有图标和收起。卡片上的「在邮件助手里看」「查看全部」在本体列了 <code>openPage</code> 时用 <code>agent.open_page</code> 打开窗口里的收件箱（列了 <code>pageArgs</code> 时带 <code>id</code>，或 <code>box</code> 和 <code>list</code>），否则调 <code>mail_open</code> 打开浏览器页面。</li>
 </ul></li>
 <li><b>资源</b>：<code>outbox</code>；<code>permissions</code>（连了邮箱报 <code>mailbox: granted</code>，没连报 <code>ask</code>）；<code>summary</code>（<code>{count, text}</code>：<code>count</code> 是要处理的加可疑的，一天内选过「先不动」的、已加星标的不算；<code>text</code> 是一句各类几封的话）；十个 <code>page/&lt;id&gt;</code>（见「页面」；可带参数读，<code>page/&lt;id&gt;?键=值</code>）；九个 <code>data/&lt;名&gt;</code>（见「给主窗口的原始数据和动作」）。</li>
-<li><b>要用户在卡片或页面上点过才执行的</b>（没有 <code>ai.luoke/user-action</code> 就拒绝）：卡片和窗口页面用的六个，加给主窗口的 34 个动作（见「给主窗口的原始数据和动作」）。六个是：<code>mail_apply_plan</code>（可带 <code>part</code>，只做「邮箱」卡的那一块；出方案之后在页面上改过的那几封不再动，回话里说明几封没动）、<code>mail_undo</code>（收方案编号，也收单条操作记录和自动处理记录的编号）、<code>mail_do</code>（照窗口页面上点的按钮处理，见「页面」）、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
+<li><b>要用户在卡片或页面上点过才执行的</b>（没有 <code>ai.luoke/user-action</code> 就拒绝）：卡片和窗口页面用的六个，加给主窗口的 37 个动作（见「给主窗口的原始数据和动作」）。六个是：<code>mail_apply_plan</code>（可带 <code>part</code>，只做「邮箱」卡的那一块；出方案之后在页面上改过的那几封不再动，回话里说明几封没动）、<code>mail_undo</code>（收方案编号，也收单条操作记录和自动处理记录的编号）、<code>mail_do</code>（照窗口页面上点的按钮处理，见「页面」）、<code>mail_open_calendar</code>（把 .ics 写进数据目录的 <code>calendar/</code>，再交给「日历」）、<code>mail_show</code>（Gmail 在浏览器里打开那封，其他邮箱打开收件箱页）、<code>mail_disconnect</code>（只打开设置，由用户在「邮箱」里移除）。</li>
 <li><b>只读、不用点的</b>：<code>outbox_ack</code>；<code>mail_view</code>（换窗口页面上显示的内容）；<code>mail_search</code>（只搜本机已存的邮件，近期的按主题、发件人和正文，更早的只按信头，不含已删除、已移到垃圾邮件的；不连邮箱、不经模型、不记日志；默认 20 条，最多 50；查的词正好是发件人的全名或地址时也算强匹配）；<code>mail_read</code>（一封的正文，遮凭证，最多 4000 字，标 <code>untrusted</code>；只有信头的旧邮件现取、不标已读，取到的 Message-ID 对不上就不给）；<code>mail_plan</code>（对同一邮箱里还在待处理的最多 8 封出一张方案卡片，不改邮箱）；<code>mail_open</code>、<code>mail_open_settings</code>、<code>mail_open_page</code>。会在 Mac 上打开东西的六个工具（这三个和 <code>mail_open_calendar</code>、<code>mail_show</code>、<code>mail_disconnect</code>）在工具说明里带 <code>_meta: {"ai.luoke/where": "mac"}</code>。</li>
 <li>只执行邮件助手自己做出的方案、只用卡片给出的选项，执行前再核对邮件仍在待处理；删除、移到垃圾邮件合计超过 1 封要处理模式；退订和开启处理模式不经 agent。</li>
-<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告五类：<code>new-mail</code>（normal）、<code>suspicious</code>（urgent）、<code>mailbox</code>（low）、<code>auto-done</code>（normal）、<code>needs-access</code>（low）；写入动作共 40 个（上面的六个加给主窗口的 34 个）；<code>data</code> 列九样原始数据；<code>service.summary</code> 为 true；<code>service.pages</code> 是十页（today、inbox、digest、clean 四个标签页，legacy-settings、activity、rules、subs、sweep、piece 六页标 <code>hidden</code>）；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」、<code>rules</code>「规则」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
+<li><b>能力声明</b>（配件清单 <code>packaging/accessory.json</code> 的 <code>capabilities</code>，协议版本 1，socket <code>~/.luoke-mail/run/agent.sock</code>）：报告五类：<code>new-mail</code>（normal）、<code>suspicious</code>（urgent）、<code>mailbox</code>（low）、<code>auto-done</code>（normal）、<code>needs-access</code>（low）；写入动作共 43 个（上面的六个加给主窗口的 37 个）；<code>data</code> 列十三样原始数据；<code>service.summary</code> 为 true；<code>service.pages</code> 是十页（today、inbox、digest、clean 四个标签页，legacy-settings、activity、rules、subs、sweep、piece 六页标 <code>hidden</code>）；<code>service.ask.search</code> 是 <code>mail_search</code>；<code>service.ui</code> 用 <code>mail_open_page</code> 打开，深页 <code>accounts</code>「邮箱」、<code>rules</code>「规则」；权限 <code>mailbox</code>（account 类，移除走 <code>mail_disconnect</code>，附三句说明：授权码只存在这台 Mac 的钥匙串里、邮件内容不离开这台 Mac、不发信不永久删除）；<code>listing</code> 的简介「用本机模型整理邮箱，每一步都能撤销」，类别「效率」。</li>
 </ul>
 
 <h2>可靠性</h2>
@@ -787,6 +791,7 @@ sequenceDiagram
 <h3>往外连的地址</h3>
 <ul>
 <li>一键退订和读用户网站之前先看地址指向哪里（<code>netguard.py</code>）：指向本机、局域网、链路本地、运营商内网、组播和保留地址的不连（包在 IPv6 里的 IPv4 按 IPv4 判）；跳转的每一步都再判一次。一键退订只连 https 的公网地址，不跟跳转。</li>
+<li>发件人校验：<code>Authentication-Results</code> 按结构解析。DMARC 没过、但发信的服务写在发件域名自己的 SPF 记录里的，判成 <code>relay</code>（代发），不当成仿冒。查 SPF 要做 DNS 查询（用 <code>dig</code>）：一次校验最多查 10 次、5 秒，每 10 分钟的总预算 20 秒。</li>
 <li>本机的页面服务：请求的 Host 要是 <code>127.0.0.1:&lt;端口&gt;</code> 或 <code>localhost:&lt;端口&gt;</code>（否则 403），<code>/api</code> 要带页面令牌（否则 401）。</li>
 <li>钥匙串不收带控制字符的授权码；邮箱拒绝登录时状态报成要重新授权。</li>
 </ul>
@@ -801,7 +806,7 @@ sequenceDiagram
 <li>网易默认只开放最近 30 天的邮件给 IMAP。</li>
 <li>agent.sock 的对端核对挡不住本账户里有意冒充螺壳 agent 的程序（见「agent 接口」）。</li>
 <li>给主窗口的原始数据：一个列表最多 200 条，只有收件箱和处理记录能翻页，精选只给前 200 条。</li>
-<li>窗口里自己画的收件箱页不认 <code>plan</code> 和 <code>part</code>：卡片上的「看是哪几封」在这一页打开的是默认列表；主窗口自己拼的收件箱读 <code>data/inbox</code>，认这两个参数。</li>
+<li>邮件助手自己画的收件箱页（后备）不认 <code>plan</code> 和 <code>part</code>；主窗口平时用的是 agent 拼的收件箱，读 <code>data/inbox</code>，认这两个参数。</li>
 <li>螺壳窗口里的页面：一页最多 400 个组件、列表一屏一般 20 封，要翻页；页上有填过的输入时不会自己更新进度，要点「刷新」；没有「记忆」页、选模型服务和外观设置；大页、带参数打开、密码框、自动刷新、存文件和后加的图标都要本体列出对应写法才用，没列的退回原来的做法（200 个组件、点「刷新」、到浏览器页面添加邮箱、过滤器存进「下载」、卡片上的按钮打开浏览器页面）。</li>
 <li>模型给的「高」优先级偏多：代码只把已过期的按「中」显示，没过期的照旧。</li>
 <li><code>settle_risks</code> 只放行以前来过信的发件方：新连的邮箱、或某个官方域名第一次来信时，被模型当成冒充的正常邮件仍标可疑。</li>
@@ -1001,8 +1006,8 @@ sequenceDiagram
 </section>
 <section class="page" id="agent" data-title="agent luoke-agent">
 <h1>agent</h1>
-<p class="lede">螺壳的后台组件和主窗口，螺壳里唯一主动找用户的部分。核心和主窗口都打在螺壳.app 里，随螺壳装好、一起升级，不在「应用」列表里单独开关。它把记忆的提问和建议、各应用要报的事排进「今天」，挑时机发急事通知和简报；用户点按卡片时，代表用户调用应用声明的动作。当前版本不使用模型。</p>
-<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.50 · 兜底用的 <code>luoke_mem</code> 0.26.2 · 按代码 4404be7 核对（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
+<p class="lede">螺壳的后台组件和主窗口，螺壳里唯一主动找用户的部分。核心和主窗口都打在螺壳.app 里，随螺壳装好、一起升级，不在「应用」列表里单独开关。它把记忆的提问和建议、各应用要报的事排进「今天」，挑时机发急事通知和简报；用户点按卡片时，代表用户调用应用声明的动作。吉祥物的那一句、简报的话和大文件的用途说明用主控的三个模型任务写；排序、提醒和调用动作不经过模型。</p>
+<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.82；模型任务、核心自己拼的应用页、设置项、<code>/activity</code> 和超时的处理按代码 f4e5400 核对，其余按 4404be7（0.0.50） · 兜底用的 <code>luoke_mem</code> 0.26.2（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
 
 <h2>职责</h2>
 <ul>
@@ -1010,6 +1015,13 @@ sequenceDiagram
 <li>把用户的回答交回来源：给记忆的经 <code>Memory.reply</code>，给应用的经工具协议调用对应的动作。</li>
 <li>主窗口里还有每个应用的页、权限页、设置和搜索框；螺壳本体的设置、添加应用、首次设置和升级也画在这个窗口里。</li>
 <li>只在用户点按时发出会改动东西的调用；不自己推断用户的信息，也不替应用执行动作。</li>
+<li><b>用到的模型任务</b>（都向主控要，<code>POST /tasks/luoke-agent.&lt;任务&gt;/v1/chat/completions</code>，流式，带 <code>X-Luoke-Priority</code>：<code>background</code> 或 <code>user-waiting</code>；提示词在 <code>luoke_agent/prompts/</code>）：
+  <ul>
+  <li><code>luoke-agent.hello</code>：吉祥物气泡里平时的那一句。核心起来 60 秒后第一次要，没要到每 1800 秒再试；一天分四段（上午、下午、晚上、深夜），每段一句。</li>
+  <li><code>luoke-agent.brief</code>：简报里的那段话；没有时照模板拼。</li>
+  <li><code>luoke-agent.explain</code>：扫描里大文件的用途说明。核心起来 90 秒后开始，每批最多问 6 件。</li>
+  </ul>
+  主控的配方里没有这些任务时不调用，页面照没有模型的样子画。</li>
 </ul>
 
 <h2>进程模型</h2>
@@ -1030,7 +1042,7 @@ sequenceDiagram
 <li><b>重启</b>：
   <ul>
   <li>核心以 75 退出时马上重起，间隔复位为 2 秒；</li>
-  <li>以 3 退出（同一数据目录已有核心）时 60 秒后再试；</li>
+  <li>以 3 退出（同一数据目录已有核心）时，前 10 次每 3 秒再试，之后每 60 秒；</li>
   <li>其他退出，间隔从 2 秒翻倍到 60 秒，稳定跑过 60 秒以后才退出的先复位为 2 秒。</li>
   </ul>
   螺壳退出时只停自己起的那个进程：SIGTERM，3 秒不退再 SIGKILL。</li>
@@ -1094,7 +1106,8 @@ sequenceDiagram
 <li><b>应用页</b>：顶上是在不在运行、概览一句话；需要用户允许时有一行「需要你允许：…」，点了进「设置 · 权限」。没有「打开完整界面」：应用要用户做的事都在页里。
   <ul>
   <li>标签只用 <code>service.pages</code>；标了 <code>hidden</code> 的页不画标签（只能由按钮跳过去），只有一个标签时不画标签条。</li>
-  <li>每页是应用的 A2UI，打开、换标签、应用有变化、页上点完按钮时重新取；页写了 <code>refresh</code>（2–60 秒）的，这一页看得见时按这个间隔再读。</li>
+  <li>清单里列了 <code>capabilities.data</code> 的应用（邮件助手、记忆、螺壳扫描、螺壳搜索），页面由核心照应用给的 <code>data/*</code> 自己拼（<code>luoke_agent/apppages/</code> 下每个应用一个模块，定页面、每页要读哪些数据、旧页 id 的别名、事项类别和权限的名字）；应用自己画的页留作隐藏的后备。侧栏的概览、类别和权限的名字，以及扫描、搜索的卡片和动作结果上的句子，也由核心照数据写。别的应用，每页仍是应用的 A2UI。</li>
+  <li>页在打开、换标签、应用有变化、页上点完按钮时重新取；页写了 <code>refresh</code>（2–60 秒）的，这一页看得见时按这个间隔再读。</li>
   <li>页可以带参数打开、分段画（一段一张卡片）、有密码框；按钮的答复可以让窗口跳到这个应用的另一页，或交回一个文件，由窗口弹存文件的框（见「卡片」）。</li>
   <li>第一页下面是「这个应用」：提醒、权限、版本和「升级」（升级交给螺壳）。</li>
   </ul></li>
@@ -1124,6 +1137,7 @@ sequenceDiagram
 <tr><td><code>GET /feed</code></td><td>Server-Sent Events：先推全部卡片，再推一个 <code>feed</code>，之后推变化；每 15 秒一行心跳</td><td>事件见下</td></tr>
 <tr><td><code>POST /action</code></td><td><code>{surfaceId, sourceComponentId, context}</code>，卡片、应用页、搜索结果的按钮都走这里</td><td><code>{text, error}</code>，可带 <code>page {app, page, args?}</code>（让窗口跳到这一页）和 <code>file</code>（让窗口存成文件）；缺字段 400</td></tr>
 <tr><td><code>GET</code> / <code>POST /settings</code></td><td>POST 只带要改的几项</td><td>改完的全部设置，并推 <code>settings</code> 事件；认不得或值不对答 400，什么都不改</td></tr>
+<tr><td><code>GET /activity</code></td><td><code>?before=&amp;app=&amp;limit=</code>（1–200）</td><td>处理记录，一行一件；能撤销的带 <code>undo {surfaceId, componentId, label}</code>，另有 <code>surface</code>、<code>undone</code></td></tr>
 <tr><td><code>GET /apps</code></td><td>—</td><td><code>{apps:[{id, running, summary, pages, ui, needs}]}</code>，页带 <code>hidden</code></td></tr>
 <tr><td><code>GET /apps/&lt;id&gt;/pages/&lt;页&gt;</code></td><td>可带 <code>?键=值</code>：最多 4 个键，键名 <code>^[a-z][a-z0-9_]{0,15}$</code>，值不超过 200 字，不对答 400</td><td>这一页的 A2UI 消息；没有这个应用或这一页 404，应用没在运行 503，画不了答一页纯文本</td></tr>
 <tr><td><code>POST /open</code></td><td><code>{app, page?}</code></td><td><code>{text, error}</code>：打开应用的完整界面；接口留着，窗口不再调</td></tr>
@@ -1202,7 +1216,7 @@ sequenceDiagram
 <li><b>回执</b>：应用有 <code>outbox_ack</code> 才调。一件事第一次说给用户时回 <code>shown</code>（每件一次：发了急事通知、进了简报，或用户正看着窗口时进来）；用户答完回 <code>answered</code>，放下回 <code>dismissed</code>。用户不在、简报没发出去、通知到不了时不回 <code>shown</code>。</li>
 <li><b>user-action 的 <code>surfaceId</code></b>：卡片上是应用自己的卡片编号，应用页上是页 id，权限页是 <code>permissions</code>，打开完整界面是 <code>open</code>。权限页的申请、打开、关闭、移除一律按写调用走。</li>
 <li><b>结果</b>：<code>structuredContent.card</code> 更新原卡片（校验过才换）；<code>done</code> 表示办完了，卡片留着，窗口关着时 30 分钟后撤下。失败码：<code>needs_user_action</code>、<code>invalid</code>、<code>not_ready</code>、<code>needs_setup</code>、<code>stale</code>、<code>failed</code>。撤销是结果卡上的一个写按钮，走同一条点按路径。</li>
-<li><b>agent 读的 capabilities</b>：<code>protocol</code>、<code>transport</code>、<code>socket</code>、<code>reports</code>、<code>service</code>（<code>summary</code>、<code>pages</code>、<code>ui</code>、<code>ask.search</code>）、<code>permissions</code>，以及清单顶层的 <code>data</code>。不读 <code>actions</code>、<code>listing</code>、<code>ask.suggest</code>、<code>ai.luoke/where</code>。</li>
+<li><b>agent 读的 capabilities</b>：<code>protocol</code>、<code>transport</code>、<code>socket</code>、<code>reports</code>、<code>service</code>（<code>summary</code>、<code>pages</code>、<code>ui</code>、<code>ask.search</code>）、<code>permissions</code>，以及 <code>capabilities.data</code>（应用给哪些数据，一列名字）和清单顶层的 <code>data</code>。不读 <code>actions</code>、<code>listing</code>、<code>ask.suggest</code>、<code>ai.luoke/where</code>。</li>
 <li><b>权限能做什么</b>（照应用现在报的状态重算）：
   <ul>
   <li><code>system</code>：不在螺壳名下、状态是待问、应用在运行时能「申请」，否则能打开系统设置里对应的那一页（14 种权限对应 12 页，地址只来自 agent 自己的对照表）；</li>
@@ -1324,9 +1338,21 @@ sequenceDiagram
 <li><b>文字和来源</b>：应用和记忆送来的文字一律按纯文本画；卡片编号带来源前缀，按钮只转给出这张卡片的来源；<code>agent.</code> 开头的动作名留给 agent。日志只记元数据，搜索不记搜了什么、命中了什么。</li>
 </ul>
 
+<h2>0.0.50 之后加的（按代码 f4e5400）</h2>
+<ul>
+<li><b><code>feed</code> 事件</b>：多了 <code>hello {text, kind}</code>（吉祥物的那一句）和 <code>brief.words</code>（简报的话）；分段多了 <code>held</code>（一天里待确认超过 3 件，多出来的先放着）、<code>past</code>、<code>undone</code>。</li>
+<li><b>设置项</b>：多了 <code>classes</code>，三类事各选怎么提醒：<code>urgent</code>、<code>decide</code>、<code>done</code>，值是 <code>now</code>（马上提醒）、<code>brief</code>（放进简报）、<code>off</code>（不提醒）；<code>brief_time</code>（<code>HH:MM</code>，空着用默认）。<code>modes</code> 的默认值从 <code>classes</code> 来。设置页的标签是「通用」「模型」「隐私与权限」。</li>
+<li><b>读数据超时</b>：读应用的数据超时算「未响应」，不算应用没在运行：页面留着上一次的数据，写「未响应」；10、30、300 秒三档超时没变。</li>
+<li><b>A2UI</b>：核心声明的能力 29 项，新加 <code>confirm</code>、<code>rowOpen</code>、<code>fieldSubmit</code>、<code>lucide2</code>、<code>choiceSubmit</code>、<code>headerPlacement</code>；图标 50 个 Lucide 名字加 7 个旧名字；<code>placement</code> 多了 <code>header</code>。</li>
+<li><b>agent 自己处理的动作</b>多了 <code>agent.search</code>、<code>agent.reveal</code>，只在核心自己拼的页上有；核心页上的 <code>agent.open_url</code> 可带 <code>authuser</code>。</li>
+<li><b>搜索</b>：列了 <code>recent</code> 的搜索工具，调用时带 <code>remember: true</code> 和一次用户点按；标了 <code>strong</code> 的结果单放一块「最相关」；结果可带 <code>duration</code>。</li>
+<li><b>应用页的隐藏页</b>可带图标（<code>service.pages[].icon</code>）。「应用」页的标题是「应用管理」。应用管理和设置里螺壳本体的那部分，数据由本体给（<code>HostApps</code>、<code>HostSettings</code>），窗口来画。</li>
+<li>最低系统：三个 Swift 包都是 macOS 26.2。</li>
+</ul>
+
 <h2>已知限制</h2>
 <ul>
-<li>没有对话（<code>/say</code> 答 501），不使用模型；outbox 靠轮询，没做订阅。「活动」页和问螺壳在代码里有，螺壳没开；搜索一次答完，不边搜边画。</li>
+<li>没有对话（<code>/say</code> 答 501）；模型只用在上面三个任务上；outbox 靠轮询，没做订阅。「活动」页和问螺壳在代码里有，螺壳没开；搜索一次答完，不边搜边画。</li>
 <li>应用不核对调用方是谁：同一账户里别的程序能连应用的 socket；user-action 不是签名的凭据；agent.sock 按进程号认人，不核代码签名。</li>
 <li>写不写只看 <code>readOnlyHint</code>，不对照清单的 <code>actions</code>；<code>readOnlyHint</code> 缓存到名字找不到才刷新。</li>
 <li><code>deadline</code> 只影响排序，过期不会标记。</li>
@@ -2193,8 +2219,8 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>URI</th><th>内容</th></tr>
 <tr><td><code>luoke://luoke-mem/outbox</code>（<code>outbox</code> 也认）</td><td><code>{items}</code>：开着、没过期的想问的和建议，按 <code>asks()</code> 的顺序，一件一项</td></tr>
-<tr><td><code>summary</code></td><td><code>{count, text}</code>：<code>text</code> 是最近了解到的一件，<code>count</code> 是概览上要确认的几件（最多 3）；什么都没记下时为 0、「还没有记下什么。」，没有记忆或打不开时为 0 和那句说明</td></tr>
-<tr><td><code>data/&lt;名&gt;</code>（十样），可带 <code>?&lt;键&gt;=&lt;值&gt;</code></td><td>原始数据，JSON，不带卡片和页上的句子，见下「原始数据」</td></tr>
+<tr><td><code>summary</code></td><td><code>{count, text, state, recent, kept, pending}</code>：<code>state</code> 是 <code>recent</code> / <code>quiet</code> / <code>empty</code> / <code>not_ready</code>（打不开时另带 <code>problem</code>），<code>recent{id, kind, text, formed_at}</code> 是最近了解到的一件，<code>kept</code>、<code>pending</code> 是两个数，供主窗口照数据写概览；<code>text</code> 是最近了解到的一件，<code>count</code> 是概览上要确认的几件（最多 3）；什么都没记下时为 0、「还没有记下什么。」，没有记忆或打不开时为 0 和那句说明</td></tr>
+<tr><td><code>data/&lt;名&gt;</code>（十一样），可带 <code>?&lt;键&gt;=&lt;值&gt;</code></td><td>原始数据，JSON，不带卡片和页上的句子，见下「原始数据」</td></tr>
 <tr><td><code>page/&lt;页&gt;</code>，可带 <code>?&lt;键&gt;=&lt;值&gt;</code></td><td>一张 A2UI 卡片（<code>surfaceId</code> 是页 id），见下「各页」</td></tr>
 </table></div>
 <p>都是 <code>application/json</code>，<code>contents[0].text</code> 是一段 JSON 文字。卡片用目录 <code>ai.luoke/a2ui/agent/1</code>。</p>
@@ -2210,11 +2236,14 @@ sequenceDiagram
 <tr><td><code>data/notes</code></td><td><code>filter</code>（<code>all</code> 默认、<code>pending</code>、<code>past</code>、<code>rejected</code> 或一个 <code>kind</code>）、<code>q</code>、<code>p</code>、<code>n</code>（默认 20，最多 100）</td><td>全部记忆。<code>all</code> 是生效的和攒够依据的猜测，不含常用说法和精选的口味。答 <code>filter</code>、<code>q</code>、<code>page</code>、<code>pages</code>、<code>total</code>、<code>waiting</code>（还在攒依据、不列的猜测几条）、<code>counts</code>（每个筛选各几条，不受 <code>q</code> 影响）、<code>items</code></td></tr>
 <tr><td><code>data/people</code></td><td><code>q</code>、<code>p</code>、<code>n</code></td><td>有理解或写信记录的人，写得多的在前。每人 <code>id</code>、<code>name</code>、<code>status</code>、<code>notes</code>、<code>relations</code>、<code>top</code>（关系以外最有依据的一条）、<code>contact</code>（<code>first</code>、<code>last</code>、<code>months</code>、<code>count</code>、<code>lapsed</code>、<code>together</code>）</td></tr>
 <tr><td><code>data/person</code></td><td><code>id</code></td><td>一个人，同上，再加 <code>aliases</code>、<code>profile</code>（完整的写信档案）、<code>about</code>（关于他的全部理解）。不在了答 <code>found: false</code></td></tr>
-<tr><td><code>data/note</code></td><td><code>id</code>、<code>p</code>、<code>n</code>（默认 50）</td><td>一条理解（加 <code>why</code>、<code>superseded_by</code>、<code>valid_from</code>、<code>valid_to</code>）和全部依据 <code>cites</code>（<code>id</code>、<code>tool</code>、<code>speaker</code>、<code>kind</code>、<code>topic</code>、<code>text</code>、<code>happened_at</code>、<code>recorded_at</code>、<code>sensitive</code>）；<code>merged</code> 是并进来的说法</td></tr>
+<tr><td><code>data/note</code></td><td><code>id</code>、<code>p</code>、<code>n</code>（默认 50）</td><td>一条理解（加 <code>why</code>、<code>superseded_by</code>、<code>valid_from</code>、<code>valid_to</code>）和全部依据 <code>cites</code>（<code>id</code>、<code>tool</code>、<code>speaker</code>、<code>kind</code>、<code>topic</code>、<code>text</code>、<code>happened_at</code>、<code>recorded_at</code>、<code>sensitive</code>）；<code>merged</code> 是并进来的说法；<code>family{head, code, notes}</code> 是同一类挨着的几条和这一类的代号</td></tr>
 <tr><td><code>data/sources</code></td><td>—</td><td>每个写过记忆、或关了停学的应用：<code>tool</code>、<code>on</code>（学不学）、<code>stopped_at</code>、<code>records</code>、<code>notes</code>、<code>topics</code>（写过哪几类记录、各几条）、<code>last</code></td></tr>
 <tr><td><code>data/data</code></td><td>—</td><td><code>tidied</code>（上次整理 <code>at</code> 和 <code>counts</code>）、<code>next: "idle"</code>、<code>typing</code>（上次归纳打的字 <code>at</code>、<code>outcome</code>）、<code>kept</code>（记住的事几条）、<code>terms</code>（输入法词条几条）、<code>archived_asks</code></td></tr>
+<tr><td><code>data/forget</code></td><td><code>tool</code></td><td>忘掉一个应用之前的预演，不改任何东西：<code>known</code>、<code>records</code>、<code>notes</code>、<code>kept</code>（用户确认过、否定过而留下的）；没有这个应用回 <code>found: false</code></td></tr>
 </table></div>
 <p><code>affects</code> 按理解的种类：<code>fact</code> 是 <code>*</code>（每个工具都当作关于用户的事实）；<code>interest</code> 邮件助手 <code>digest_prefer</code>；<code>dislike</code> <code>digest_avoid</code>；<code>preference</code> <code>habit</code>；<code>term</code> 输入法 <code>candidates_first</code>；<code>taste</code> <code>digest_taste</code>；建议照它的 <code>action</code>；<code>same_person</code> 是 <code>luoke-mem</code> 的 <code>merge_people</code>。「是不是同一个人」交 <code>mem_reply</code> 的 <code>choice: "answer"</code>、<code>text</code> 为「是」或「不是」。</p>
+<p><b>代号和数</b>（0.43–0.44）：<code>data/*</code> 里每条理解带 <code>why_data{code, …, waiting}</code>，<code>code</code> 取 <code>typing_term</code>、<code>typing_interest</code>（各有 <code>_pending</code>）、<code>sent_mail_person</code>、<code>frequent_contact</code>、<code>habit_overridden</code>、<code>habit_manual</code>、<code>sent_mail</code>、<code>received_mail</code>、<code>mail_opened</code>、<code>topics_mail</code>、<code>taste_mail</code>、<code>digest_dislike</code>。写入工具的结果在 <code>structuredContent</code> 里带 <code>result</code> 和相应的数（<code>mem_reply</code> 带选了什么和 <code>answer</code> / <code>days</code> / <code>same</code>；<code>mem_note</code> 带 <code>n</code>、<code>of</code>、<code>new_text</code>、<code>was</code>；<code>mem_archive</code> 带 <code>n</code>、<code>of</code>）。问题已经变了再答，回 <code>result: "changed"</code>、<code>stale: true</code>。出错时带 <code>reason</code>：<code>unknown</code>、<code>empty_text</code>、<code>same_text</code>、<code>secret</code>、<code>unconfirmed</code>、<code>no_choice</code>、<code>wrong_word</code>、<code>changed</code>、<code>family_changed</code>、<code>no_share</code> 等，全表在 <code>fixtures/agent/README.md</code>「代号和数字」。清单的 <code>jobs[].title</code> 给后台任务的名字（整理记忆）。</p>
+
 <h3>outbox 事项</h3>
 <div class="tbl"><table>
 <tr><th>字段</th><th>取值</th></tr>
@@ -2768,6 +2797,10 @@ sequenceDiagram
 <h2>2026-11-18</h2>
 <ul>
 <li>决策页整页换成新的十条 ADR（0001–0010）：原来的 0013–0028 并进这十条，旧路径留占位文件，对照表在 <code>docs/adr/README.md</code>。搜索页、扫描页里提到的 ADR 号跟着改（0021 改 0004，0019 改 0007）。</li>
+<li>agent 页按代码 f4e5400（核心 0.0.82）复核：用上三个模型任务（<code>luoke-agent.hello</code>、<code>brief</code>、<code>explain</code>）；邮件助手、记忆、扫描、搜索的页面改由核心照应用给的 <code>data/*</code> 自己拼，应用自己画的页留作后备；加 <code>GET /activity</code>、<code>feed</code> 的新字段、三类事的提醒设置；读数据超时写「未响应」；以 3 退出后的重试改成前 10 次每 3 秒。</li>
+<li>邮件页按代码 e124c8b（0.19.71）复核：去掉「数据快照」一节（开发构建直接用真实数据）；给主窗口的数据从九样到十三样（加发件人、旧邮件、任务、一篇精选），动作从 34 个到 37 个；句子旁边带代号；<code>data/clean</code> 的订阅部分换了形状；发件人校验加「代发」（<code>relay</code>），要查 DNS。</li>
+<li>记忆页、参考页的记忆部分按代码 c60631b（0.44.0）复核：数据从十样到十一样（加 <code>data/forget</code>）；每条理解带理由的代号和数，动作结果带结果代号和原因代号；概览多给状态和两个数；处理习惯的问法和理由换成书面的说法。</li>
+<li>主控页按代码 8bc9f92 复核五处：子进程默认 disclaim，只有搜索、扫描和换包几步带螺壳的身份；停用在那一行里做、删数据是单独的接口；用电池时三档；主控不核配件版本，另有 <code>core_too_old</code>；主控成了孤儿时本体接口谁都不认。</li>
 <li>最低系统版本：螺壳按 macOS 26.2 起（ADR 0008）。agent 的三个 Swift 包已改到 26.2（代码 84f1949），主控的声明还在改；搜索、扫描本来就是 26.2。</li>
 </ul>
 
