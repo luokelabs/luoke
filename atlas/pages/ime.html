@@ -1,7 +1,7 @@
 <!-- id: ime | nav: 输入法 luoke-ime | group: 组件 -->
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。语音输入是随包自带的快捷键引擎，设置里默认关：按住说话、松开上屏，转写和整理都交给主控。个人化组件把上屏写入记忆，把打分和联想请求转给主控，并给语音提供热词。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.103（build 106）；界面上的名字、输入法菜单和语音提示按代码 24d828b 核对，其余按 6b827c6（0.1.88） · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.113（build 116）；给主窗口的数据和动作、最低系统、默认输入方案按代码 375095d 核对；界面上的名字、输入法菜单和语音提示按代码 24d828b 核对，其余按 6b827c6（0.1.88） · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
@@ -148,6 +148,18 @@
 <p><b>设置窗口</b>四页：通用（输入方案、模糊音（一个总开关，打开后才列出六组勾选，关着时勾选照样留着）、语音、中英文、排版、候选窗口，装了个人化组件才有联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案的「已学词语」和「已忘记词语」；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（最前面是使用统计：最近 7 天的上屏次数、首选占比、上屏后马上退格的占比，装了个人化组件时加联想出现、打开、选中的次数和字数，能清零；然后是开发模式记录、记录文件夹、引擎文件夹、设置文件）。联想、记忆记录、记忆页和高级页的行带一句说明；窗口里不放文本框。语音一节：开关「语音输入」（下面一行小字说明按住哪个键说话、松开上屏，键名跟着设置变），打开后才出现「语音输入按键」（右 ⌥（Alt）、右 ⌘、右 ⌃，说明外接 Windows 键盘、对调过修饰键的选右 ⌘ 试试）和开关「语音整理：去除口头禅、修正改口、整理列表和分段」，没有麦克风权限时红字提示并给一个去系统设置的按钮；下面说明识别和整理都由螺壳在这台 Mac 上做。</p>
 <p><b>输入法菜单</b>连不上螺壳时最上面多一行「未连接螺壳：AI 重排和联想不可用」（开着语音输入时写「AI 重排、联想和语音输入不可用」）：每次打开菜单时试连一次主控的 socket（0.2 秒），连不上才显示，不轮询。菜单只放常用操作：输入方案、当前中英文模式、清除当前方案的已学词语、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用（打字引擎、个人化组件、快捷键引擎包括语音，都带原因和「重新启用」）、沙盒拦截、等确认的第三方引擎也列在这里。</p>
 
+<h3>给螺壳主窗口的数据和动作</h3>
+<p>主窗口里输入法的「设置」「各应用」两页由 luoke-agent 照下面的原始数据自己拼（界面和措辞归 luoke-agent）。清单 <code>Resources/App/luoke-accessory.json</code> 的 <code>capabilities.data</code> 是 <code>settings</code>、<code>apps</code>，<code>actions</code> 是 <code>ime_set</code>、<code>ime_do</code>。输入法自己画的旧页 <code>page/settings</code>、<code>page/apps</code> 和 <code>ime_page</code> 还留着，给还不认 <code>data/*</code> 的旧版螺壳用。</p>
+<ul>
+<li><b><code>data/settings</code></b>（只读）：<code>state</code>、<code>settings</code>（各项设置的代号和值）、<code>learned</code>（当前打字引擎）、<code>forgotten</code>（已忘记词语）、<code>usage</code>（最近 7 天的使用计数，只有次数）、<code>dev</code>（开发模式）、<code>paths</code>（文件夹和设置文件的路径）。</li>
+<li><b><code>data/apps</code></b>（只读）：<code>state</code>、<code>personal</code>、<code>apps[]</code>（每个有单独设置的应用：<code>id</code>、<code>name</code>、<code>settings</code>）。带 <code>?app=&lt;bundle id&gt;</code> 时，这个应用还没单独设置过也列一项：各项都是跟随全局，标 <code>new: true</code>；只读不记，改了第一项才写进设置。</li>
+<li><b><code>ime_set</code></b>：只改写死的一张表；答复里带 <code>data {key, value}</code>（旧的 <code>card</code> 还一起给）。</li>
+<li><b><code>ime_do</code></b>：<code>op</code> 取 <code>clear_learned</code>（带 <code>engine</code>，清除当前打字引擎学到的词）、<code>restore</code>（带 <code>id</code>，恢复一个已忘记的词）、<code>reset_usage</code>（清零使用计数）、<code>dev_mode</code>（带 <code>engine</code>、<code>on</code>）。清除、恢复、清零由正在运行的输入法做，3 秒内没取走答 <code>not_running</code>。失败的代号：<code>needs_user_action</code>、<code>invalid</code>、<code>not_running</code>、<code>engine_not_running</code>、<code>engine_changed</code>（期间换了打字引擎）、<code>not_found</code>、<code>not_ready</code>、<code>settings_unreadable</code>、<code>failed</code>。</li>
+<li>两个动作都要 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code>）。</li>
+<li>输入法菜单的「设置」「此应用设置」现在仍打开输入法自己的设置窗口；主控的 <code>luoke://app/luoke-ime/…</code> 地址已有，菜单还没改用它。自己的设置窗口只做兜底，主窗口的两页随版本发出去以后去掉。</li>
+<li>新装时默认的输入方案是全拼（<code>EngineCatalog.defaultTyping</code>），不靠引擎的排序。</li>
+</ul>
+
 <h2>安全</h2>
 <ul>
 <li><b>安全输入</b>（<code>IsSecureEventInputEnabled</code>）：不读前文、不写记忆、不打分、不记使用计数，快捷键引擎不触发、不发 <code>arm</code>（语音不会往密码框里出字）；一段组字中碰到过安全输入，整段都按安全输入处理。</li>
@@ -161,7 +173,7 @@
 <p>自带的 librime 在编译时把源码路径换成相对路径（<code>-ffile-prefix-map</code>），组装时删掉它自带的全部 rpath 和 rime_helper 指向 vendor 的 rpath；编好的版本标记对不上就重编，没有 cmake 就报错退出、不删旧的。安装脚本对两个壳程序 <code>strip -S</code>，组装完在整个 .app 里查编译机的仓库路径，查到就失败。</p>
 
 <h2>系统要求</h2>
-<p>螺壳只在 macOS 26 起安装输入法（清单 <code>min_macos</code> 26）；LuokeIME.app 本身的最低系统是 14.0，供手动安装验证旧系统。只编 arm64（Apple 芯片）。</p>
+<p>最低系统是 macOS 26.2：清单 <code>min_macos</code>、<code>Package.swift</code> 和 Info.plist 的 <code>LSMinimumSystemVersion</code> 都是 26.2。只编 arm64（Apple 芯片）。</p>
 
 <h2>评测</h2>
 <ul>

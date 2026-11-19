@@ -1,7 +1,7 @@
 <!-- id: core | nav: 螺壳（主控） luoke-core | group: 组件 -->
 <h1>螺壳（主控）</h1>
 <p class="lede">用户装的应用「螺壳」（<code>螺壳.app</code>）；"主控"是它在内部分工里的叫法。本机所有模型推理的唯一入口。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 都打在它的包里，跟它一起升级；输入法单独一个包，由它安装和升级。它按配方为每个硬件档选择模型，调度各配件的请求和空闲任务，监管推理引擎和专用模型进程，并负责下载、升级和卸载。</p>
-<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对；起子进程的方式、开启和停用、电池设置、配件版本、本体接口的核对按 8bc9f92（主控 0.2.0）复核 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
+<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对；<code>luoke://app</code>、更新前核对最低系统、主窗口最小尺寸、退出的顺序和最低 macOS 按 8bbe6f9 核对；起子进程的方式、开启和停用、电池设置、配件版本、本体接口的核对按 8bc9f92（主控 0.2.0）复核 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
 
 <h2>组成</h2>
 <div class="tbl"><table>
@@ -118,6 +118,15 @@
 <li><b>再次打开主控</b>：有安装器交来的预选时，首次运行没走完就回到首次运行并预选那个应用，否则在「应用」窗口那一行里装；没有预选时，带了主窗口、首次运行已走完、首次运行和升级窗口都没开着就打开主窗口；不然有开着的窗口就叫到前面；都没有且首次运行已走完时弹出主控小窗口，显示运行状态（在运行 / 启动中 / 没连上），说明主控在菜单栏的海螺图标里、找不到时可能的原因，给「打开菜单栏设置」，并列出 记忆（随主控带的时候才有）、应用、检查更新、设置 四个入口。⌘, 打开设置窗口。</li>
 <li><b>设置</b>：通用（能耗模式 全速 / 均衡 / 静音；用电池时三档：照常运行、少干活（默认）、不运行大模型，<code>PUT /settings</code> 的 <code>battery_mode</code> 取 <code>normal</code> / <code>light</code> / <code>no_large_model</code>，旧的 <code>background_on_battery</code> 仍收、对到这三档；选了不运行大模型又在用电池时，后台状态的原因是 <code>battery_no_large_model</code>，等着的请求答 <code>needs_user</code>；登录时启动螺壳）、下载（有下载或缺模型时出现：逐项进度或排队中，缺的可重试）、模型（占多少空间——可选档多于一个时出现，磁盘不够换档时在下面写明；底座模型；换档等待时的说明；已下载的模型及大小）、高级（本机端点）、关于（螺壳版本即发布号、导出诊断信息、卸载螺壳）。Finder「显示简介」里的版本也是发布号（如 beta1、internal-1027；<code>CFBundleShortVersionString</code>），主控版本号在 <code>CFBundleVersion</code>。档位、引擎、本机试跑在诊断信息里。</li>
 <li><b>只给本体用的接口</b>（下载、设置、端点、冒烟、卸载、开启、停用、权限、第一次任务、删数据、回到上一版本、重新登记、重新启动输入法）按 socket 对端进程核对是不是本体（主控成了孤儿、父进程是 1 时谁都不认），<code>/settings</code>、<code>/endpoint</code> 也认主控自带的 <code>luoke</code> 命令行；不是的答 <code>forbidden</code>（403）。</li>
+</ul>
+
+<h3>2026-11-19 复核的几处（按代码 8bbe6f9）</h3>
+<ul>
+<li><b><code>luoke://app/&lt;配件标识&gt;[/&lt;页&gt;][?参数=值…]</code></b>：打开主窗口、翻到那个应用的那一页（不写页是第一页），参数原样交给那一页；螺壳没在跑时由系统拉起。配件标识最多 64 个字符（小写字母、数字、<code>-</code>、<code>_</code>、<code>.</code>，字母或数字开头）；页名最多 32 个字符（同一组字符，不含 <code>.</code>）；参数最多 8 个，名字照页名的规则、不能重复，值是可打印的 ASCII、最多 256 个字符。不合格式的整条忽略（只记一行日志）。只翻到侧栏里有的应用，应用还没出现时最多等 30 秒。另一个地址是 <code>luoke://memory[?note=…|?view=recent|?view=people]</code>。</li>
+<li><b>检查更新先核对系统版本</b>：新版要的最低 macOS（发布清单里 <code>hub</code> 和 <code>engine</code> 的 <code>min_macos</code> 取高的）比这台 Mac 高时不提供升级，写明需要的系统版本。</li>
+<li><b>主窗口最小 860×600</b>，拖边时也卡在这个尺寸。</li>
+<li><b>退出</b>：先把窗口藏起来、去掉菜单栏图标，再收尾；收尾期间不再把停下的引擎当成崩溃重启。</li>
+<li><b>最低 macOS 26.2</b>：<code>app/Package.swift</code> 声明 26.2；<code>LSMinimumSystemVersion</code> 由 <code>app/build_app.sh</code> 取 <code>tools/minos_check.py</code> 里的 <code>LUOKE_MIN_MACOS</code>（26.2）写入。</li>
 </ul>
 
 <h2>文件</h2>

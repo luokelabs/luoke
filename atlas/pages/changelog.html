@@ -1,6 +1,16 @@
 <!-- id: changelog | nav: 文档修订 | group: 其他 -->
 <h1>文档修订</h1>
 
+<h2>2026-11-19</h2>
+<ul>
+<li>分工（ADR 0002）：输入法的设置页并进主窗口，界面和措辞归 agent，输入法给数据和动作。决策页、输入法页、agent 页跟着改。</li>
+<li>输入法页：给主窗口的 <code>data/settings</code>、<code>data/apps</code>、<code>ime_set</code>、<code>ime_do</code>；最低系统 macOS 26.2；新装默认全拼。版本 0.1.113。</li>
+<li>主控页：<code>luoke://app</code> 打开主窗口里某个应用的页；检查更新先核对新版要的系统版本；主窗口最小 860×600；退出的顺序；最低 macOS 26.2。</li>
+<li>邮件页：截止日期进日历、归档后照样提醒、「即将截止」的事项、服务器没给回的邮件、网易 30 天提示的条件。版本 0.19.75。</li>
+<li>记忆页：处理习惯的建议在 <code>data/ask</code> 的 <code>facts</code> 里带执行内容。版本 0.44.1。</li>
+<li>agent 页：输入法两页、<code>countChecks</code>、扫描页的几处、扫描结论卡上的时间。核心 0.0.96。</li>
+</ul>
+
 <h2>2026-11-18</h2>
 <ul>
 <li>决策页整页换成新的十条 ADR（0001–0010）：原来的 0013–0028 并进这十条，旧路径留占位文件，对照表在 <code>docs/adr/README.md</code>。搜索页、扫描页里提到的 ADR 号跟着改（0021 改 0004，0019 改 0007）。</li>

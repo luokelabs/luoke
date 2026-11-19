@@ -73,7 +73,7 @@ footer{margin-top:48px;font-size:12px;color:var(--muted)}
 <body>
 <div class="wrap">
 <nav class="rail" aria-label="目录">
-  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-18 17:01</small></div>
+  <div class="brand">螺壳系统文档<small>LUOKE DOCS · 生成于 2026-11-19 16:58</small></div>
   <label class="picker-label" for="pagepicker" hidden>页面</label>
   <select class="picker" id="pagepicker"><option value="overview">概览 · 总览</option><option value="concepts">概览 · 核心概念</option><option value="flows">概览 · 数据流</option><option value="core">组件 · 螺壳（主控） luoke-core</option><option value="mem">组件 · 记忆 luoke-mem</option><option value="mail">组件 · 邮件助手 luoke-mail</option><option value="ime">组件 · 输入法 luoke-ime</option><option value="agent">组件 · agent luoke-agent</option><option value="search">组件 · 螺壳搜索 luoke-search</option><option value="audit">组件 · 螺壳扫描 luoke-scan</option><option value="ref-api">参考 · 主控任务接口</option><option value="ref-manifest">参考 · 配件清单与配方</option><option value="ref-mem">参考 · 记忆接口与表结构</option><option value="ref-tasks">参考 · 任务与提示词</option><option value="ref-prompts">参考 · 提示词</option><option value="ref-files">参考 · 文件位置</option><option value="ops">运维 · 运行与发布</option><option value="decisions">其他 · 决策</option><option value="open">其他 · 已知问题</option><option value="glossary">其他 · 术语表</option><option value="changelog">其他 · 文档修订</option></select>
   <div class="navgroup"><div class="navlabel">概览</div><a href="#overview" data-page="overview">总览</a><a href="#concepts" data-page="concepts">核心概念</a><a href="#flows" data-page="flows">数据流</a></div>
@@ -254,7 +254,7 @@ sequenceDiagram
 <section class="page" id="core" data-title="螺壳（主控） luoke-core">
 <h1>螺壳（主控）</h1>
 <p class="lede">用户装的应用「螺壳」（<code>螺壳.app</code>）；"主控"是它在内部分工里的叫法。本机所有模型推理的唯一入口。邮件助手、螺壳搜索、螺壳扫描、记忆和 agent 都打在它的包里，跟它一起升级；输入法单独一个包，由它安装和升级。它按配方为每个硬件档选择模型，调度各配件的请求和空闲任务，监管推理引擎和专用模型进程，并负责下载、升级和卸载。</p>
-<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对；起子进程的方式、开启和停用、电池设置、配件版本、本体接口的核对按 8bc9f92（主控 0.2.0）复核 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
+<p class="src">仓库 <code>luoke-core</code> · 按代码 364e582 核对；<code>luoke://app</code>、更新前核对最低系统、主窗口最小尺寸、退出的顺序和最低 macOS 按 8bbe6f9 核对；起子进程的方式、开启和停用、电池设置、配件版本、本体接口的核对按 8bc9f92（主控 0.2.0）复核 · bundle id <code>ai.luoke.core</code>（开发版 <code>ai.luoke.core.dev</code>，名为「螺壳（开发）」，和正式版用同一个环境目录 <code>luoke-core</code>、同一时间只开一个，不认领 <code>luoke://</code>）· 接口细节见「参考 · 主控任务接口」「参考 · 配件清单与配方」</p>
 
 <h2>组成</h2>
 <div class="tbl"><table>
@@ -373,6 +373,15 @@ sequenceDiagram
 <li><b>只给本体用的接口</b>（下载、设置、端点、冒烟、卸载、开启、停用、权限、第一次任务、删数据、回到上一版本、重新登记、重新启动输入法）按 socket 对端进程核对是不是本体（主控成了孤儿、父进程是 1 时谁都不认），<code>/settings</code>、<code>/endpoint</code> 也认主控自带的 <code>luoke</code> 命令行；不是的答 <code>forbidden</code>（403）。</li>
 </ul>
 
+<h3>2026-11-19 复核的几处（按代码 8bbe6f9）</h3>
+<ul>
+<li><b><code>luoke://app/&lt;配件标识&gt;[/&lt;页&gt;][?参数=值…]</code></b>：打开主窗口、翻到那个应用的那一页（不写页是第一页），参数原样交给那一页；螺壳没在跑时由系统拉起。配件标识最多 64 个字符（小写字母、数字、<code>-</code>、<code>_</code>、<code>.</code>，字母或数字开头）；页名最多 32 个字符（同一组字符，不含 <code>.</code>）；参数最多 8 个，名字照页名的规则、不能重复，值是可打印的 ASCII、最多 256 个字符。不合格式的整条忽略（只记一行日志）。只翻到侧栏里有的应用，应用还没出现时最多等 30 秒。另一个地址是 <code>luoke://memory[?note=…|?view=recent|?view=people]</code>。</li>
+<li><b>检查更新先核对系统版本</b>：新版要的最低 macOS（发布清单里 <code>hub</code> 和 <code>engine</code> 的 <code>min_macos</code> 取高的）比这台 Mac 高时不提供升级，写明需要的系统版本。</li>
+<li><b>主窗口最小 860×600</b>，拖边时也卡在这个尺寸。</li>
+<li><b>退出</b>：先把窗口藏起来、去掉菜单栏图标，再收尾；收尾期间不再把停下的引擎当成崩溃重启。</li>
+<li><b>最低 macOS 26.2</b>：<code>app/Package.swift</code> 声明 26.2；<code>LSMinimumSystemVersion</code> 由 <code>app/build_app.sh</code> 取 <code>tools/minos_check.py</code> 里的 <code>LUOKE_MIN_MACOS</code>（26.2）写入。</li>
+</ul>
+
 <h2>文件</h2>
 <p>环境目录 <code>~/Library/Application Support/luoke-core/</code>，详见「参考 · 文件位置」。日志只记元数据（任务、优先级、token 数、耗时、结果），请求文字不落盘、不进日志。</p>
 
@@ -388,7 +397,7 @@ sequenceDiagram
 <section class="page" id="mem" data-title="记忆 luoke-mem">
 <h1>记忆</h1>
 <p class="lede">螺壳各组件共用的本机记忆：一个 SQLite 文件。工具写入"发生了什么"（记录）；记忆是唯一形成结论的地方，从记录归纳出带依据、分三档把握程度的理解，并在空闲时整理，产出想问用户的问题和建议。</p>
-<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.44.0，按代码 c60631b 核对 · 许可 Apache-2.0 · schema 9 · 接口和表结构见「参考 · 记忆」</p>
+<p class="src">仓库 <code>luoke-mem</code>（包 <code>luoke_mem</code>，仅标准库，Python 3.9+）· 版本 0.44.1，按代码 8aac80f 核对 · 许可 Apache-2.0 · schema 9 · 接口和表结构见「参考 · 记忆」</p>
 
 <h2>职责</h2>
 <ul>
@@ -525,7 +534,7 @@ sequenceDiagram
 <ul>
 <li><b>分工</b>：主窗口的记忆页由 luoke-agent 照效果图拼。记忆给原始数据和动作，不决定页上的内容、顺序和措辞；清单 <code>capabilities.data</code> 列出它给哪几样数据，核心见到就照 <code>data/*</code> 拼，没列的照旧读 <code>page/*</code>。记忆自己拼的页（<code>page/*</code>）在 luoke-agent 搬完之前照旧答。</li>
 <li><b>原始数据</b>（<code>data/*</code>）：十一样只读资源，JSON，不带卡片、不带页上的句子；每条理解另带理由的代号和数（<code>why_data</code>），动作的结果带结果代号（<code>result</code>）和没做成的原因代号（<code>reason</code>），页上的话由 luoke-agent 照代号写：最近了解到的（<code>recent</code>）、要确认的（<code>asks</code>，最多 3 件）和其中一件（<code>ask</code>）、全部记忆（<code>notes</code>：筛选、搜索、翻页、各筛选的条数）、一条理解和全部依据（<code>note</code>）、人物（<code>people</code>）和一个人（<code>person</code>）、各应用学不学和写过哪几类记录（<code>sources</code>）、整理的时间和两种条数（<code>data</code>）、忘掉一个应用之前先看会删什么（<code>forget</code>），以及 <code>helped</code>（记忆不记谁读了什么，没有数可报）。哪些算最近、待确认、可以列，和记忆自己的页是同一套规则。</li>
-<li><b>一件要问的事带什么</b>（<code>data/ask</code>）：类型（是不是同一个人、关于一条理解、记忆自己的问题、退订、处理习惯、别的建议）、「为什么」凭的事实、答了改动哪个应用的哪件事、依据的记录、能怎么答（照原样交给 <code>mem_reply</code>）。</li>
+<li><b>一件要问的事带什么</b>（<code>data/ask</code>）：类型（是不是同一个人、关于一条理解、记忆自己的问题、退订、处理习惯、别的建议）、「为什么」凭的事实、答了改动哪个应用的哪件事、依据的记录、能怎么答（照原样交给 <code>mem_reply</code>）。处理习惯的建议在 <code>facts</code> 里给出邮件助手会执行的内容：<code>account</code>、<code>sender</code>（地址）、<code>name</code>、<code>category</code>、<code>action</code>，动作是加标签或按规则处理时另有 <code>label</code>、<code>filter</code>（0.44.1）。</li>
 <li><b>outbox</b>：开着、没过期的想问的和建议（<code>asks(status=["open"])</code>），每件一张卡片；问不问、每天几个、「以后再说」之后何时再问仍由反刍定。卡片标题「记忆想问你」或「记忆有个建议」，下面是问题和理由；关于某条理解的附它最新的 3 条依据原文（「应用 · 日期：原文」，每条 120 字以内），没有就写 <code>evidence</code>。</li>
 <li><b>卡片上的按钮</b>：关于某条理解的问题有输入框「不太对的话，改成」和 对 / 不对 / 以前是，现在不是 / 按我改的 / 以后再说；「是不是同一个人」是 是 / 不是 / 以后再说；处理习惯的建议是 好 / 不用 / 别再提，退订建议是 知道了 / 别再提；每张最后有「归档」。点了交回 <code>mem_reply</code>，记忆照 <code>reply</code> 处理，卡片换成一句话的结果，这件从 outbox 撤下；改成的话里有密码、验证码、证件号码时不收，卡片留着让用户改。「以后再说」哪种问题都是 <code>choice: "later"</code>，过 7 天再问。</li>
 <li><b>概览那句话</b>（<code>summary</code>）：<code>text</code> 是最近了解到的一件，<code>count</code> 是概览上要确认的几件；不报总条数。</li>
@@ -558,7 +567,7 @@ sequenceDiagram
 <section class="page" id="mail" data-title="邮件助手 luoke-mail">
 <h1>邮件助手</h1>
 <p class="lede">用本机模型整理整个邮箱：逐封分拣近期邮件，清理旧邮件，体检订阅并挑选精选，起草回复放入草稿箱。可撤回的处理会自动执行，并在"今日处理"页集中复查。</p>
-<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.71；给主窗口的数据和动作、发件人校验按代码 e124c8b 核对，其余按 21a0ccc（0.19.66） · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
+<p class="src">仓库 <code>luoke-mail</code>（包 <code>luoke_mail</code>）· 版本 0.19.75；截止日期进日历、归档后照样提醒、「即将截止」的事项、没读到的邮件按代码 a1466c1 核对；给主窗口的数据和动作、发件人校验按代码 e124c8b 核对，其余按 21a0ccc（0.19.66） · 许可 Apache-2.0 · 支持 Gmail、QQ、网易 163/126、自定义 IMAP（含 139），可连接多个邮箱</p>
 
 <h2>职责</h2>
 <ul>
@@ -625,6 +634,15 @@ sequenceDiagram
 <li>精选：每周一 08:00 之后的第一次后台整理；今日处理：每晚 20:00 之后一次。</li>
 <li><b>通知权限</b>：经管道问本体（<code>notify-status</code>）macOS 是否允许螺壳发通知，缓存 1 分钟，本体没答时不提示。设置的"后台整理"一行：被拒绝或提醒关闭时显示警告（请在「系统设置 → 通知 → 螺壳」里打开「允许通知」）和"打开通知设置"（打开系统设置中螺壳的通知页，回到页面时重新检查）；从未询问过时提示点"发送测试通知"并选"允许"。"发送测试通知"发一条测试通知并说明结果。</li>
 <li>邮箱连接失败连续 2 次才报，同一问题只报一次；模型不可用时报一次"N 封新邮件尚未分析"；钥匙串因锁屏读不到时不报，下一轮再试。</li>
+</ul>
+
+<h3>截止日期和归档后的提醒（0.19.72 起，按代码 a1466c1）</h3>
+<ul>
+<li><b>截止日期进日历</b>：建议是加星标或回复、带截止日期、又不是日程的邮件，也给一条日历项：全天，标题「截止：主题」，前一天 9:00 提醒（.ics 里带 <code>VALARM</code>）。<code>data/mail</code> 的 <code>events[]</code> 每项带 <code>kind</code>：<code>event</code>（日程）或 <code>due</code>（截止）。</li>
+<li><b>归档了照样提醒</b>：在截止日之前归档的邮件，到日子仍然提醒；<code>data/inbox</code> 的 <code>list</code> 多了 <code>archived</code>（不算进 <code>all</code>），每行带 <code>archived</code> 和 <code>calendar_added</code>（这一行的「加入日程」做没做过）。这样的邮件能做的只有「完成」（<code>ways: ["complete"]</code>）。</li>
+<li><b>「即将截止」的事项</b>（outbox 的 <code>due</code>，清单里登记了这一种）：今天或明天截止的邮件合成一张，标题「N 封即将截止」，最多列 8 行，每行选「完成」或「暂不处理」（默认暂不处理），还没进日历的行带「加入日程」；主按钮写「标为完成 N 封」。通知的说法是「N 封邮件即将截止」。</li>
+<li><b>服务器没给回的邮件</b>：<code>data/old</code> 和 <code>data/clean</code>（订阅体检、归档）带 <code>unreturned</code>，页上写明有几封没读到。</li>
+<li><b>网易邮箱的 30 天提示</b>：只在 163 / 126、没有早于 31 天的邮件、且有邮件落在 28 到 31 天之间时出现，新开的邮箱不再误报。</li>
 </ul>
 
 <h2>页面</h2>
@@ -816,7 +834,7 @@ sequenceDiagram
 <section class="page" id="ime" data-title="输入法 luoke-ime">
 <h1>输入法</h1>
 <p class="lede">macOS 输入法。壳负责按键、组字、候选窗和上屏；候选全部由沙盒里的引擎子进程给出。语音输入是随包自带的快捷键引擎，设置里默认关：按住说话、松开上屏，转写和整理都交给主控。个人化组件把上屏写入记忆，把打分和联想请求转给主控，并给语音提供热词。</p>
-<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.103（build 106）；界面上的名字、输入法菜单和语音提示按代码 24d828b 核对，其余按 6b827c6（0.1.88） · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
+<p class="src">仓库 <code>luoke-ime</code> · 版本 0.1.113（build 116）；给主窗口的数据和动作、最低系统、默认输入方案按代码 375095d 核对；界面上的名字、输入法菜单和语音提示按代码 24d828b 核对，其余按 6b827c6（0.1.88） · bundle id <code>ai.luoke.inputmethod.Luoke</code></p>
 
 <h2>结构</h2>
 <div class="tbl"><table>
@@ -963,6 +981,18 @@ sequenceDiagram
 <p><b>设置窗口</b>四页：通用（输入方案、模糊音（一个总开关，打开后才列出六组勾选，关着时勾选照样留着）、语音、中英文、排版、候选窗口，装了个人化组件才有联想、「记录输入内容到记忆」和「暂停所有记录」）、应用（每个应用的默认输入模式、拼音显示位置、联想、禁止记录，可恢复跟随全局）、记忆（记了什么、打开螺壳的记忆界面、当前方案的「已学词语」和「已忘记词语」；忘掉的可逐个撤销，学到的可确认后全部清掉）、高级（最前面是使用统计：最近 7 天的上屏次数、首选占比、上屏后马上退格的占比，装了个人化组件时加联想出现、打开、选中的次数和字数，能清零；然后是开发模式记录、记录文件夹、引擎文件夹、设置文件）。联想、记忆记录、记忆页和高级页的行带一句说明；窗口里不放文本框。语音一节：开关「语音输入」（下面一行小字说明按住哪个键说话、松开上屏，键名跟着设置变），打开后才出现「语音输入按键」（右 ⌥（Alt）、右 ⌘、右 ⌃，说明外接 Windows 键盘、对调过修饰键的选右 ⌘ 试试）和开关「语音整理：去除口头禅、修正改口、整理列表和分段」，没有麦克风权限时红字提示并给一个去系统设置的按钮；下面说明识别和整理都由螺壳在这台 Mac 上做。</p>
 <p><b>输入法菜单</b>连不上螺壳时最上面多一行「未连接螺壳：AI 重排和联想不可用」（开着语音输入时写「AI 重排、联想和语音输入不可用」）：每次打开菜单时试连一次主控的 socket（0.2 秒），连不上才显示，不轮询。菜单只放常用操作：输入方案、当前中英文模式、清除当前方案的已学词语、当前应用（此应用设置、在此应用关闭联想（按实际是否联想打勾，终端里取消勾选即打开联想）、在此应用禁止记录）、记忆记录状态（开启 / 暂停 / 恢复、管理记忆）、设置、高级（开发模式、打开引擎文件夹、打开设置文件）；引擎停用（打字引擎、个人化组件、快捷键引擎包括语音，都带原因和「重新启用」）、沙盒拦截、等确认的第三方引擎也列在这里。</p>
 
+<h3>给螺壳主窗口的数据和动作</h3>
+<p>主窗口里输入法的「设置」「各应用」两页由 luoke-agent 照下面的原始数据自己拼（界面和措辞归 luoke-agent）。清单 <code>Resources/App/luoke-accessory.json</code> 的 <code>capabilities.data</code> 是 <code>settings</code>、<code>apps</code>，<code>actions</code> 是 <code>ime_set</code>、<code>ime_do</code>。输入法自己画的旧页 <code>page/settings</code>、<code>page/apps</code> 和 <code>ime_page</code> 还留着，给还不认 <code>data/*</code> 的旧版螺壳用。</p>
+<ul>
+<li><b><code>data/settings</code></b>（只读）：<code>state</code>、<code>settings</code>（各项设置的代号和值）、<code>learned</code>（当前打字引擎）、<code>forgotten</code>（已忘记词语）、<code>usage</code>（最近 7 天的使用计数，只有次数）、<code>dev</code>（开发模式）、<code>paths</code>（文件夹和设置文件的路径）。</li>
+<li><b><code>data/apps</code></b>（只读）：<code>state</code>、<code>personal</code>、<code>apps[]</code>（每个有单独设置的应用：<code>id</code>、<code>name</code>、<code>settings</code>）。带 <code>?app=&lt;bundle id&gt;</code> 时，这个应用还没单独设置过也列一项：各项都是跟随全局，标 <code>new: true</code>；只读不记，改了第一项才写进设置。</li>
+<li><b><code>ime_set</code></b>：只改写死的一张表；答复里带 <code>data {key, value}</code>（旧的 <code>card</code> 还一起给）。</li>
+<li><b><code>ime_do</code></b>：<code>op</code> 取 <code>clear_learned</code>（带 <code>engine</code>，清除当前打字引擎学到的词）、<code>restore</code>（带 <code>id</code>，恢复一个已忘记的词）、<code>reset_usage</code>（清零使用计数）、<code>dev_mode</code>（带 <code>engine</code>、<code>on</code>）。清除、恢复、清零由正在运行的输入法做，3 秒内没取走答 <code>not_running</code>。失败的代号：<code>needs_user_action</code>、<code>invalid</code>、<code>not_running</code>、<code>engine_not_running</code>、<code>engine_changed</code>（期间换了打字引擎）、<code>not_found</code>、<code>not_ready</code>、<code>settings_unreadable</code>、<code>failed</code>。</li>
+<li>两个动作都要 <code>ai.luoke/user-action</code>（<code>surfaceId</code>、<code>componentId</code>、<code>at</code>）。</li>
+<li>输入法菜单的「设置」「此应用设置」现在仍打开输入法自己的设置窗口；主控的 <code>luoke://app/luoke-ime/…</code> 地址已有，菜单还没改用它。自己的设置窗口只做兜底，主窗口的两页随版本发出去以后去掉。</li>
+<li>新装时默认的输入方案是全拼（<code>EngineCatalog.defaultTyping</code>），不靠引擎的排序。</li>
+</ul>
+
 <h2>安全</h2>
 <ul>
 <li><b>安全输入</b>（<code>IsSecureEventInputEnabled</code>）：不读前文、不写记忆、不打分、不记使用计数，快捷键引擎不触发、不发 <code>arm</code>（语音不会往密码框里出字）；一段组字中碰到过安全输入，整段都按安全输入处理。</li>
@@ -976,7 +1006,7 @@ sequenceDiagram
 <p>自带的 librime 在编译时把源码路径换成相对路径（<code>-ffile-prefix-map</code>），组装时删掉它自带的全部 rpath 和 rime_helper 指向 vendor 的 rpath；编好的版本标记对不上就重编，没有 cmake 就报错退出、不删旧的。安装脚本对两个壳程序 <code>strip -S</code>，组装完在整个 .app 里查编译机的仓库路径，查到就失败。</p>
 
 <h2>系统要求</h2>
-<p>螺壳只在 macOS 26 起安装输入法（清单 <code>min_macos</code> 26）；LuokeIME.app 本身的最低系统是 14.0，供手动安装验证旧系统。只编 arm64（Apple 芯片）。</p>
+<p>最低系统是 macOS 26.2：清单 <code>min_macos</code>、<code>Package.swift</code> 和 Info.plist 的 <code>LSMinimumSystemVersion</code> 都是 26.2。只编 arm64（Apple 芯片）。</p>
 
 <h2>评测</h2>
 <ul>
@@ -1007,7 +1037,7 @@ sequenceDiagram
 <section class="page" id="agent" data-title="agent luoke-agent">
 <h1>agent</h1>
 <p class="lede">螺壳的后台组件和主窗口，螺壳里唯一主动找用户的部分。核心和主窗口都打在螺壳.app 里，随螺壳装好、一起升级，不在「应用」列表里单独开关。它把记忆的提问和建议、各应用要报的事排进「今天」，挑时机发急事通知和简报；用户点按卡片时，代表用户调用应用声明的动作。吉祥物的那一句、简报的话和大文件的用途说明用主控的三个模型任务写；排序、提醒和调用动作不经过模型。</p>
-<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.82；模型任务、核心自己拼的应用页、设置项、<code>/activity</code> 和超时的处理按代码 f4e5400 核对，其余按 4404be7（0.0.50） · 兜底用的 <code>luoke_mem</code> 0.26.2（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
+<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.96；输入法两页、<code>countChecks</code>、扫描页的几处按代码 66e322f1 核对；模型任务、核心自己拼的应用页、设置项、<code>/activity</code> 和超时的处理按代码 f4e5400 核对，其余按 4404be7（0.0.50） · 兜底用的 <code>luoke_mem</code> 0.44.1（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
 
 <h2>职责</h2>
 <ul>
@@ -1348,6 +1378,15 @@ sequenceDiagram
 <li><b>搜索</b>：列了 <code>recent</code> 的搜索工具，调用时带 <code>remember: true</code> 和一次用户点按；标了 <code>strong</code> 的结果单放一块「最相关」；结果可带 <code>duration</code>。</li>
 <li><b>应用页的隐藏页</b>可带图标（<code>service.pages[].icon</code>）。「应用」页的标题是「应用管理」。应用管理和设置里螺壳本体的那部分，数据由本体给（<code>HostApps</code>、<code>HostSettings</code>），窗口来画。</li>
 <li>最低系统：三个 Swift 包都是 macOS 26.2。</li>
+</ul>
+
+<h2>2026-11-19 复核的几处（按代码 66e322f1）</h2>
+<ul>
+<li><b>输入法的两页</b>：<code>luoke_agent/apppages/</code> 现在有 <code>ime</code>、<code>mail</code>、<code>mem</code>、<code>scan</code>、<code>search</code> 五个应用的模块。输入法的「设置」页读 <code>data/settings</code>；「各应用」页读 <code>data/apps</code>，从 <code>luoke://app/luoke-ime/apps?app=&lt;bundle id&gt;</code> 进来时带着这个应用读，把它排在最前。</li>
+<li><b>A2UI</b>：核心声明的能力 30 项，新加 <code>countChecks</code>：按钮数一组勾选框里勾了几项写在按钮上，一项没勾时不画按钮（工具协议 §4「后加的写法」）。</li>
+<li><b>扫描页</b>：要注意的项先列 8 项、折叠里再 8 项，再多的写「另有 N 项未列出」；行上的动作只画图标、名称作悬停提示；每一项的大小画成一个标签。</li>
+<li><b>「今天」</b>：扫描一轮的结论卡右上角写检查完成的时间。</li>
+<li>核心的 GET 接口没有新加：<code>/feed</code>、<code>/status</code>、<code>/settings</code>、<code>/apps</code>、<code>/apps/&lt;id&gt;/pages/&lt;page&gt;</code>、<code>/permissions</code>、<code>/activity</code>、<code>/thumb</code>。</li>
 </ul>
 
 <h2>已知限制</h2>
@@ -2700,7 +2739,7 @@ sequenceDiagram
 <div class="tbl"><table>
 <tr><th>编号</th><th>决策</th><th>要点</th></tr>
 <tr><td>0001</td><td>本机就是边界</td><td>数据不出用户自己的设备（设备之间端到端加密）；写进用户自己选定并在用的账户（他的邮箱、日历）不算外传。本机组件之间不为隐私设限，要读什么就读什么；每条理解都查得到依据，用户能否定、修改、忘掉。凭证（密码、验证码、密钥、令牌、完整卡号和证件号）不进记忆，走钥匙串，值不经过模型，命中时只遮那一串；螺壳搜索的本机索引可以存原值，交给 agent 或画成卡片时再遮。记忆和螺壳搜索的本机数据默认加密存放，密钥归主控，拿不到密钥就不打开、不另建明文。</td></tr>
-<tr><td>0002</td><td>组件分工，一个螺壳.app</td><td>模型在主控，理解在记忆，事情在工具，沟通、主窗口的界面和措辞在 agent。工具之间不互相调用，调用工具能力的只有 agent；每个工具仍是一个配件、一个身份；空闲任务由主控定时机。除输入法外所有应用都在螺壳.app 里，跟螺壳整体升级，签名只有一份，通知由螺壳代发；输入法单独一个包，由螺壳安装和升级。主窗口里的一切（「今天」、右边栏、卡片、各应用的页面、应用管理、设置）只在 agent 里改；自带的应用和主控只给结构化的东西（哪一种事、涉及什么、数字、状态、能做的动作和参数），卡片、概览、动作结果上的句子和固定的名字由 agent 照数据写，邮件主题、文件名、摘要、记忆里的理解算内容、仍由工具给；工具自己带界面描述的卡片留给 agent 不认识的工具和过渡期。清单里的能力只加不改；会改动东西的动作只认用户点按；凭证不在卡片里填；装、卸载、开启、停用每一步要用户点。主控另提供日历接口（EventKit）和浏览器桥。</td></tr>
+<tr><td>0002</td><td>组件分工，一个螺壳.app</td><td>模型在主控，理解在记忆，事情在工具，沟通、主窗口的界面和措辞在 agent。工具之间不互相调用，调用工具能力的只有 agent；每个工具仍是一个配件、一个身份；空闲任务由主控定时机。除输入法外所有应用都在螺壳.app 里，跟螺壳整体升级，签名只有一份，通知由螺壳代发；输入法单独一个包，由螺壳安装和升级。主窗口里的一切（「今天」、右边栏、卡片、各应用的页面、应用管理、设置）只在 agent 里改，输入法的设置页也在主窗口里、归 agent（输入法自己的设置窗口只做兜底，引导窗口仍归输入法）；自带的应用和主控只给结构化的东西（哪一种事、涉及什么、数字、状态、能做的动作和参数），卡片、概览、动作结果上的句子和固定的名字由 agent 照数据写，邮件主题、文件名、摘要、记忆里的理解算内容、仍由工具给；工具自己带界面描述的卡片留给 agent 不认识的工具和过渡期。清单里的能力只加不改；会改动东西的动作只认用户点按；凭证不在卡片里填；装、卸载、开启、停用每一步要用户点。主控另提供日历接口（EventKit）和浏览器桥。</td></tr>
 <tr><td>0003</td><td>推理、模型和调度归主控</td><td>本机的模型推理和权重都归主控，工具按任务要结果、不点名模型，不自带模型也不自己加载；垂类模型同样做成主控的任务；一直加载的小模型（语音转写、搜索的嵌入）由主控按任务管内存。唯一的例外是没装螺壳时的小精灵。调度在主控，引擎只管跑模型；螺壳自己的任务协议：任务声明优先级、权限、资源，自己的组件和外来应用走同一张任务表，外来应用照协议自己接入；任务队列在右边栏看得见。引擎换成螺壳自己做的，在单独的仓库里做。高级用户的本机端点：127.0.0.1 上的 OpenAI 兼容端点，默认关，只听本机、校验 Host、拒绝带 Origin 的请求，请求文字不落盘。</td></tr>
 <tr><td>0004</td><td>系统权限授权给螺壳本身</td><td>完全磁盘访问这类系统权限只授权给螺壳本身，螺壳扫描、螺壳搜索复用这一份。组件不直接向系统要权限：要用的在清单里声明（<code>permissions</code>），经螺壳请求。用户在「应用管理」里开启组件时确认一次，不在第一次用到时再弹第二个框；所有授权请求都紧跟在用户操作之后弹；权限页列出每个组件确认过什么。</td></tr>
 <tr><td>0005</td><td>记忆怎么想</td><td>工具只记发生了什么（谁做的、什么时候真正发生，可以带原文），不下关于用户的结论；记忆读原文去理解、下结论。三档把握程度：猜测、比较确定、确定，工具只用比较确定以上的，确定只来自用户说的或确认的。先粗后细，按用户的确认、否定、撤回逼近；按依据里最新一条的真实时间算新鲜度，太久没有新依据的算「以前的事」；同一机构的事实合成一条；空闲时反刍，产出「想问的」和「建议」，只提议不动手；用户对理解说的话归记忆，卸载工具时留着；不按上下文隔离记忆。</td></tr>
@@ -2793,6 +2832,16 @@ sequenceDiagram
 </section>
 <section class="page" id="changelog" data-title="文档修订">
 <h1>文档修订</h1>
+
+<h2>2026-11-19</h2>
+<ul>
+<li>分工（ADR 0002）：输入法的设置页并进主窗口，界面和措辞归 agent，输入法给数据和动作。决策页、输入法页、agent 页跟着改。</li>
+<li>输入法页：给主窗口的 <code>data/settings</code>、<code>data/apps</code>、<code>ime_set</code>、<code>ime_do</code>；最低系统 macOS 26.2；新装默认全拼。版本 0.1.113。</li>
+<li>主控页：<code>luoke://app</code> 打开主窗口里某个应用的页；检查更新先核对新版要的系统版本；主窗口最小 860×600；退出的顺序；最低 macOS 26.2。</li>
+<li>邮件页：截止日期进日历、归档后照样提醒、「即将截止」的事项、服务器没给回的邮件、网易 30 天提示的条件。版本 0.19.75。</li>
+<li>记忆页：处理习惯的建议在 <code>data/ask</code> 的 <code>facts</code> 里带执行内容。版本 0.44.1。</li>
+<li>agent 页：输入法两页、<code>countChecks</code>、扫描页的几处、扫描结论卡上的时间。核心 0.0.96。</li>
+</ul>
 
 <h2>2026-11-18</h2>
 <ul>
