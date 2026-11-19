@@ -89,7 +89,7 @@ macOS 输入法。壳只管按键、候选窗、上屏和沙盒，出什么候�
   - 重排、联想的语料是私有的博客语料，只在实验室的机器上跑。
   - 主控评测表 `tools/release_evals.json` 每项的 `paths` 写着这项评测读哪些文件，只在这些文件变了时重跑。评测开始读别的文件时，输入法同一次改动里请主控改 `paths`。
 - **安装和启动**：
-  - 装在 `~/Library/Input Methods/LuokeIME.app`，bundle id `ai.luoke.inputmethod.Luoke`，要求 macOS 26 起。
+  - 装在 `~/Library/Input Methods/LuokeIME.app`，bundle id `ai.luoke.inputmethod.Luoke`，要求 macOS 26.2 起。
   - 由系统的输入源机制拉起，不是常驻配件，不调 `PUT /accessory/resident`。正常退出前调 `POST /accessory/exiting`。只当一份输入法服务：不是 launchd 拉起的、或已有一份在跑就退出。
   - 用户自己打开 LuokeIME.app、而螺壳还没被添加时，输入法弹添加的引导窗口（带参数运行时不弹）。
   - `LuokeIME --status` 输出一行 JSON：
