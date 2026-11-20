@@ -9,7 +9,7 @@
 
 记忆归用户，不归任何一个工具。本机就是边界（[ADR 0001](../docs/adr/0001-the-machine-is-the-boundary.md)）：任何工具、agent 都读得到全部记录、理解和依据原文；删别的工具写的、清空，只在记忆自己的界面里做。记忆打在主控里，打开方式是 `luoke://memory`。
 
-现状 0.44.1（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支；beta 2 用 0.36.0，`release/beta2`）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
+现状 0.44.2（beta1 用 0.25.8，beta1.1 用 0.25.8.1，beta 分支；beta 2 用 0.36.0，`release/beta2`）。每一版的变化见 `luoke-mem/CHANGELOG.md`。
 
 ## 对外提供
 
@@ -60,7 +60,7 @@
 - **luoke-agent**：想问的、建议从 `asks()` 读，依据从 `note(about_note)["cites"]` 读，回答一律 `reply`；习惯建议（`action.capability == "habit"`）给"好 / 不用 / 别再提"。
   - **主窗口的记忆页归 luoke-agent**（顶层 ADR 0002）：页上放什么、什么顺序、按钮、措辞都由 luoke-agent 定；记忆给原始数据（理解、依据、人、想问的和建议、各应用写了什么、停学名单、整理的时间）和动作（确认、否定、改写、忘掉、并人拆人、停学、回答、归档、清空），句子由 agent 写。界面改动在长期分支 `ui-refactor` 上做，luoke-agent 直接改本仓库给页面供数据和动作的那层、把 `luoke_mem/agent.py` 里的页面层（`page/*`、outbox 卡片）搬走；记忆这边不再改页面内容，每次合回 `main` 之前把分支过一遍，盯着不改数据格式。
     - 原始数据 `data/*`：`recent`、`helped`、`asks`、`ask?id=`（一件要问的事，今天的卡片也能读：凭的事实、影响到哪个应用、依据、能怎么答）、`notes`、`people`、`person`、`note`（带 `family`：同一类里还没表态的几条和类别代号）、`sources`、`forget?tool=`（忘掉一个应用写的之前先试算）、`data`。只读，JSON，不带 A2UI 和句子，`v` 是形状版本；清单 `capabilities.data` 列出这几样。形状写在 `luoke-mem/fixtures/agent/README.md`「原始数据」。
-    - 代号和数字（0.44）：记忆自己的句子照旧给，旁边另给代号：每条理解的理由 `why_data`（代号和数）、概览 `summary` 的 `state` 和计数、点按做成了的 `result` 和数、问题已经变了的 `stale: true`、没做成的 `reason`。处理习惯的建议在 `data/ask` 的 `facts` 里给邮件助手照着执行的发件人地址、类别、动作（加标签、按规则处理时另有 `label`、`filter`）。字段见同一份 README「代号和数字」。
+    - 代号和数字（0.44）：记忆自己的句子照旧给，旁边另给代号：每条理解的理由 `why_data`（代号和数）、概览 `summary` 的 `state` 和计数、点按做成了的 `result` 和数、问题已经变了的 `stale: true`、没做成的 `reason`。处理习惯的建议在 `data/ask` 的 `facts` 里给邮件助手照着执行的发件人地址、类别、动作（加标签时另有 `label`）；「按规则处理」不作为习惯提出（0.44.2）。字段见同一份 README「代号和数字」。
     - 「以后再说」哪种问题都是 `mem_reply` 交 `choice: "later"`，过 7 天再问。
 - **luoke-scan**（原名 luoke-audit，luoke-mem#7 商定，0.26.0 起有，0.27.1 改名，话题 0.27.3 起是 `scan-*`）：扫描是 Swift 程序，用螺壳的 Python 起 `python -m luoke_mem record --tool luoke-scan`，标准输入一行一条 JSON（字段同 `record()`），标准输出一行对一行回 `{"id"}` 或 `{"error"}`；没给 `sensitive` 就由命令标。topic：`scan-cleaned`（user / receipt）、`scan-ignored`（user / statement）、`scan-auto-cleaned`（system / activity，`by=rule`）、`scan-malware`（user / receipt）、`scan-autoclean`（user / statement）。不记路径。「螺壳体检」四个字不算健康（旧名，留着）。
 - **luoke-peek**（螺壳探头，和探头商定，beta1 之后做，还没开工）：记录 `web-event-*`（不记 `web-event-seen`），网页上抽的字段放 `data.event`、标 `event_from: "page"`；来源 `sender = "site:<主机名>"`、`category = page_type`；链接只留主机名和路径，路径里像令牌的一段由记忆遮掉；agent 上线前由探头自己显示 `asks(tool="luoke-peek")`。
@@ -73,5 +73,4 @@
 - **luoke-ime**（给语音热词的英文专名）：英文模式下上屏的词也写进 `ime-commit`（输入法提的，等输入法定），照中文模式一样不写密码框里的、带验证码和证件号码的；`data` 里标一下是英文模式，记忆只从里面取专名。
 - **luoke-search**（认人，负责人 2026-11-09 同意提，建议排在 ADR 0001 加密之后）：照片图库里用户起了名字的人脸组，每组每月一条记录（比如 `photo-person`，用户 / 活动，带名字、组编号、几张、最早和最近的日期；人脸特征只留在搜索自己的索引里，不写照片和地点）；以后再加用户文档里反复出现的人名、机构名（带出处，记忆当别人说的、只做猜测）。单独的开关，默认关；起了名字才算一个人，不判断亲疏。
 - **luoke-agent**（去掉记忆自己的网页）：记忆网页上的事 0.36 起都搬进了主窗口，记忆想去掉自己的网页（`ui`、`serve` 命令和 `luoke_mem.ui.ensure`），省得两处界面各改一遍。邮件助手 0.19.49 起已经不用（「查看整份记忆」打开主窗口的记忆页，用数据副本时不显示）。还在用的：luoke-agent 的 `memsource.py` 让人用 `python3 -m luoke_mem ui --path … --open` 看临时记忆，luoke-agent 已接，改成指到主窗口。它改完、记忆也核过旧核心的 `mem_open` 不再靠这个网页，再删。
-- **luoke-mail**（执行「按规则处理」的习惯）：记忆会提「某发件人的某类邮件以后都按规则处理」这种处理习惯（`action` 是 `filter`），邮件助手现在只执行归档、标成已读、加上标签三种，用户同意了也不会执行。请邮件助手补上`filter` 的执行；规则就是习惯 `data.filter` 里的那条（`data/ask` 的 `facts.filter` 也给），怎么执行、能不能一键撤销由邮件助手定。补上之前，记忆照样会提这种建议。
 - **luoke-mail**：ADR 0005 说的"必要时向工具要更多原文"还没有通道；beta1 之后商定一个读取接口（比如按发件人取最近几封的正文）。
