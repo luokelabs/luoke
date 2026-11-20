@@ -1,7 +1,7 @@
 <!-- id: agent | nav: agent luoke-agent | group: 组件 -->
 <h1>agent</h1>
 <p class="lede">螺壳的后台组件和主窗口，螺壳里唯一主动找用户的部分。核心和主窗口都打在螺壳.app 里，随螺壳装好、一起升级，不在「应用」列表里单独开关。它把记忆的提问和建议、各应用要报的事排进「今天」，挑时机发急事通知和简报；用户点按卡片时，代表用户调用应用声明的动作。吉祥物的那一句、简报的话和大文件的用途说明用主控的三个模型任务写；排序、提醒和调用动作不经过模型。</p>
-<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.96；输入法两页、<code>countChecks</code>、扫描页的几处按代码 66e322f1 核对；模型任务、核心自己拼的应用页、设置项、<code>/activity</code> 和超时的处理按代码 f4e5400 核对，其余按 4404be7（0.0.50） · 兜底用的 <code>luoke_mem</code> 0.44.1（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
+<p class="src">仓库 <code>luoke-agent</code> · 核心 0.0.97；输入法两页、<code>countChecks</code>、扫描页的几处按代码 66e322f1 核对；模型任务、核心自己拼的应用页、设置项、<code>/activity</code> 和超时的处理按代码 f4e5400 核对，其余按 4404be7（0.0.50） · 兜底用的 <code>luoke_mem</code> 0.44.1（螺壳一侧的启动、重启、本体通道按 luoke-core 64eb552，开哪些页和窗口尺寸按 50d1346） · 封闭测试，随螺壳 beta 2 第一次提供</p>
 
 <h2>职责</h2>
 <ul>
@@ -129,7 +129,7 @@
 <div class="tbl"><table>
 <tr><th>方法</th><th>请求</th><th>答复</th></tr>
 <tr><td><code>GET /feed</code></td><td>Server-Sent Events：先推全部卡片，再推一个 <code>feed</code>，之后推变化；每 15 秒一行心跳</td><td>事件见下</td></tr>
-<tr><td><code>POST /action</code></td><td><code>{surfaceId, sourceComponentId, context}</code>，卡片、应用页、搜索结果的按钮都走这里</td><td><code>{text, error}</code>，可带 <code>page {app, page, args?}</code>（让窗口跳到这一页）和 <code>file</code>（让窗口存成文件）；缺字段 400</td></tr>
+<tr><td><code>POST /action</code></td><td><code>{surfaceId, sourceComponentId, context}</code>，卡片、应用页、搜索结果的按钮都走这里</td><td><code>{text, error}</code>，可带 <code>page {app, page, args?}</code>（让窗口跳到这一页）、<code>file</code>（让窗口存成文件）和 <code>search</code>（应用页上点了「最近搜索」：窗口拿这句话去搜）；缺字段 400</td></tr>
 <tr><td><code>GET</code> / <code>POST /settings</code></td><td>POST 只带要改的几项</td><td>改完的全部设置，并推 <code>settings</code> 事件；认不得或值不对答 400，什么都不改</td></tr>
 <tr><td><code>GET /activity</code></td><td><code>?before=&amp;app=&amp;limit=</code>（1–200）</td><td>处理记录，一行一件；能撤销的带 <code>undo {surfaceId, componentId, label}</code>，另有 <code>surface</code>、<code>undone</code></td></tr>
 <tr><td><code>GET /apps</code></td><td>—</td><td><code>{apps:[{id, running, summary, pages, ui, needs}]}</code>，页带 <code>hidden</code></td></tr>
@@ -163,7 +163,7 @@
   <li><code>brief</code>：morning / twice / on_open；</li>
   <li><code>quiet</code>：null 或 <code>{start, end}</code>，HH:MM，两者不能相同；</li>
   <li><code>paused_until</code>：null 或今后 7 天内；</li>
-  <li><code>kinds</code>：只读，每类 <code>{id, app, label, mode, default}</code>；</li>
+  <li><code>kinds</code>：只读，每类 <code>{id, app, label, mode, default}</code>；应用清单里已经没有的旧类别不列（清单还没读到的应用照旧全列，还有开着的事的那一类留着），窗口把没名字的一类写成「其他提醒」；</li>
   <li><code>modes</code>：每类的方式。用户自己改了某一类，这一类「连着没理」的计数清零。</li>
   </ul></li>
 <li><b>谁报什么</b>：
